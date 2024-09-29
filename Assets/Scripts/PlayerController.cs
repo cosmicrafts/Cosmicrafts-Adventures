@@ -6,18 +6,43 @@ using System.Collections.Generic;
 public class PlayerController : NetworkBehaviour
 {
     private Camera mainCamera;
-
-    [Header("Player Health Settings")]
-    public int maxHealth = 10;
-    private NetworkVariable<int> currentHealth = new NetworkVariable<int>();
-
-    public GameObject healthBarUI;
-    public Slider healthSlider;
+    public Health health;
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
+    public float moveSmoothTime = 0.1f;
+
+    [Header("Dash Settings")]
+    public float dashSpeed = 15f;
+    public float dashDuration = 0.2f;
+    public float dashCooldown = 1f;
+
+    [Header("Shooting Settings")]
+    public List<Transform> shootPoints;
+    public GameObject bulletPrefab;
+    public float bulletSpeed = 20f;
+    public float shootingCooldown = 0.1f;
+    public GameObject muzzleFlashPrefab;
+
+    [Header("Thrusters Settings")]
+    public List<GameObject> thrusters;
+
+    [Header("Camera Zoom Settings")]
+    public float zoomSmoothSpeed = 5f;
+    private readonly float[] zoomLevels = { 8f, 16f, 24f, 36f };
+    private int currentZoomIndex;
 
     private Vector2 moveInput;
+    private Vector2 smoothMoveVelocity;
+    private float zoomInput;
+    private Vector3 mouseWorldPosition;
+
+    private bool isDashing;
+    private bool isShooting;
+    private bool canMove = true;
+    private float dashTime;
+    private float dashCooldownTimer;
+    private float shootingCooldownTimer;
     private Rigidbody2D rb;
 
     private void Start()
@@ -27,10 +52,7 @@ public class PlayerController : NetworkBehaviour
 
         if (IsOwner)
         {
-            currentHealth.Value = maxHealth;
-            healthSlider.maxValue = maxHealth;
-            healthSlider.value = currentHealth.Value;
-            healthBarUI.SetActive(false); // Initially hide the health bar
+            currentZoomIndex = GetClosestZoomIndex(mainCamera.orthographicSize);
         }
     }
 
@@ -39,32 +61,23 @@ public class PlayerController : NetworkBehaviour
         if (!IsOwner) return;
 
         HandleInput();
-
-        // Predict movement locally
-        Vector2 predictedVelocity = moveInput * moveSpeed;
-        rb.linearVelocity = predictedVelocity;
-
-        // Send movement input to the server
-        SendMovementInputServerRpc(moveInput);
+        HandleDashTimer();
+        HandleShooting();
+        HandleCameraZoom();
     }
 
-    [ServerRpc]
-    private void SendMovementInputServerRpc(Vector2 input)
+    private void FixedUpdate()
     {
-        // Only the server should update the rigidbody's velocity
-        rb.linearVelocity = input * moveSpeed;
+        if (IsOwner && canMove)
+        {
+            SendMovementInputServerRpc(moveInput);
+            SendRotationInputServerRpc(mouseWorldPosition);
+        }
 
-        // Synchronize position with all clients
-        UpdatePositionClientRpc(rb.position);
-    }
-
-    [ClientRpc]
-    private void UpdatePositionClientRpc(Vector2 serverPosition)
-    {
-        if (IsOwner) return;
-
-        // Correct the client position if it differs from the server's authoritative position
-        rb.position = Vector2.Lerp(rb.position, serverPosition, 0.1f);
+        if (IsServer && !IsOwner)
+        {
+            UpdateMovement();
+        }
     }
 
     private void HandleInput()
@@ -72,5 +85,183 @@ public class PlayerController : NetworkBehaviour
         // Get input for movement
         moveInput.x = Input.GetAxis("Horizontal");
         moveInput.y = Input.GetAxis("Vertical");
+
+        // Check for dash input
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            RequestDashServerRpc();
+        }
+
+        // Check for shooting input
+        if (Input.GetMouseButton(0))
+        {
+            isShooting = true;
+        }
+        else
+        {
+            isShooting = false;
+        }
+
+        // Handle mouse position
+        mouseWorldPosition = mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -mainCamera.transform.position.z));
+
+        // Handle zoom input
+        zoomInput = Input.GetAxis("Mouse ScrollWheel");
+    }
+
+    private void UpdateMovement()
+    {
+        if (isDashing) return;
+
+        Vector2 targetVelocity = moveInput * moveSpeed;
+        rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, targetVelocity, ref smoothMoveVelocity, moveSmoothTime);
+    }
+
+    [ServerRpc]
+    private void SendMovementInputServerRpc(Vector2 input)
+    {
+        moveInput = input;
+        UpdateMovement();
+    }
+
+    [ServerRpc]
+    private void SendRotationInputServerRpc(Vector3 mousePosition)
+    {
+        HandleRotation(mousePosition);
+        UpdateRotationClientRpc(mousePosition);
+    }
+
+    [ClientRpc]
+    private void UpdateRotationClientRpc(Vector3 mousePosition)
+    {
+        HandleRotation(mousePosition);
+    }
+
+    private void HandleRotation(Vector3 mousePosition)
+    {
+        if (mousePosition == Vector3.zero) return;
+
+        Vector2 direction = (mousePosition - transform.position).normalized;
+        float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
+
+        rb.SetRotation(targetAngle);
+    }
+
+    [ServerRpc]
+    private void RequestDashServerRpc()
+    {
+        if (!isDashing && dashCooldownTimer <= 0f)
+        {
+            isDashing = true;
+            dashTime = dashDuration;
+            dashCooldownTimer = dashCooldown;
+
+            Vector2 dashVelocity = transform.up * dashSpeed;
+            rb.linearVelocity = dashVelocity;
+
+            StartDashClientRpc(dashVelocity);
+        }
+    }
+
+    [ClientRpc]
+    private void StartDashClientRpc(Vector2 dashVelocity)
+    {
+        if (IsOwner) return;
+
+        isDashing = true;
+        rb.linearVelocity = dashVelocity;
+    }
+
+    private void HandleDashTimer()
+    {
+        if (isDashing)
+        {
+            dashTime -= Time.deltaTime;
+            if (dashTime <= 0f)
+            {
+                isDashing = false;
+                rb.linearVelocity = Vector2.zero;
+                canMove = true; // Re-enable movement after dash
+            }
+        }
+
+        if (dashCooldownTimer > 0f)
+        {
+            dashCooldownTimer -= Time.deltaTime;
+        }
+    }
+
+    private void HandleShooting()
+    {
+        if (isShooting && shootingCooldownTimer <= 0f)
+        {
+            ShootServerRpc();
+            shootingCooldownTimer = shootingCooldown;
+        }
+
+        if (shootingCooldownTimer > 0f)
+        {
+            shootingCooldownTimer -= Time.deltaTime;
+        }
+    }
+
+    [ServerRpc]
+    private void ShootServerRpc()
+    {
+        foreach (Transform shootPoint in shootPoints)
+        {
+            GameObject bullet = Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
+            bullet.GetComponent<Rigidbody2D>().linearVelocity = shootPoint.up * bulletSpeed;
+            bullet.GetComponent<NetworkObject>().Spawn();
+
+            if (muzzleFlashPrefab != null)
+            {
+                GameObject muzzleFlash = Instantiate(muzzleFlashPrefab, shootPoint.position, shootPoint.rotation, shootPoint);
+                Destroy(muzzleFlash, 0.1f);
+            }
+        }
+    }
+
+    private void HandleCameraZoom()
+    {
+        if (zoomInput > 0 && currentZoomIndex > 0)
+        {
+            currentZoomIndex--;
+        }
+        else if (zoomInput < 0 && currentZoomIndex < zoomLevels.Length - 1)
+        {
+            currentZoomIndex++;
+        }
+
+        zoomInput = 0;
+
+        float targetZoom = zoomLevels[currentZoomIndex];
+        mainCamera.orthographicSize = Mathf.Lerp(mainCamera.orthographicSize, targetZoom, Time.deltaTime * zoomSmoothSpeed);
+    }
+
+    private int GetClosestZoomIndex(float currentZoom)
+    {
+        int closestIndex = 0;
+        float closestDifference = Mathf.Abs(currentZoom - zoomLevels[0]);
+
+        for (int i = 1; i < zoomLevels.Length; i++)
+        {
+            float difference = Mathf.Abs(currentZoom - zoomLevels[i]);
+            if (difference < closestDifference)
+            {
+                closestDifference = difference;
+                closestIndex = i;
+            }
+        }
+
+        return closestIndex;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Asteroid"))
+        {
+            health.TakeDamage(1);
+        }
     }
 }

@@ -101,7 +101,6 @@ GameObject:
   - component: {fileID: 1265066989378144559}
   - component: {fileID: 6052367794722924886}
   - component: {fileID: 5281812775428470645}
-  - component: {fileID: 3868622017435881936}
   m_Layer: 10
   m_Name: Asteroid
   m_TagString: Asteroid
@@ -243,24 +242,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &3868622017435881936
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2376172856132117595}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4914c1c3c40e5dc4e9693b5927d1ab4d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  explosionPrefab: {fileID: 4726858116288998076, guid: b6fd84498ab5fee47b7b4f8a4b68dd0e,
-    type: 3}
-  explosionDestroyDelay: 0.35
-  maxHealth: 4
-  healthBarUI: {fileID: 9024487000921277053}
-  healthSlider: {fileID: 7807174602945204154}
 --- !u!1 &4024892388222020509
 GameObject:
   m_ObjectHideFlags: 0
@@ -496,8 +477,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 2
-  m_Camera: {fileID: 3577802464578715850, guid: 7512c18b6d2f1334f812fcc13febd8a3,
-    type: 3}
+  m_Camera: {fileID: 3577802464578715850, guid: 7512c18b6d2f1334f812fcc13febd8a3, type: 3}
   m_PlaneDistance: 100
   m_PixelPerfect: 1
   m_ReceivesEvents: 1

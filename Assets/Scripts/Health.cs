@@ -5,7 +5,9 @@ using Unity.Netcode;
 public class Health : NetworkBehaviour
 {
     public int maxHealth = 10; // Default health (can be different for asteroids)
-    private NetworkVariable<int> currentHealth = new NetworkVariable<int>();
+    private NetworkVariable<int> currentHealth = new NetworkVariable<int>(
+        writePerm: NetworkVariableWritePermission.Server
+    );
 
     public GameObject healthBarUI; // Reference to the health bar UI
     public Slider healthSlider; // Slider component for the health bar
@@ -17,14 +19,11 @@ public class Health : NetworkBehaviour
             currentHealth.Value = maxHealth; // Initialize health only on the server
         }
 
-        healthSlider.maxValue = maxHealth;
-        healthSlider.value = currentHealth.Value;
-
-        // Hide the health bar at the start
-        healthBarUI.SetActive(false);
-
         // Register callback to update the health bar whenever health changes
         currentHealth.OnValueChanged += OnHealthChanged;
+        
+        // Set UI elements to initial state
+        UpdateHealthUI(currentHealth.Value);
     }
 
     // Method to take damage
@@ -41,7 +40,7 @@ public class Health : NetworkBehaviour
     }
 
     // Method to destroy the object
-    void Die()
+    private void Die()
     {
         if (gameObject.CompareTag("Player"))
         {
@@ -58,12 +57,32 @@ public class Health : NetworkBehaviour
     // Callback to update the health bar whenever the health value changes
     private void OnHealthChanged(int previousValue, int newValue)
     {
-        healthSlider.value = newValue;
+        UpdateHealthUI(newValue);
+    }
+
+    private void UpdateHealthUI(int healthValue)
+    {
+        healthSlider.value = healthValue;
 
         // Show the health bar when the entity takes damage
-        if (newValue < maxHealth && !healthBarUI.activeSelf)
+        if (healthValue < maxHealth && !healthBarUI.activeSelf)
         {
             healthBarUI.SetActive(true);
+        }
+        // Hide the health bar when health is full
+        else if (healthValue == maxHealth && healthBarUI.activeSelf)
+        {
+            healthBarUI.SetActive(false);
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (!IsServer) return; // Ensure collision handling happens only on the server
+
+        if (collision.gameObject.CompareTag("Asteroid"))
+        {
+            TakeDamage(1);
         }
     }
 }
