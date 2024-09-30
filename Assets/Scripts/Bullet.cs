@@ -6,6 +6,16 @@ public class Bullet : NetworkBehaviour
     public float lifespan = 5f;
     private ulong shooterClientId;
 
+    // Components to hide
+    private Renderer bulletRenderer;
+    private Collider2D bulletCollider;
+
+    private void Awake()
+    {
+        bulletRenderer = GetComponent<Renderer>();
+        bulletCollider = GetComponent<Collider2D>();
+    }
+
     /// <summary>
     /// Initializes the bullet with the shooter's client ID.
     /// </summary>
@@ -51,7 +61,16 @@ public class Bullet : NetworkBehaviour
     {
         if (NetworkManager.Singleton.LocalClientId == shooterClientId)
         {
-            Destroy(gameObject);
+            // Disable the renderer and collider to hide the bullet instead of destroying it
+            if (bulletRenderer != null)
+            {
+                bulletRenderer.enabled = false;
+            }
+
+            if (bulletCollider != null)
+            {
+                bulletCollider.enabled = false;
+            }
         }
     }
 }
