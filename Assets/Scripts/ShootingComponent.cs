@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class ShootingComponent : NetworkBehaviour
 {
     public List<Transform> shootPoints;
-    public GameObject bulletPrefab; // Networked bullet prefab
+    public GameObject bulletPrefab; // Bullet prefab with NetworkObject component
     public float bulletSpeed = 20f;
     public float shootingCooldown = 0.1f;
     public GameObject muzzleFlashPrefab;
@@ -27,16 +27,22 @@ public class ShootingComponent : NetworkBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles the shoot request from the client.
+    /// </summary>
     public void RequestShoot()
     {
         if (shootingCooldownTimer <= 0f)
         {
             ClientShootPrediction(); // Immediate client-side prediction
-            ShootServerRpc(NetworkManager.LocalClientId); // Send to server for authoritative handling
+            ShootServerRpc(); // Send to server for authoritative handling
             shootingCooldownTimer = shootingCooldown;
         }
     }
 
+    /// <summary>
+    /// Instantiates a local-only bullet for immediate visual feedback.
+    /// </summary>
     private void ClientShootPrediction()
     {
         foreach (Transform shootPoint in shootPoints)
@@ -48,56 +54,59 @@ public class ShootingComponent : NetworkBehaviour
                 Destroy(muzzleFlash, 0.1f);
             }
 
-            // Instantiate a local-only bullet for visual feedback (no NetworkObject component)
+            // Instantiate a local-only bullet for visual feedback
             GameObject clientBullet = Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
+
+            // Remove the NetworkObject component if it exists to make it local-only
+            NetworkObject netObj = clientBullet.GetComponent<NetworkObject>();
+            if (netObj != null)
+            {
+                Destroy(netObj);
+            }
+
             Rigidbody2D bulletRb = clientBullet.GetComponent<Rigidbody2D>();
             if (bulletRb != null)
             {
                 bulletRb.linearVelocity = shootPoint.up * bulletSpeed;
             }
+
             Destroy(clientBullet, 2f); // Destroy after a short time to avoid clutter
         }
     }
 
+    /// <summary>
+    /// ServerRpc to handle shooting on the server side.
+    /// </summary>
     [ServerRpc]
-    private void ShootServerRpc(ulong shooterClientId, ServerRpcParams rpcParams = default)
+    private void ShootServerRpc(ServerRpcParams rpcParams = default)
     {
+        ulong shooterClientId = rpcParams.Receive.SenderClientId;
+
         foreach (Transform shootPoint in shootPoints)
         {
             // Instantiate the bullet on the server
-            GameObject bullet = Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
+            GameObject bulletObject = Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
+
+            // Initialize the bullet with the shooter's client ID
+            Bullet bulletScript = bulletObject.GetComponent<Bullet>();
+            if (bulletScript != null)
+            {
+                bulletScript.Initialize(shooterClientId);
+            }
 
             // Set bullet velocity
-            Rigidbody2D bulletRb = bullet.GetComponent<Rigidbody2D>();
+            Rigidbody2D bulletRb = bulletObject.GetComponent<Rigidbody2D>();
             if (bulletRb != null)
             {
                 bulletRb.linearVelocity = shootPoint.up * bulletSpeed;
             }
 
             // Spawn the bullet over the network
-            NetworkObject bulletNetworkObject = bullet.GetComponent<NetworkObject>();
+            NetworkObject bulletNetworkObject = bulletObject.GetComponent<NetworkObject>();
             if (bulletNetworkObject != null)
             {
                 bulletNetworkObject.Spawn();
             }
-
-            // Notify other clients to display the bullet (excluding the shooter)
-            SpawnBulletClientRpc(shootPoint.position, shootPoint.rotation, shooterClientId);
         }
-    }
-
-    [ClientRpc]
-    private void SpawnBulletClientRpc(Vector3 position, Quaternion rotation, ulong shooterClientId, ClientRpcParams clientRpcParams = default)
-    {
-        if (NetworkManager.LocalClientId == shooterClientId) return; // Shooter already has its own bullet
-
-        // Instantiate the bullet for all other clients
-        GameObject bullet = Instantiate(bulletPrefab, position, rotation);
-        Rigidbody2D bulletRb = bullet.GetComponent<Rigidbody2D>();
-        if (bulletRb != null)
-        {
-            bulletRb.linearVelocity = transform.up * bulletSpeed;
-        }
-        Destroy(bullet, 2f); // Destroy after a short time
     }
 }

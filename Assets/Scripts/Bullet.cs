@@ -4,13 +4,30 @@ using Unity.Netcode;
 public class Bullet : NetworkBehaviour
 {
     public float lifespan = 5f;
+    private ulong shooterClientId;
+
+    /// <summary>
+    /// Initializes the bullet with the shooter's client ID.
+    /// </summary>
+    /// <param name="shooterId">The Client ID of the shooter.</param>
+    public void Initialize(ulong shooterId)
+    {
+        shooterClientId = shooterId;
+    }
 
     private void Start()
     {
         if (IsServer)
         {
-            // Destroy the bullet after its lifespan
+            // Destroy the bullet after its lifespan on the server
             Invoke(nameof(DespawnBullet), lifespan);
+        }
+
+        // On clients, check if this bullet was shot by the local client
+        if (IsClient && NetworkManager.Singleton.LocalClientId == shooterClientId)
+        {
+            // Destroy the bullet on the shooter client to avoid duplication
+            Destroy(gameObject);
         }
     }
 
