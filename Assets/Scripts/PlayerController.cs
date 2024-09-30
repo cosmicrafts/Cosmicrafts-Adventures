@@ -36,12 +36,15 @@ public class PlayerController : NetworkBehaviour
     private float zoomInput;
     private Vector3 mouseWorldPosition;
 
-    private bool isDashing;
     private bool isShooting;
     private bool canMove = true;
     private float dashCooldownTimer;
     private float shootingCooldownTimer;
     private Rigidbody2D rb;
+
+    private NetworkVariable<bool> isDashing = new NetworkVariable<bool>
+    (false, NetworkVariableReadPermission.Everyone,
+     NetworkVariableWritePermission.Server);
 
     private void Start()
     {
@@ -52,6 +55,24 @@ public class PlayerController : NetworkBehaviour
         {
             currentZoomIndex = GetClosestZoomIndex(mainCamera.orthographicSize);
         }
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsOwner)
+        {
+            mainCamera = Camera.main;
+            currentZoomIndex = GetClosestZoomIndex(mainCamera.orthographicSize);
+        }
+
+        // Subscribe to changes in isDashing to handle state synchronization
+        isDashing.OnValueChanged += (oldValue, newValue) =>
+        {
+            if (newValue)
+            {
+                StartDashLocal();
+            }
+        };
     }
 
     private void Update()
@@ -78,14 +99,14 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-        [ServerRpc]
+    [ServerRpc]
     private void SendMovementInputServerRpc(Vector2 input)
     {
         moveInput = input;
         UpdateMovement();
     }
 
-        [ServerRpc]
+    [ServerRpc]
     private void SendRotationInputServerRpc(Vector3 mousePosition)
     {
         HandleRotation(mousePosition);
@@ -98,7 +119,7 @@ public class PlayerController : NetworkBehaviour
         HandleRotation(mousePosition);
     }
 
-        private void HandleRotation(Vector3 mousePosition)
+    private void HandleRotation(Vector3 mousePosition)
     {
         if (mousePosition == Vector3.zero) return;
 
@@ -115,10 +136,9 @@ public class PlayerController : NetworkBehaviour
         moveInput.y = Input.GetAxis("Vertical");
 
         // Check for dash input
-        if (Input.GetKeyDown(KeyCode.Space) && !isDashing && dashCooldownTimer <= 0f)
+        if (Input.GetKeyDown(KeyCode.Space) && !isDashing.Value && dashCooldownTimer <= 0f)
         {
-            StartDash();
-            DashServerRpc();
+            RequestDashServerRpc();
         }
 
         // Check for shooting input
@@ -133,24 +153,26 @@ public class PlayerController : NetworkBehaviour
 
     private void UpdateMovement()
     {
-        if (isDashing) return;
+        if (isDashing.Value) return;
 
         Vector2 targetVelocity = moveInput * moveSpeed;
         rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, targetVelocity, ref smoothMoveVelocity, moveSmoothTime);
     }
 
-    private void StartDash()
+    private void StartDashLocal()
     {
-        isDashing = true;
+        isDashing.Value = true;
         rb.linearVelocity = transform.up * dashSpeed;
         Invoke(nameof(EndDash), dashDuration);
         dashCooldownTimer = dashCooldown;
+        Debug.Log($"[Client] Player {OwnerClientId} started dashing. Cooldown set to {dashCooldownTimer}.");
     }
 
     private void EndDash()
     {
-        isDashing = false;
-        canMove = true; // Re-enable movement after dash
+        isDashing.Value = false;
+        canMove = true;
+        Debug.Log($"[Client] Player {OwnerClientId} ended dashing. Dash state set to false.");
     }
 
     private void HandleDashTimer()
@@ -158,22 +180,40 @@ public class PlayerController : NetworkBehaviour
         if (dashCooldownTimer > 0f)
         {
             dashCooldownTimer -= Time.deltaTime;
+            Debug.Log($"[Client] Player {OwnerClientId} dash cooldown timer: {dashCooldownTimer}");
+        }
+        if (dashCooldownTimer < 0f)
+        {
+            dashCooldownTimer = 0f;
+            Debug.Log($"[Client] Player {OwnerClientId} dash cooldown timer reset to 0.");
         }
     }
 
     [ServerRpc]
-    private void DashServerRpc()
+    private void RequestDashServerRpc()
     {
-        DashClientRpc();
+        if (!isDashing.Value && dashCooldownTimer <= 0f)
+        {
+            StartDashLocal();
+            
+            // Reset cooldown timer on the server
+            dashCooldownTimer = dashCooldown;
+            Debug.Log($"[Server] Dash cooldown timer set to {dashCooldownTimer} for Player {OwnerClientId}.");
+
+            // Notify the client about the cooldown reset
+            UpdateCooldownClientRpc(dashCooldown);
+        }
+        else
+        {
+            Debug.Log($"[Server] Player {OwnerClientId} tried to dash but is currently unable to. Cooldown Timer: {dashCooldownTimer}, isDashing: {isDashing.Value}");
+        }
     }
 
     [ClientRpc]
-    private void DashClientRpc()
+    private void UpdateCooldownClientRpc(float cooldown)
     {
-        if (!IsOwner)
-        {
-            StartDash();
-        }
+        dashCooldownTimer = cooldown;
+        Debug.Log($"[Client] Cooldown timer reset to {dashCooldownTimer} for Player {OwnerClientId}.");
     }
 
     private void HandleShooting()
