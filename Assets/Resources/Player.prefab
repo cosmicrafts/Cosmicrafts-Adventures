@@ -187,7 +187,7 @@ MonoBehaviour:
   UseHalfFloatPrecision: 0
   InLocalSpace: 0
   Interpolate: 1
-  SlerpPosition: 1
+  SlerpPosition: 0
 --- !u!50 &-8877122685938278519
 Rigidbody2D:
   serializedVersion: 5
@@ -286,7 +286,6 @@ MonoBehaviour:
   - {fileID: 7717762117677849440}
   - {fileID: 7588855986598522962}
   bulletPrefab: {fileID: 8260421220360360718, guid: 535d954a18f375f65af4e09f16729c87, type: 3}
-  networkedBulletPrefab: {fileID: 8260421220360360718, guid: 535d954a18f375f65af4e09f16729c87, type: 3}
   bulletSpeed: 15
   shootingCooldown: 0.25
   muzzleFlashPrefab: {fileID: 5460127182250096457, guid: 6a31f1870254c504d93b909a93023824, type: 3}
