@@ -20,9 +20,15 @@ public class MovementComponent : NetworkBehaviour
     public void SetMoveInput(Vector2 input)
     {
         moveInput = input;
+
+        if (IsOwner && canMove)
+        {
+            // Send movement input to the server
+            SendMovementInputServerRpc(moveInput);
+        }
     }
 
-    // Add this property to expose moveInput
+    // Expose moveInput
     public Vector2 MoveInput => moveInput;
 
     private void Start()
@@ -30,9 +36,23 @@ public class MovementComponent : NetworkBehaviour
         rb = GetComponent<Rigidbody2D>();
     }
 
+    [ServerRpc]
+    private void SendMovementInputServerRpc(Vector2 input)
+    {
+        moveInput = input;
+    }
+
     private void FixedUpdate()
     {
-        if (!IsOwner || !canMove) return;
+        if (IsServer)
+        {
+            UpdateMovement();
+        }
+    }
+
+    private void UpdateMovement()
+    {
+        if (!canMove) return;
 
         Vector2 targetVelocity = moveInput * moveSpeed;
         rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, targetVelocity, ref smoothMoveVelocity, moveSmoothTime);

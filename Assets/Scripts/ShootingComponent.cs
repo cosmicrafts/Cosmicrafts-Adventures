@@ -12,16 +12,17 @@ public class ShootingComponent : NetworkBehaviour
 
     private float shootingCooldownTimer;
 
-    private void Update()
+    public void RequestShoot()
     {
-        if (!IsOwner) return;
-
-        if (Input.GetMouseButton(0) && shootingCooldownTimer <= 0f)
+        if (shootingCooldownTimer <= 0f)
         {
             ShootServerRpc();
             shootingCooldownTimer = shootingCooldown;
         }
+    }
 
+    private void Update()
+    {
         if (shootingCooldownTimer > 0f)
         {
             shootingCooldownTimer -= Time.deltaTime;

@@ -27,10 +27,13 @@ public class DashComponent : NetworkBehaviour
         {
             HandleServerCooldown();
         }
+    }
 
-        if (IsOwner && Input.GetKeyDown(KeyCode.Space))
+    public void RequestDash()
+    {
+        if (!isDashing.Value && serverDashCooldownTimer <= 0f)
         {
-            RequestDash(); // Update to use the new public method
+            RequestDashServerRpc();
         }
     }
 
@@ -42,15 +45,6 @@ public class DashComponent : NetworkBehaviour
         }
     }
 
-    // Add this public method to be called by InputComponent
-    public void RequestDash()
-    {
-        if (!isDashing.Value && serverDashCooldownTimer <= 0f)
-        {
-            RequestDashServerRpc();
-        }
-    }
-
     [ServerRpc]
     private void RequestDashServerRpc()
     {
@@ -58,19 +52,9 @@ public class DashComponent : NetworkBehaviour
         {
             isDashing.Value = true;
             serverDashCooldownTimer = dashCooldown;
+            StartDash();
             StartDashClientRpc();
-            Debug.Log($"[Server] Player {OwnerClientId} started dashing.");
         }
-        else
-        {
-            Debug.Log($"[Server] Player {OwnerClientId} cannot dash yet. Cooldown: {serverDashCooldownTimer}");
-        }
-    }
-
-    [ClientRpc]
-    private void StartDashClientRpc()
-    {
-        StartDash();
     }
 
     private void StartDash()
@@ -80,16 +64,21 @@ public class DashComponent : NetworkBehaviour
         Invoke(nameof(EndDash), dashDuration);
     }
 
+    [ClientRpc]
+    private void StartDashClientRpc()
+    {
+        if (!IsServer)
+        {
+            StartDash();
+        }
+    }
+
     private void EndDash()
     {
         movementComponent.SetCanMove(true);
-        NotifyDashEndedServerRpc();
-    }
-
-    [ServerRpc]
-    private void NotifyDashEndedServerRpc()
-    {
-        isDashing.Value = false;
-        Debug.Log($"[Server] Player {OwnerClientId} ended dashing.");
+        if (IsServer)
+        {
+            isDashing.Value = false;
+        }
     }
 }

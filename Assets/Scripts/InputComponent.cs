@@ -6,8 +6,7 @@ public class InputComponent : NetworkBehaviour
     private MovementComponent movementComponent;
     private RotationComponent rotationComponent;
     private DashComponent dashComponent;
-    // If you have a ShootingComponent, include it here
-    // private ShootingComponent shootingComponent;
+    private ShootingComponent shootingComponent; // Assuming you have this
 
     private Camera mainCamera;
 
@@ -16,7 +15,7 @@ public class InputComponent : NetworkBehaviour
         movementComponent = GetComponent<MovementComponent>();
         rotationComponent = GetComponent<RotationComponent>();
         dashComponent = GetComponent<DashComponent>();
-        // shootingComponent = GetComponent<ShootingComponent>();
+        shootingComponent = GetComponent<ShootingComponent>();
 
         if (IsOwner)
         {
@@ -43,10 +42,10 @@ public class InputComponent : NetworkBehaviour
             dashComponent.RequestDash();
         }
 
-        // Handle Shooting Input (if applicable)
-        // bool isShooting = Input.GetMouseButton(0);
-        // shootingComponent.SetShootingInput(isShooting);
-
-        // Handle Camera Zoom or other inputs if necessary
+        // Handle Shooting Input
+        if (Input.GetMouseButton(0))
+        {
+            shootingComponent.RequestShoot();
+        }
     }
 }
