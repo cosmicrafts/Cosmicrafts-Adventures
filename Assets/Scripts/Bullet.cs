@@ -1,6 +1,5 @@
 using UnityEngine;
 using Unity.Netcode;
-using System.Collections;
 
 public class Bullet : NetworkBehaviour
 {
@@ -10,11 +9,6 @@ public class Bullet : NetworkBehaviour
     // Components to hide
     private Renderer bulletRenderer;
     private Collider2D bulletCollider;
-
-    // For interpolation
-    private Vector2 previousPosition;
-    private Vector2 currentPosition;
-    private float interpolationSpeed = 10f; // Adjust this to control the smoothness
 
     private void Awake()
     {
@@ -37,17 +31,6 @@ public class Bullet : NetworkBehaviour
         {
             // Destroy the bullet after its lifespan on the server
             Invoke(nameof(DespawnBullet), lifespan);
-        }
-    }
-
-    private void Update()
-    {
-        if (IsClient && !IsOwner)
-        {
-            // Interpolation logic to smooth the bullet position
-            previousPosition = currentPosition;
-            currentPosition = transform.position;
-            transform.position = Vector2.Lerp(previousPosition, currentPosition, Time.deltaTime * interpolationSpeed);
         }
     }
 
@@ -78,24 +61,16 @@ public class Bullet : NetworkBehaviour
     {
         if (NetworkManager.Singleton.LocalClientId == shooterClientId)
         {
-            // Delay the destruction or hiding of the client bullet
-            StartCoroutine(DelayedHide(0.2f)); // Delay for 0.2 seconds or any duration you prefer
-        }
-    }
+            // Disable the renderer and collider to hide the bullet instead of destroying it
+            if (bulletRenderer != null)
+            {
+                bulletRenderer.enabled = false;
+            }
 
-    private IEnumerator DelayedHide(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-
-        // Disable the renderer and collider to hide the bullet instead of destroying it
-        if (bulletRenderer != null)
-        {
-            bulletRenderer.enabled = false;
-        }
-
-        if (bulletCollider != null)
-        {
-            bulletCollider.enabled = false;
+            if (bulletCollider != null)
+            {
+                bulletCollider.enabled = false;
+            }
         }
     }
 }
