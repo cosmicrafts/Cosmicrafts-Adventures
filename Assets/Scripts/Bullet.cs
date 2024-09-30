@@ -3,25 +3,32 @@ using Unity.Netcode;
 
 public class Bullet : NetworkBehaviour
 {
-    public float lifespan = 5f; // Time before the bullet is automatically destroyed
-    private ulong shooterClientId;
-
-    public void Initialize(ulong shooterClientId)
-    {
-        this.shooterClientId = shooterClientId;
-    }
+    public float lifespan = 5f;
 
     private void Start()
     {
-        // Destroy the bullet after its lifespan
-        Destroy(gameObject, lifespan);
+        if (IsServer)
+        {
+            // Destroy the bullet after its lifespan
+            Invoke(nameof(DespawnBullet), lifespan);
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (!IsServer) return;
 
+        // Handle collision logic here (e.g., apply damage)
+
         // Destroy the bullet upon collision
-        Destroy(gameObject);
+        DespawnBullet();
+    }
+
+    private void DespawnBullet()
+    {
+        if (IsServer && NetworkObject != null && NetworkObject.IsSpawned)
+        {
+            NetworkObject.Despawn(true); // Despawn and destroy the bullet
+        }
     }
 }
