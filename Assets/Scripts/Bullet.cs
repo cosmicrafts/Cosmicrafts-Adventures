@@ -22,13 +22,6 @@ public class Bullet : NetworkBehaviour
             // Destroy the bullet after its lifespan on the server
             Invoke(nameof(DespawnBullet), lifespan);
         }
-
-        // On clients, check if this bullet was shot by the local client
-        if (IsClient && NetworkManager.Singleton.LocalClientId == shooterClientId)
-        {
-            // Destroy the bullet on the shooter client to avoid duplication
-            Destroy(gameObject);
-        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -46,6 +39,19 @@ public class Bullet : NetworkBehaviour
         if (IsServer && NetworkObject != null && NetworkObject.IsSpawned)
         {
             NetworkObject.Despawn(true); // Despawn and destroy the bullet
+        }
+    }
+
+    /// <summary>
+    /// Hides the bullet for the shooter client.
+    /// </summary>
+    /// <param name="shooterClientId">The client ID of the shooter.</param>
+    [ClientRpc]
+    public void HideForShooterClientRpc(ulong shooterClientId, ClientRpcParams clientRpcParams = default)
+    {
+        if (NetworkManager.Singleton.LocalClientId == shooterClientId)
+        {
+            Destroy(gameObject);
         }
     }
 }
