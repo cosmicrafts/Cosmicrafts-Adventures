@@ -53,24 +53,20 @@ public class Bullet : NetworkBehaviour
     }
 
     /// <summary>
-    /// Hides the bullet for the shooter client.
+    /// Hides the bullet for all clients.
     /// </summary>
-    /// <param name="shooterClientId">The client ID of the shooter.</param>
     [ClientRpc]
-    public void HideForShooterClientRpc(ulong shooterClientId, ClientRpcParams clientRpcParams = default)
+    public void HideForAllClientsClientRpc(ClientRpcParams clientRpcParams = default)
     {
-        if (NetworkManager.Singleton.LocalClientId == shooterClientId)
+        // Disable the renderer and collider to hide the bullet instead of destroying it
+        if (bulletRenderer != null)
         {
-            // Disable the renderer and collider to hide the bullet instead of destroying it
-            if (bulletRenderer != null)
-            {
-                bulletRenderer.enabled = false;
-            }
+            bulletRenderer.enabled = false;
+        }
 
-            if (bulletCollider != null)
-            {
-                bulletCollider.enabled = false;
-            }
+        if (bulletCollider != null)
+        {
+            bulletCollider.enabled = false;
         }
     }
 }
