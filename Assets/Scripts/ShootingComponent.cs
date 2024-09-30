@@ -30,14 +30,29 @@ public class ShootingComponent : NetworkBehaviour
     }
 
     [ServerRpc]
-    private void ShootServerRpc()
+    private void ShootServerRpc(ServerRpcParams rpcParams = default)
     {
+        ulong shooterClientId = rpcParams.Receive.SenderClientId;
+
         foreach (Transform shootPoint in shootPoints)
         {
             GameObject bullet = Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
-            bullet.GetComponent<Rigidbody2D>().linearVelocity = shootPoint.up * bulletSpeed;
-            bullet.GetComponent<NetworkObject>().Spawn();
 
+            // Set bullet velocity
+            Rigidbody2D bulletRb = bullet.GetComponent<Rigidbody2D>();
+            if (bulletRb != null)
+            {
+                bulletRb.linearVelocity = shootPoint.up * bulletSpeed; // Use velocity instead of linearVelocity for better performance
+            }
+
+            // Spawn the bullet over the network
+            NetworkObject bulletNetworkObject = bullet.GetComponent<NetworkObject>();
+            if (bulletNetworkObject != null)
+            {
+                bulletNetworkObject.Spawn();
+            }
+
+            // Spawn muzzle flash if it exists
             if (muzzleFlashPrefab != null)
             {
                 SpawnMuzzleFlashClientRpc(shootPoint.position, shootPoint.rotation);
