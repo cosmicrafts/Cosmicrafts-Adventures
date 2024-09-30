@@ -39,7 +39,6 @@ public class PlayerController : NetworkBehaviour
     private bool isDashing;
     private bool isShooting;
     private bool canMove = true;
-    private float dashTime;
     private float dashCooldownTimer;
     private float shootingCooldownTimer;
     private Rigidbody2D rb;
@@ -79,6 +78,36 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
+        [ServerRpc]
+    private void SendMovementInputServerRpc(Vector2 input)
+    {
+        moveInput = input;
+        UpdateMovement();
+    }
+
+        [ServerRpc]
+    private void SendRotationInputServerRpc(Vector3 mousePosition)
+    {
+        HandleRotation(mousePosition);
+        UpdateRotationClientRpc(mousePosition);
+    }
+
+    [ClientRpc]
+    private void UpdateRotationClientRpc(Vector3 mousePosition)
+    {
+        HandleRotation(mousePosition);
+    }
+
+        private void HandleRotation(Vector3 mousePosition)
+    {
+        if (mousePosition == Vector3.zero) return;
+
+        Vector2 direction = (mousePosition - transform.position).normalized;
+        float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
+
+        rb.SetRotation(targetAngle);
+    }
+
     private void HandleInput()
     {
         // Get input for movement
@@ -86,20 +115,14 @@ public class PlayerController : NetworkBehaviour
         moveInput.y = Input.GetAxis("Vertical");
 
         // Check for dash input
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && !isDashing && dashCooldownTimer <= 0f)
         {
-            RequestDashServerRpc();
+            StartDash();
+            DashServerRpc();
         }
 
         // Check for shooting input
-        if (Input.GetMouseButton(0))
-        {
-            isShooting = true;
-        }
-        else
-        {
-            isShooting = false;
-        }
+        isShooting = Input.GetMouseButton(0);
 
         // Handle mouse position
         mouseWorldPosition = mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -mainCamera.transform.position.z));
@@ -116,77 +139,40 @@ public class PlayerController : NetworkBehaviour
         rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, targetVelocity, ref smoothMoveVelocity, moveSmoothTime);
     }
 
-    [ServerRpc]
-    private void SendMovementInputServerRpc(Vector2 input)
+    private void StartDash()
     {
-        moveInput = input;
-        UpdateMovement();
-    }
-
-    [ServerRpc]
-    private void SendRotationInputServerRpc(Vector3 mousePosition)
-    {
-        HandleRotation(mousePosition);
-        UpdateRotationClientRpc(mousePosition);
-    }
-
-    [ClientRpc]
-    private void UpdateRotationClientRpc(Vector3 mousePosition)
-    {
-        HandleRotation(mousePosition);
-    }
-
-    private void HandleRotation(Vector3 mousePosition)
-    {
-        if (mousePosition == Vector3.zero) return;
-
-        Vector2 direction = (mousePosition - transform.position).normalized;
-        float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
-
-        rb.SetRotation(targetAngle);
-    }
-
-    [ServerRpc]
-    private void RequestDashServerRpc()
-    {
-        if (!isDashing && dashCooldownTimer <= 0f)
-        {
-            isDashing = true;
-            dashTime = dashDuration;
-            dashCooldownTimer = dashCooldown;
-
-            Vector2 dashVelocity = transform.up * dashSpeed;
-            rb.linearVelocity = dashVelocity;
-
-            StartDashClientRpc(dashVelocity);
-        }
-    }
-
-    [ClientRpc]
-    private void StartDashClientRpc(Vector2 dashVelocity)
-    {
-        if (IsOwner) return;
-
         isDashing = true;
-        rb.linearVelocity = dashVelocity;
+        rb.linearVelocity = transform.up * dashSpeed;
+        Invoke(nameof(EndDash), dashDuration);
+        dashCooldownTimer = dashCooldown;
+    }
+
+    private void EndDash()
+    {
+        isDashing = false;
+        canMove = true; // Re-enable movement after dash
     }
 
     private void HandleDashTimer()
     {
-        if (isDashing)
-        {
-            dashTime -= Time.deltaTime;
-            if (dashTime <= 0f)
-            {
-                isDashing = false;
-                rb.linearVelocity = Vector2.zero;
-                canMove = true; // Re-enable movement after dash
-            }
-        }
-
         if (dashCooldownTimer > 0f)
         {
             dashCooldownTimer -= Time.deltaTime;
+        }
+    }
+
+    [ServerRpc]
+    private void DashServerRpc()
+    {
+        DashClientRpc();
+    }
+
+    [ClientRpc]
+    private void DashClientRpc()
+    {
+        if (!IsOwner)
+        {
+            StartDash();
         }
     }
 
