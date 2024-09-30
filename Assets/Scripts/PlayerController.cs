@@ -1,12 +1,11 @@
 using UnityEngine;
 using Unity.Netcode;
-using UnityEngine.UI;
 using System.Collections.Generic;
 
 public class PlayerController : NetworkBehaviour
 {
     private Camera mainCamera;
-    public Health health;
+    private Health health;
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
