@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2474853391618831995}
   - component: {fileID: 7459687913656615908}
-  m_Layer: 20
+  m_Layer: 8
   m_Name: Muzzle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -27,7 +27,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.10000001, y: 0.15625001, z: 0}
+  m_LocalScale: {x: 0.11, y: 0.171875, z: 0}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -75,7 +75,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 9
   m_Sprite: {fileID: 21300000, guid: 10a1a28551616e930a5a97ab8fc04b29, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 0.8392157}
   m_FlipX: 0

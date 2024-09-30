@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5052128026158649887}
   - component: {fileID: 6682347331816801693}
   - component: {fileID: 2788809226058364677}
-  m_Layer: 10
+  m_Layer: 8
   m_Name: Thruster
   m_TagString: Untagged
   m_Icon: {fileID: 0}
