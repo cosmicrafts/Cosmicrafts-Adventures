@@ -30,7 +30,7 @@ public class DashComponent : NetworkBehaviour
 
         if (IsOwner && Input.GetKeyDown(KeyCode.Space))
         {
-            RequestDashServerRpc();
+            RequestDash(); // Update to use the new public method
         }
     }
 
@@ -39,6 +39,15 @@ public class DashComponent : NetworkBehaviour
         if (serverDashCooldownTimer > 0f)
         {
             serverDashCooldownTimer -= Time.deltaTime;
+        }
+    }
+
+    // Add this public method to be called by InputComponent
+    public void RequestDash()
+    {
+        if (!isDashing.Value && serverDashCooldownTimer <= 0f)
+        {
+            RequestDashServerRpc();
         }
     }
 

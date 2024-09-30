@@ -22,6 +22,9 @@ public class MovementComponent : NetworkBehaviour
         moveInput = input;
     }
 
+    // Add this property to expose moveInput
+    public Vector2 MoveInput => moveInput;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
