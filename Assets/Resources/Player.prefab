@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2753726425
+  GlobalObjectIdHash: 3926462412
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -286,8 +286,8 @@ MonoBehaviour:
   - {fileID: 7717762117677849440}
   - {fileID: 7588855986598522962}
   bulletPrefab: {fileID: 8260421220360360718, guid: 535d954a18f375f65af4e09f16729c87, type: 3}
-  bulletSpeed: 15
-  shootingCooldown: 0.25
+  bulletSpeed: 4
+  shootingCooldown: 0.2
   muzzleFlashPrefab: {fileID: 5460127182250096457, guid: 6a31f1870254c504d93b909a93023824, type: 3}
 --- !u!114 &3894512252052835016
 MonoBehaviour:

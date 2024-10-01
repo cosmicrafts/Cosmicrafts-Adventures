@@ -1,16 +1,16 @@
 using UnityEngine;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 
 public class Bullet : NetworkBehaviour
 {
     public float lifespan = 5f;
-    public GameObject impactEffectPrefab; // Impact effect prefab for local collision effect
+    public GameObject impactEffectPrefab; // Impact effect prefab for collision effect
     private ulong shooterClientId;
 
     // Components to hide
     private Renderer bulletRenderer;
     private Collider2D bulletCollider;
-
     private bool isLocalOnly = false; // Flag to differentiate between networked and local-only bullets
 
     private void Awake()
@@ -25,7 +25,6 @@ public class Bullet : NetworkBehaviour
     /// <summary>
     /// Initializes the bullet with the shooter's client ID.
     /// </summary>
-    /// <param name="shooterId">The Client ID of the shooter.</param>
     public void Initialize(ulong shooterId)
     {
         shooterClientId = shooterId;
@@ -33,7 +32,19 @@ public class Bullet : NetworkBehaviour
 
     public void SetLocalOnly()
     {
-        isLocalOnly = true; // Mark the bullet as local-only
+        // Mark the bullet as local-only and disable network components
+        isLocalOnly = true;
+
+        // Remove or disable network components
+        if (TryGetComponent<NetworkObject>(out var netObj))
+        {
+            Destroy(netObj);
+        }
+
+        if (TryGetComponent<NetworkRigidbody2D>(out var netRigidbody))
+        {
+            Destroy(netRigidbody);
+        }
     }
 
     private void Start()
@@ -104,7 +115,7 @@ public class Bullet : NetworkBehaviour
             Destroy(impactEffect, 0.1f); // Destroy the impact effect after a short delay
         }
 
-        // Destroy the bullet locally only if it's not a networked bullet
+        // Destroy the bullet locally
         Destroy(gameObject);
     }
 

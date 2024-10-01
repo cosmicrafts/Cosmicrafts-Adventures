@@ -85,7 +85,7 @@ SpriteRenderer:
   m_Sprite: {fileID: 1083388977, guid: db0d3400fb5e18f479988fcb011d6ba3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
-  m_FlipY: 1
+  m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
@@ -218,8 +218,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1.26, y: 2.09}
+  m_Offset: {x: 0, y: 1.03}
+  m_Size: {x: 0.64, y: 1.4}
   m_Direction: 0
 --- !u!114 &199973353297509416
 MonoBehaviour:
@@ -233,5 +233,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ae096c6b5956da138c3a1ff94a9ac5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lifespan: 2
+  lifespan: 3
   impactEffectPrefab: {fileID: 8601097328188198969, guid: 7ab7b8d1f2f5a3f408ab55ec19fabc50, type: 3}

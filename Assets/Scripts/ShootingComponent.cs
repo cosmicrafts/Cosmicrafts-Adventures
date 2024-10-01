@@ -1,7 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
 using System.Collections.Generic;
-using Unity.Netcode.Components;
 
 public class ShootingComponent : NetworkBehaviour
 {
@@ -58,24 +57,11 @@ public class ShootingComponent : NetworkBehaviour
             // Instantiate a local-only bullet for visual feedback
             GameObject clientBullet = Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
 
-            // Remove or deactivate NetworkObject and NetworkRigidbody2D components to make it local-only
-            NetworkObject netObj = clientBullet.GetComponent<NetworkObject>();
-            if (netObj != null)
+            // Set the bullet to be local-only and remove network components
+            Bullet bulletScript = clientBullet.GetComponent<Bullet>();
+            if (bulletScript != null)
             {
-                Destroy(netObj); // Remove the NetworkObject component
-            }
-
-            NetworkRigidbody2D netRigidbody = clientBullet.GetComponent<NetworkRigidbody2D>();
-            if (netRigidbody != null)
-            {
-                Destroy(netRigidbody); // Remove the NetworkRigidbody2D component
-            }
-
-            // Ensure that the Collider2D is enabled for local collision detection
-            Collider2D bulletCollider = clientBullet.GetComponent<Collider2D>();
-            if (bulletCollider != null)
-            {
-                bulletCollider.enabled = true;
+                bulletScript.SetLocalOnly();
             }
 
             Rigidbody2D bulletRb = clientBullet.GetComponent<Rigidbody2D>();
