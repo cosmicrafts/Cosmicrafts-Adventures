@@ -6,13 +6,11 @@ public class HealthComponent : NetworkBehaviour
 {
     public float maxHealth = 100f;
     public NetworkVariable<float> currentHealth = new NetworkVariable<float>(100f);
-
-    public Slider healthSlider; // Reference to the health bar UI slider
+    public Slider healthSlider;
 
     private void Start()
     {
-        Debug.Log($"{gameObject.name} HealthComponent initialized");
-
+        // Initialize health and setup slider
         if (IsServer)
         {
             currentHealth.Value = maxHealth;
@@ -29,6 +27,8 @@ public class HealthComponent : NetworkBehaviour
         {
             Debug.LogWarning("Health slider is not assigned.");
         }
+
+        Debug.Log($"{gameObject.name} HealthComponent initialized with {currentHealth.Value} health");
     }
 
     private new void OnDestroy()
@@ -39,7 +39,8 @@ public class HealthComponent : NetworkBehaviour
 
     private void OnHealthChanged(float oldHealth, float newHealth)
     {
-        Debug.Log($"Health updated from {oldHealth} to {newHealth}");
+        Debug.Log($"{gameObject.name} health changed from {oldHealth} to {newHealth}");
+
         if (healthSlider != null)
         {
             healthSlider.value = newHealth;
@@ -50,22 +51,15 @@ public class HealthComponent : NetworkBehaviour
         }
     }
 
-    /// <summary>
-    /// Server-side method to reduce health.
-    /// </summary>
-    /// <param name="amount">The amount of health to reduce.</param>
     [ServerRpc(RequireOwnership = false)]
     public void TakeDamageServerRpc(float amount)
     {
-        Debug.Log($"TakeDamageServerRpc called on {gameObject.name} with damage: {amount}");
-
         if (!IsServer)
         {
-            Debug.Log("TakeDamageServerRpc called, but not on the server. Exiting.");
+            Debug.LogWarning("TakeDamageServerRpc called, but not on the server.");
             return;
         }
 
-        Debug.Log($"Reducing health for {gameObject.name} by {amount}");
         currentHealth.Value -= amount;
 
         if (currentHealth.Value <= 0)
@@ -79,6 +73,6 @@ public class HealthComponent : NetworkBehaviour
     private void HandleDeath()
     {
         Debug.Log($"{gameObject.name} has died!");
-        // Handle death logic here (e.g., respawn, disable player, etc.)
+        // Handle death logic here, like respawning or disabling the player
     }
 }

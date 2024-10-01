@@ -1,11 +1,11 @@
 using UnityEngine;
 using Unity.Netcode;
 using Unity.Netcode.Components;
-
 public class Bullet : NetworkBehaviour
 {
     public float lifespan = 5f;
     public GameObject impactEffectPrefab; // Impact effect prefab for collision effect
+    public float bulletDamage = 1f; // Amount of damage each bullet deals
     private ulong shooterClientId;
 
     // Components to hide
@@ -22,9 +22,6 @@ public class Bullet : NetworkBehaviour
         gameObject.tag = "Bullet";
     }
 
-    /// <summary>
-    /// Initializes the bullet with the shooter's client ID.
-    /// </summary>
     public void Initialize(ulong shooterId)
     {
         shooterClientId = shooterId;
@@ -51,12 +48,10 @@ public class Bullet : NetworkBehaviour
     {
         if (isLocalOnly)
         {
-            // Destroy the bullet locally after its lifespan on the clients
             Destroy(gameObject, lifespan);
         }
         else if (IsServer)
         {
-            // Destroy the bullet after its lifespan on the server
             Invoke(nameof(DespawnBullet), lifespan);
         }
     }
@@ -65,7 +60,6 @@ public class Bullet : NetworkBehaviour
     {
         if (collision.gameObject.CompareTag("Bullet"))
         {
-            // Handle bullet-to-bullet collision for both server and clients
             if (isLocalOnly)
             {
                 HandleLocalCollision(collision.contacts[0].point);
@@ -73,61 +67,63 @@ public class Bullet : NetworkBehaviour
             else if (IsServer)
             {
                 DespawnBullet();
+            }
+        }
+        else if (collision.gameObject.CompareTag("Player"))
+        {
+            if (IsServer)
+            {
+                // Apply damage to the player if the collision happens on the server
+                HealthComponent healthComponent = collision.gameObject.GetComponent<HealthComponent>();
+                if (healthComponent != null)
+                {
+                    healthComponent.TakeDamageServerRpc(bulletDamage);
+                }
+
+                DespawnBullet();
+            }
+            else if (isLocalOnly)
+            {
+                HandleLocalCollision(collision.contacts[0].point);
             }
         }
         else
         {
-            // Handle collisions with other objects (e.g., walls, targets)
             if (isLocalOnly)
             {
                 HandleLocalCollision(collision.contacts[0].point);
             }
             else if (IsServer)
             {
-                // Handle server-side collision logic here (e.g., apply damage)
                 DespawnBullet();
             }
         }
     }
 
-    /// <summary>
-    /// Handles bullet despawning on the server.
-    /// </summary>
     private void DespawnBullet()
     {
         if (IsServer && NetworkObject != null && NetworkObject.IsSpawned)
         {
-            // Ensure that only the server despawns the network object
             NetworkObject.Despawn(true);
         }
     }
 
-    /// <summary>
-    /// Handles the local impact effect and bullet destruction.
-    /// </summary>
-    /// <param name="impactPoint">The point of impact where the effect should be instantiated.</param>
     private void HandleLocalCollision(Vector2 impactPoint)
     {
-        // Instantiate impact effect locally
         if (impactEffectPrefab != null)
         {
             GameObject impactEffect = Instantiate(impactEffectPrefab, impactPoint, Quaternion.identity);
-            Destroy(impactEffect, 0.1f); // Destroy the impact effect after a short delay
+            Destroy(impactEffect, 0.1f);
         }
 
-        // Destroy the bullet locally
         Destroy(gameObject);
     }
 
-    /// <summary>
-    /// Hides the bullet for all clients except the server.
-    /// </summary>
     [ClientRpc]
     public void HideForAllClientsClientRpc(ClientRpcParams clientRpcParams = default)
     {
         if (!IsServer)
         {
-            // Disable the renderer and collider to hide the bullet instead of destroying it
             if (bulletRenderer != null)
             {
                 bulletRenderer.enabled = false;
