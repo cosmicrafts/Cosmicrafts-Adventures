@@ -74,12 +74,12 @@ private void SetupSecureClient()
             Debug.Log("Client CA Certificate: " + SecureParameters.MyGameClientCA);
 
             // Set the client to connect to the server IP address
-            transport.SetConnectionData("127.0.0.1", 7777);
+            transport.SetConnectionData("74.208.246.177", 7777);
 
             // Set client secure parameters for encrypted communication
             transport.SetClientSecrets(SecureParameters.ServerCommonName, SecureParameters.MyGameClientCA);
 
-            Debug.Log("Client connection data set to 127.0.0.1:7777 with encryption.");
+            Debug.Log("Client connection data set to 74.208.246.177:7777 with encryption.");
         }
         else
         {
