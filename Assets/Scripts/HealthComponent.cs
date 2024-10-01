@@ -8,6 +8,7 @@ public class HealthComponent : NetworkBehaviour
     public NetworkVariable<float> currentHealth = new NetworkVariable<float>(100f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public Slider healthSlider;
     public float collisionDamage = 4f; // Damage taken upon collision
+    private float predictedHealth; // For client-side prediction
 
     private void Start()
     {
@@ -17,20 +18,15 @@ public class HealthComponent : NetworkBehaviour
             currentHealth.Value = maxHealth;
         }
 
+        predictedHealth = currentHealth.Value; // Initialize prediction to current health
+
         currentHealth.OnValueChanged += OnHealthChanged;
 
         if (healthSlider != null)
         {
             healthSlider.maxValue = maxHealth;
             healthSlider.value = currentHealth.Value;
-            Debug.Log($"{gameObject.name} [HealthComponent] Slider initialized with value {healthSlider.value}");
         }
-        else
-        {
-            Debug.LogWarning($"{gameObject.name} [HealthComponent] Health slider is not assigned.");
-        }
-
-        Debug.Log($"{gameObject.name} [HealthComponent] initialized with {currentHealth.Value} health");
     }
 
     private new void OnDestroy()
@@ -41,30 +37,14 @@ public class HealthComponent : NetworkBehaviour
 
     private void OnHealthChanged(float oldHealth, float newHealth)
     {
-        Debug.Log($"{gameObject.name} [HealthComponent] health changed from {oldHealth} to {newHealth}");
-
-        if (healthSlider != null)
-        {
-            healthSlider.value = newHealth;
-            Debug.Log($"{gameObject.name} [HealthComponent] Slider updated to value {newHealth}");
-        }
-        else
-        {
-            Debug.LogWarning($"{gameObject.name} [HealthComponent] Health slider reference is missing on the client side.");
-        }
+        // Server-authoritative value received, adjust the predicted health
+        predictedHealth = newHealth;
+        UpdateHealthUI(predictedHealth);
     }
 
     [ServerRpc(RequireOwnership = false)]
     public void TakeDamageServerRpc(float amount)
     {
-        if (!IsServer)
-        {
-            Debug.LogWarning($"[HealthComponent] TakeDamageServerRpc called, but not on the server. Current server status: {IsServer}");
-            return;
-        }
-
-        Debug.Log($"{gameObject.name} [HealthComponent] taking {amount} damage. Current health before damage: {currentHealth.Value}");
-
         ApplyDamage(amount);
     }
 
@@ -81,20 +61,9 @@ public class HealthComponent : NetworkBehaviour
         // Update the NetworkVariable
         currentHealth.Value = newHealth;
 
-        // Confirm if the value is updated
-        if (currentHealth.Value == newHealth)
-        {
-            Debug.Log($"{gameObject.name} [HealthComponent] current health updated successfully to: {currentHealth.Value}");
-        }
-        else
-        {
-            Debug.LogError($"{gameObject.name} [HealthComponent] failed to update current health. Current value: {currentHealth.Value}");
-        }
-
         // Handle death if health is zero
         if (currentHealth.Value <= 0)
         {
-            Debug.Log($"{gameObject.name} [HealthComponent] has died. Handling death.");
             HandleDeath();
         }
     }
@@ -107,12 +76,40 @@ public class HealthComponent : NetworkBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (IsServer)
+        if (IsClient)
         {
-            Debug.Log($"{gameObject.name} [HealthComponent] collided with {collision.gameObject.name}. Taking {collisionDamage} damage.");
+            // Client prediction
+            Debug.Log($"{gameObject.name} [HealthComponent] collided with {collision.gameObject.name}. Predicted damage: {collisionDamage}");
 
-            // For testing purposes, directly apply damage without using the ServerRpc.
-            ApplyDamage(collisionDamage);
+            predictedHealth -= collisionDamage;
+            if (predictedHealth < 0)
+                predictedHealth = 0;
+
+            UpdateHealthUI(predictedHealth);
+
+            // Request server to apply damage
+            if (IsOwner) // To avoid multiple clients requesting damage for the same object
+            {
+                TakeDamageServerRpc(collisionDamage);
+            }
+        }
+    }
+
+    private void UpdateHealthUI(float healthValue)
+    {
+        if (healthSlider != null)
+        {
+            healthSlider.value = healthValue;
+        }
+    }
+
+    private void Update()
+    {
+        if (IsClient)
+        {
+            // Smooth correction towards server-authoritative health
+            predictedHealth = Mathf.Lerp(predictedHealth, currentHealth.Value, Time.deltaTime * 10f);
+            UpdateHealthUI(predictedHealth);
         }
     }
 }

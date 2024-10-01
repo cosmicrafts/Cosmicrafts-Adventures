@@ -59,25 +59,17 @@ public class Bullet : NetworkBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.Log($"[Bullet] OnCollisionEnter2D with {collision.gameObject.name}");
 
         HealthComponent healthComponent = collision.gameObject.GetComponent<HealthComponent>();
         if (healthComponent != null)
         {
-            Debug.Log($"[Bullet] Found HealthComponent on {collision.gameObject.name}. Applying damage...");
 
             if (IsServer)
             {
                 if (healthComponent.NetworkObject != null)
                 {
-                    Debug.Log($"[Bullet] Calling TakeDamageServerRpc for {collision.gameObject.name} with {bulletDamage} damage.");
                     healthComponent.TakeDamageServerRpc(bulletDamage);
                 }
-                else
-                {
-                    Debug.LogWarning($"[Bullet] HealthComponent does not have a NetworkObject on {collision.gameObject.name}.");
-                }
-
                 DespawnBullet();
             }
             else if (isLocalOnly)
@@ -87,7 +79,6 @@ public class Bullet : NetworkBehaviour
         }
         else
         {
-            Debug.Log($"[Bullet] No HealthComponent found on {collision.gameObject.name}. Handling general collision.");
 
             if (isLocalOnly)
             {
