@@ -15,6 +15,9 @@ public class Bullet : NetworkBehaviour
     {
         bulletRenderer = GetComponent<Renderer>();
         bulletCollider = GetComponent<Collider2D>();
+
+        // Set the bullet tag
+        gameObject.tag = "Bullet";
     }
 
     /// <summary>
@@ -42,15 +45,31 @@ public class Bullet : NetworkBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (IsServer)
+        if (collision.gameObject.CompareTag("Bullet"))
         {
-            // Handle server-side collision logic here (e.g., apply damage)
-            DespawnBullet();
+            // Handle bullet-to-bullet collision for both server and clients
+            if (IsServer)
+            {
+                DespawnBullet();
+            }
+            else
+            {
+                HandleLocalCollision(collision.contacts[0].point);
+            }
         }
         else
         {
-            // Handle local collision for visual feedback
-            HandleLocalCollision(collision.contacts[0].point);
+            // Handle collisions with other objects (e.g., walls, targets)
+            if (IsServer)
+            {
+                // Handle server-side collision logic here (e.g., apply damage)
+                DespawnBullet();
+            }
+            else
+            {
+                // Handle local collision for visual feedback
+                HandleLocalCollision(collision.contacts[0].point);
+            }
         }
     }
 
@@ -61,7 +80,8 @@ public class Bullet : NetworkBehaviour
     {
         if (IsServer && NetworkObject != null && NetworkObject.IsSpawned)
         {
-            NetworkObject.Despawn(true); // Despawn and destroy the bullet
+            // Ensure that only the server despawns the network object
+            NetworkObject.Despawn(true);
         }
     }
 
@@ -78,8 +98,11 @@ public class Bullet : NetworkBehaviour
             Destroy(impactEffect, 0.1f); // Destroy the impact effect after a short delay
         }
 
-        // Destroy the bullet locally
-        Destroy(gameObject);
+        // Destroy the bullet locally only if it's not a networked bullet
+        if (NetworkObject == null || !NetworkObject.IsSpawned)
+        {
+            Destroy(gameObject);
+        }
     }
 
     /// <summary>
