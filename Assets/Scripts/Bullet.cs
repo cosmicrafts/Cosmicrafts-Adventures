@@ -11,6 +11,8 @@ public class Bullet : NetworkBehaviour
     private Renderer bulletRenderer;
     private Collider2D bulletCollider;
 
+    private bool isLocalOnly = false; // Flag to differentiate between networked and local-only bullets
+
     private void Awake()
     {
         bulletRenderer = GetComponent<Renderer>();
@@ -29,17 +31,22 @@ public class Bullet : NetworkBehaviour
         shooterClientId = shooterId;
     }
 
+    public void SetLocalOnly()
+    {
+        isLocalOnly = true; // Mark the bullet as local-only
+    }
+
     private void Start()
     {
-        if (IsServer)
-        {
-            // Destroy the bullet after its lifespan on the server
-            Invoke(nameof(DespawnBullet), lifespan);
-        }
-        else
+        if (isLocalOnly)
         {
             // Destroy the bullet locally after its lifespan on the clients
             Destroy(gameObject, lifespan);
+        }
+        else if (IsServer)
+        {
+            // Destroy the bullet after its lifespan on the server
+            Invoke(nameof(DespawnBullet), lifespan);
         }
     }
 
@@ -48,27 +55,26 @@ public class Bullet : NetworkBehaviour
         if (collision.gameObject.CompareTag("Bullet"))
         {
             // Handle bullet-to-bullet collision for both server and clients
-            if (IsServer)
-            {
-                DespawnBullet();
-            }
-            else
+            if (isLocalOnly)
             {
                 HandleLocalCollision(collision.contacts[0].point);
+            }
+            else if (IsServer)
+            {
+                DespawnBullet();
             }
         }
         else
         {
             // Handle collisions with other objects (e.g., walls, targets)
-            if (IsServer)
+            if (isLocalOnly)
+            {
+                HandleLocalCollision(collision.contacts[0].point);
+            }
+            else if (IsServer)
             {
                 // Handle server-side collision logic here (e.g., apply damage)
                 DespawnBullet();
-            }
-            else
-            {
-                // Handle local collision for visual feedback
-                HandleLocalCollision(collision.contacts[0].point);
             }
         }
     }
@@ -99,10 +105,7 @@ public class Bullet : NetworkBehaviour
         }
 
         // Destroy the bullet locally only if it's not a networked bullet
-        if (NetworkObject == null || !NetworkObject.IsSpawned)
-        {
-            Destroy(gameObject);
-        }
+        Destroy(gameObject);
     }
 
     /// <summary>
