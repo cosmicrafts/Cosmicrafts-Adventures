@@ -4,6 +4,7 @@ using Unity.Netcode;
 public class Bullet : NetworkBehaviour
 {
     public float lifespan = 5f;
+    public GameObject impactEffectPrefab; // Impact effect prefab for local collision effect
     private ulong shooterClientId;
 
     // Components to hide
@@ -32,18 +33,30 @@ public class Bullet : NetworkBehaviour
             // Destroy the bullet after its lifespan on the server
             Invoke(nameof(DespawnBullet), lifespan);
         }
+        else
+        {
+            // Destroy the bullet locally after its lifespan on the clients
+            Destroy(gameObject, lifespan);
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (!IsServer) return;
-
-        // Handle collision logic here (e.g., apply damage)
-
-        // Destroy the bullet upon collision
-        DespawnBullet();
+        if (IsServer)
+        {
+            // Handle server-side collision logic here (e.g., apply damage)
+            DespawnBullet();
+        }
+        else
+        {
+            // Handle local collision for visual feedback
+            HandleLocalCollision(collision.contacts[0].point);
+        }
     }
 
+    /// <summary>
+    /// Handles bullet despawning on the server.
+    /// </summary>
     private void DespawnBullet()
     {
         if (IsServer && NetworkObject != null && NetworkObject.IsSpawned)
@@ -53,20 +66,39 @@ public class Bullet : NetworkBehaviour
     }
 
     /// <summary>
-    /// Hides the bullet for all clients.
+    /// Handles the local impact effect and bullet destruction.
+    /// </summary>
+    /// <param name="impactPoint">The point of impact where the effect should be instantiated.</param>
+    private void HandleLocalCollision(Vector2 impactPoint)
+    {
+        // Instantiate impact effect locally
+        if (impactEffectPrefab != null)
+        {
+            Instantiate(impactEffectPrefab, impactPoint, Quaternion.identity);
+        }
+
+        // Destroy the bullet locally
+        Destroy(gameObject);
+    }
+
+    /// <summary>
+    /// Hides the bullet for all clients except the server.
     /// </summary>
     [ClientRpc]
     public void HideForAllClientsClientRpc(ClientRpcParams clientRpcParams = default)
     {
-        // Disable the renderer and collider to hide the bullet instead of destroying it
-        if (bulletRenderer != null)
+        if (!IsServer)
         {
-            bulletRenderer.enabled = false;
-        }
+            // Disable the renderer and collider to hide the bullet instead of destroying it
+            if (bulletRenderer != null)
+            {
+                bulletRenderer.enabled = false;
+            }
 
-        if (bulletCollider != null)
-        {
-            bulletCollider.enabled = false;
+            if (bulletCollider != null)
+            {
+                bulletCollider.enabled = false;
+            }
         }
     }
 }

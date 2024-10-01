@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using System.Collections.Generic;
+using Unity.Netcode.Components;
 
 public class ShootingComponent : NetworkBehaviour
 {
@@ -43,36 +44,53 @@ public class ShootingComponent : NetworkBehaviour
     /// <summary>
     /// Instantiates a local-only bullet for immediate visual feedback.
     /// </summary>
-    private void ClientShootPrediction()
+private void ClientShootPrediction()
+{
+    foreach (Transform shootPoint in shootPoints)
     {
-        foreach (Transform shootPoint in shootPoints)
+        // Spawn muzzle flash immediately on the client
+        if (muzzleFlashPrefab != null)
         {
-            // Spawn muzzle flash immediately on the client
-            if (muzzleFlashPrefab != null)
-            {
-                GameObject muzzleFlash = Instantiate(muzzleFlashPrefab, shootPoint.position, shootPoint.rotation, shootPoint);
-                Destroy(muzzleFlash, 0.1f);
-            }
-
-            // Instantiate a local-only bullet for visual feedback
-            GameObject clientBullet = Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
-
-            // Remove the NetworkObject component if it exists to make it local-only
-            NetworkObject netObj = clientBullet.GetComponent<NetworkObject>();
-            if (netObj != null)
-            {
-                Destroy(netObj);
-            }
-
-            Rigidbody2D bulletRb = clientBullet.GetComponent<Rigidbody2D>();
-            if (bulletRb != null)
-            {
-                bulletRb.linearVelocity = shootPoint.up * bulletSpeed;
-            }
-
-            Destroy(clientBullet, 2f); // Destroy after a short time to avoid clutter
+            GameObject muzzleFlash = Instantiate(muzzleFlashPrefab, shootPoint.position, shootPoint.rotation, shootPoint);
+            Destroy(muzzleFlash, 0.1f);
         }
+
+        // Instantiate a local-only bullet for visual feedback
+        GameObject clientBullet = Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
+
+        // Remove or deactivate NetworkObject and NetworkRigidbody2D components to make it local-only
+        NetworkObject netObj = clientBullet.GetComponent<NetworkObject>();
+        if (netObj != null)
+        {
+            Destroy(netObj); // Remove the NetworkObject component
+        }
+
+        NetworkRigidbody2D netRigidbody = clientBullet.GetComponent<NetworkRigidbody2D>();
+        if (netRigidbody != null)
+        {
+            Destroy(netRigidbody); // Remove the NetworkRigidbody2D component
+        }
+
+        // Ensure that the Collider2D is enabled for local collision detection
+        Collider2D bulletCollider = clientBullet.GetComponent<Collider2D>();
+        if (bulletCollider != null)
+        {
+            bulletCollider.enabled = true;
+        }
+
+        Rigidbody2D bulletRb = clientBullet.GetComponent<Rigidbody2D>();
+        if (bulletRb != null)
+        {
+            bulletRb.bodyType = RigidbodyType2D.Dynamic;
+            bulletRb.isKinematic = false;
+            bulletRb.gravityScale = 0;
+            bulletRb.linearVelocity = shootPoint.up * bulletSpeed;
+        }
+
+        Destroy(clientBullet, 2f); // Destroy after a short time to avoid clutter
     }
+}
+
 
     [ServerRpc]
     private void ShootServerRpc(ServerRpcParams rpcParams = default)
