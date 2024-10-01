@@ -4,6 +4,7 @@
 TagManager:
   serializedVersion: 3
   tags:
+  - Healthbar
   - Bullet
   layers:
   - Default
@@ -36,7 +37,7 @@ TagManager:
   - 
   - 
   - 
-  - 
+  - Healthbar
   - 
   m_SortingLayers:
   - name: Default

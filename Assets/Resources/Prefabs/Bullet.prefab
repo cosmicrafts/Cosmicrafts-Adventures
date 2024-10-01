@@ -105,7 +105,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2141755282
+  GlobalObjectIdHash: 640472746
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -233,5 +233,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ae096c6b5956da138c3a1ff94a9ac5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lifespan: 8
+  lifespan: 4
   impactEffectPrefab: {fileID: 8601097328188198969, guid: 7ab7b8d1f2f5a3f408ab55ec19fabc50, type: 3}
+  bulletDamage: 4

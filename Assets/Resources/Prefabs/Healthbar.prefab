@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6237445536114303687}
   - component: {fileID: 3426871641739308808}
   - component: {fileID: 4053789690338828203}
-  m_Layer: 1
+  m_Layer: 30
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -84,7 +84,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8272118511575521792}
-  m_Layer: 1
+  m_Layer: 30
   m_Name: Fill Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -121,7 +121,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8338280399416968410}
   - component: {fileID: 6274300619826020187}
-  m_Layer: 1
+  m_Layer: 30
   m_Name: Slider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -212,9 +212,9 @@ GameObject:
   - component: {fileID: 9122700511045111383}
   - component: {fileID: 4731550738214483384}
   - component: {fileID: 1558522031610483207}
-  m_Layer: 1
+  m_Layer: 30
   m_Name: Healthbar
-  m_TagString: Untagged
+  m_TagString: Healthbar
   m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -284,7 +284,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!111 &1558522031610483207
 Animation:
   m_ObjectHideFlags: 0
@@ -313,7 +313,7 @@ GameObject:
   - component: {fileID: 7205504579877206552}
   - component: {fileID: 6948242886370350916}
   - component: {fileID: 7248709003543275487}
-  m_Layer: 1
+  m_Layer: 30
   m_Name: Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
