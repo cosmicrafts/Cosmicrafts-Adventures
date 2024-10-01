@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using Unity.Netcode.Components;
+
 public class Bullet : NetworkBehaviour
 {
     public float lifespan = 5f;
@@ -18,7 +19,7 @@ public class Bullet : NetworkBehaviour
         bulletRenderer = GetComponent<Renderer>();
         bulletCollider = GetComponent<Collider2D>();
 
-        // Set the bullet tag
+        // Set the bullet tag (optional, but removed tag comparison logic)
         gameObject.tag = "Bullet";
     }
 
@@ -58,26 +59,23 @@ public class Bullet : NetworkBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Bullet"))
+        Debug.Log($"[Bullet] OnCollisionEnter2D with {collision.gameObject.name}");
+
+        HealthComponent healthComponent = collision.gameObject.GetComponent<HealthComponent>();
+        if (healthComponent != null)
         {
-            if (isLocalOnly)
-            {
-                HandleLocalCollision(collision.contacts[0].point);
-            }
-            else if (IsServer)
-            {
-                DespawnBullet();
-            }
-        }
-        else if (collision.gameObject.CompareTag("Player"))
-        {
+            Debug.Log($"[Bullet] Found HealthComponent on {collision.gameObject.name}. Applying damage...");
+
             if (IsServer)
             {
-                // Apply damage to the player if the collision happens on the server
-                HealthComponent healthComponent = collision.gameObject.GetComponent<HealthComponent>();
-                if (healthComponent != null)
+                if (healthComponent.NetworkObject != null)
                 {
+                    Debug.Log($"[Bullet] Calling TakeDamageServerRpc for {collision.gameObject.name} with {bulletDamage} damage.");
                     healthComponent.TakeDamageServerRpc(bulletDamage);
+                }
+                else
+                {
+                    Debug.LogWarning($"[Bullet] HealthComponent does not have a NetworkObject on {collision.gameObject.name}.");
                 }
 
                 DespawnBullet();
@@ -89,6 +87,8 @@ public class Bullet : NetworkBehaviour
         }
         else
         {
+            Debug.Log($"[Bullet] No HealthComponent found on {collision.gameObject.name}. Handling general collision.");
+
             if (isLocalOnly)
             {
                 HandleLocalCollision(collision.contacts[0].point);
@@ -115,7 +115,6 @@ public class Bullet : NetworkBehaviour
             GameObject impactEffect = Instantiate(impactEffectPrefab, impactPoint, Quaternion.identity);
             Destroy(impactEffect, 0.1f);
         }
-
         Destroy(gameObject);
     }
 

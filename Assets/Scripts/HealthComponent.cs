@@ -5,8 +5,9 @@ using Unity.Netcode;
 public class HealthComponent : NetworkBehaviour
 {
     public float maxHealth = 100f;
-    public NetworkVariable<float> currentHealth = new NetworkVariable<float>(100f);
+    public NetworkVariable<float> currentHealth = new NetworkVariable<float>(100f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public Slider healthSlider;
+    public float collisionDamage = 4f; // Damage taken upon collision
 
     private void Start()
     {
@@ -22,13 +23,14 @@ public class HealthComponent : NetworkBehaviour
         {
             healthSlider.maxValue = maxHealth;
             healthSlider.value = currentHealth.Value;
+            Debug.Log($"{gameObject.name} [HealthComponent] Slider initialized with value {healthSlider.value}");
         }
         else
         {
-            Debug.LogWarning("Health slider is not assigned.");
+            Debug.LogWarning($"{gameObject.name} [HealthComponent] Health slider is not assigned.");
         }
 
-        Debug.Log($"{gameObject.name} HealthComponent initialized with {currentHealth.Value} health");
+        Debug.Log($"{gameObject.name} [HealthComponent] initialized with {currentHealth.Value} health");
     }
 
     private new void OnDestroy()
@@ -39,15 +41,16 @@ public class HealthComponent : NetworkBehaviour
 
     private void OnHealthChanged(float oldHealth, float newHealth)
     {
-        Debug.Log($"{gameObject.name} health changed from {oldHealth} to {newHealth}");
+        Debug.Log($"{gameObject.name} [HealthComponent] health changed from {oldHealth} to {newHealth}");
 
         if (healthSlider != null)
         {
             healthSlider.value = newHealth;
+            Debug.Log($"{gameObject.name} [HealthComponent] Slider updated to value {newHealth}");
         }
         else
         {
-            Debug.LogWarning("Health slider reference is missing on the client side.");
+            Debug.LogWarning($"{gameObject.name} [HealthComponent] Health slider reference is missing on the client side.");
         }
     }
 
@@ -56,23 +59,60 @@ public class HealthComponent : NetworkBehaviour
     {
         if (!IsServer)
         {
-            Debug.LogWarning("TakeDamageServerRpc called, but not on the server.");
+            Debug.LogWarning($"[HealthComponent] TakeDamageServerRpc called, but not on the server. Current server status: {IsServer}");
             return;
         }
 
-        currentHealth.Value -= amount;
+        Debug.Log($"{gameObject.name} [HealthComponent] taking {amount} damage. Current health before damage: {currentHealth.Value}");
 
+        ApplyDamage(amount);
+    }
+
+    private void ApplyDamage(float amount)
+    {
+        float newHealth = currentHealth.Value - amount;
+
+        // Prevent health from going below zero
+        if (newHealth < 0)
+        {
+            newHealth = 0;
+        }
+
+        // Update the NetworkVariable
+        currentHealth.Value = newHealth;
+
+        // Confirm if the value is updated
+        if (currentHealth.Value == newHealth)
+        {
+            Debug.Log($"{gameObject.name} [HealthComponent] current health updated successfully to: {currentHealth.Value}");
+        }
+        else
+        {
+            Debug.LogError($"{gameObject.name} [HealthComponent] failed to update current health. Current value: {currentHealth.Value}");
+        }
+
+        // Handle death if health is zero
         if (currentHealth.Value <= 0)
         {
-            currentHealth.Value = 0;
-            Debug.Log($"{gameObject.name} has died. Handling death.");
+            Debug.Log($"{gameObject.name} [HealthComponent] has died. Handling death.");
             HandleDeath();
         }
     }
 
     private void HandleDeath()
     {
-        Debug.Log($"{gameObject.name} has died!");
+        Debug.Log($"{gameObject.name} [HealthComponent] has died!");
         // Handle death logic here, like respawning or disabling the player
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (IsServer)
+        {
+            Debug.Log($"{gameObject.name} [HealthComponent] collided with {collision.gameObject.name}. Taking {collisionDamage} damage.");
+
+            // For testing purposes, directly apply damage without using the ServerRpc.
+            ApplyDamage(collisionDamage);
+        }
     }
 }
