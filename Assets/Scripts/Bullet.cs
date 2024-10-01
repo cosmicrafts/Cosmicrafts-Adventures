@@ -74,7 +74,8 @@ public class Bullet : NetworkBehaviour
         // Instantiate impact effect locally
         if (impactEffectPrefab != null)
         {
-            Instantiate(impactEffectPrefab, impactPoint, Quaternion.identity);
+            GameObject impactEffect = Instantiate(impactEffectPrefab, impactPoint, Quaternion.identity);
+            Destroy(impactEffect, 0.1f); // Destroy the impact effect after a short delay
         }
 
         // Destroy the bullet locally
