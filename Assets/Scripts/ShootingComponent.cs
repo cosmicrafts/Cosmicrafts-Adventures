@@ -44,37 +44,37 @@ public class ShootingComponent : NetworkBehaviour
     /// Instantiates a local-only bullet for immediate visual feedback.
     /// </summary>
     private void ClientShootPrediction()
+{
+    foreach (Transform shootPoint in shootPoints)
     {
-        foreach (Transform shootPoint in shootPoints)
+        // Spawn muzzle flash immediately on the client
+        if (muzzleFlashPrefab != null)
         {
-            // Spawn muzzle flash immediately on the client
-            if (muzzleFlashPrefab != null)
-            {
-                GameObject muzzleFlash = Instantiate(muzzleFlashPrefab, shootPoint.position, shootPoint.rotation, shootPoint);
-                Destroy(muzzleFlash, 0.1f);
-            }
+            GameObject muzzleFlash = Instantiate(muzzleFlashPrefab, shootPoint.position, shootPoint.rotation, shootPoint);
+            Destroy(muzzleFlash, 0.1f);
+        }
 
-            // Instantiate a local-only bullet for visual feedback
-            GameObject clientBullet = Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
+        // Instantiate a local-only bullet for visual feedback
+        GameObject clientBullet = Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
 
-            // Set the bullet to be local-only and remove network components
-            Bullet bulletScript = clientBullet.GetComponent<Bullet>();
-            if (bulletScript != null)
-            {
-                bulletScript.SetLocalOnly();
-            }
+        // Set the bullet to be local-only and remove network components
+        Bullet bulletScript = clientBullet.GetComponent<Bullet>();
+        if (bulletScript != null)
+        {
+            bulletScript.SetLocalOnly();
+            Destroy(clientBullet, bulletScript.lifespan); // Destroy after the defined lifespan
+        }
 
-            Rigidbody2D bulletRb = clientBullet.GetComponent<Rigidbody2D>();
-            if (bulletRb != null)
-            {
-                bulletRb.bodyType = RigidbodyType2D.Dynamic;
-                bulletRb.gravityScale = 0;
-                bulletRb.linearVelocity = shootPoint.up * bulletSpeed;
-            }
-
-            Destroy(clientBullet, 2f); // Destroy after a short time to avoid clutter
+        Rigidbody2D bulletRb = clientBullet.GetComponent<Rigidbody2D>();
+        if (bulletRb != null)
+        {
+            bulletRb.bodyType = RigidbodyType2D.Dynamic;
+            bulletRb.gravityScale = 0;
+            bulletRb.linearVelocity = shootPoint.up * bulletSpeed;
         }
     }
+}
+
 
     [ServerRpc]
     private void ShootServerRpc(ServerRpcParams rpcParams = default)
