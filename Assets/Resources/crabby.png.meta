@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      crabby_0: -2704229953061288984
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
