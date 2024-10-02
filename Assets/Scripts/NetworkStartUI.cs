@@ -33,9 +33,6 @@ private void SetupSecureServer()
         var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
         if (transport != null)
         {
-            Debug.Log("Server Certificate: " + SecureParameters.MyGameServerCertificate);
-            Debug.Log("Server Private Key: " + SecureParameters.MyGameServerPrivateKey);
-
             // Set the bind address to 0.0.0.0 to listen on all network interfaces
             transport.SetConnectionData("0.0.0.0", 7777);
 
@@ -71,15 +68,13 @@ private void SetupSecureClient()
         var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
         if (transport != null)
         {
-            Debug.Log("Client CA Certificate: " + SecureParameters.MyGameClientCA);
-
             // Set the client to connect to the server IP address
-            transport.SetConnectionData("74.208.246.177", 7777);
+            transport.SetConnectionData("127.0.0.1", 7777);
 
             // Set client secure parameters for encrypted communication
             transport.SetClientSecrets(SecureParameters.ServerCommonName, SecureParameters.MyGameClientCA);
 
-            Debug.Log("Client connection data set to 74.208.246.177:7777 with encryption.");
+            Debug.Log("Client connection data set to 127.0.0.1:7777 with encryption.");
         }
         else
         {
