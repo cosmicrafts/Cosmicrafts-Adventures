@@ -6,6 +6,9 @@ public class RotationComponent : NetworkBehaviour
     private Rigidbody2D rb;
     private MovementComponent movementComponent;
 
+    [Header("Camera Settings")]
+    public Camera playerCamera; // Assign the correct player camera in the inspector
+
     public float maxTiltAngleX = 8f;
     public float maxTiltAngleY = 8f;
 
@@ -24,11 +27,16 @@ public class RotationComponent : NetworkBehaviour
 
     private void Update()
     {
-        if (IsOwner)
+        if (!IsOwner) return;
+
+        if (playerCamera != null)
         {
-            Vector2 moveInput = movementComponent.MoveInput;
-            SendRotationInputServerRpc(mousePosition, moveInput);
+            mousePosition = playerCamera.ScreenToWorldPoint(new Vector3(
+                Input.mousePosition.x, Input.mousePosition.y, -playerCamera.transform.position.z));
         }
+
+        Vector2 moveInput = movementComponent.MoveInput;
+        SendRotationInputServerRpc(mousePosition, moveInput);
     }
 
     [ServerRpc]

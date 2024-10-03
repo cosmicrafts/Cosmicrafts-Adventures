@@ -6,9 +6,10 @@ public class InputComponent : NetworkBehaviour
     private MovementComponent movementComponent;
     private RotationComponent rotationComponent;
     private DashComponent dashComponent;
-    private ShootingComponent shootingComponent; // Assuming you have this
+    private ShootingComponent shootingComponent;
 
-    private Camera mainCamera;
+    [Header("Camera Settings")]
+    public Camera playerCamera; // Assign the correct player camera from the prefab in the editor
 
     [Header("Camera Zoom Settings")]
     public float zoomSmoothSpeed = 5f; // Smooth transition speed between zoom levels
@@ -23,12 +24,10 @@ public class InputComponent : NetworkBehaviour
         dashComponent = GetComponent<DashComponent>();
         shootingComponent = GetComponent<ShootingComponent>();
 
-        if (IsOwner)
+        if (IsOwner && playerCamera != null)
         {
-            mainCamera = Camera.main;
-
             // Initialize the zoom level to the closest matching level to the current orthographic size
-            currentZoomIndex = GetClosestZoomIndex(mainCamera.orthographicSize);
+            currentZoomIndex = GetClosestZoomIndex(playerCamera.orthographicSize);
         }
     }
 
@@ -41,8 +40,8 @@ public class InputComponent : NetworkBehaviour
         movementComponent.SetMoveInput(moveInput);
 
         // Handle Rotation Input
-        Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(new Vector3(
-            Input.mousePosition.x, Input.mousePosition.y, -mainCamera.transform.position.z));
+        Vector3 mouseWorldPosition = playerCamera.ScreenToWorldPoint(new Vector3(
+            Input.mousePosition.x, Input.mousePosition.y, -playerCamera.transform.position.z));
         rotationComponent.SetMousePosition(mouseWorldPosition);
 
         // Handle Dash Input
@@ -87,9 +86,11 @@ public class InputComponent : NetworkBehaviour
 
     private void HandleCameraZoom()
     {
+        if (playerCamera == null) return;
+
         // Smoothly interpolate the camera's orthographic size to the target zoom level
         float targetZoom = zoomLevels[currentZoomIndex];
-        mainCamera.orthographicSize = Mathf.Lerp(mainCamera.orthographicSize, targetZoom, Time.deltaTime * zoomSmoothSpeed);
+        playerCamera.orthographicSize = Mathf.Lerp(playerCamera.orthographicSize, targetZoom, Time.deltaTime * zoomSmoothSpeed);
     }
 
     private int GetClosestZoomIndex(float currentZoom)
@@ -109,10 +110,4 @@ public class InputComponent : NetworkBehaviour
 
         return closestIndex;
     }
-}
-
-public class PlayerIdentifier : NetworkBehaviour
-{
-    // This will be true only for the local player's object
-    public new bool IsLocalPlayer => IsOwner;
 }

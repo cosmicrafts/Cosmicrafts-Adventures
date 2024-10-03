@@ -1,19 +1,27 @@
 using UnityEngine;
+using Unity.Netcode;
 using System.Collections;
 
-public class CameraFollow : MonoBehaviour
+public class CameraFollow : NetworkBehaviour
 {
-    public float smoothSpeed = 0.125f;
-    public Vector3 offset;
-    public float delay = 0.01f;
+    public Transform target; // Reference to the target (player) to follow
+    public float smoothSpeed = 0.125f; // Smooth speed for following
+    public Vector3 offset; // Offset to maintain relative to the player
+    public float delay = 0.01f; // Delay before following
 
     private Vector3 velocity = Vector3.zero;
-    private Transform target;
 
-    private void Start()
+    void Start()
     {
-        // Start coroutine to find the player after it's spawned
-        StartCoroutine(FindLocalPlayer());
+        // Only execute this script if it belongs to the client who owns the camera.
+        if (!IsOwner)
+        {
+            this.enabled = false;
+            return;
+        }
+
+        // Assuming the target (player) is this transform's parent (as it is part of the prefab)
+        target = transform.parent;
     }
 
     void LateUpdate()
@@ -21,44 +29,21 @@ public class CameraFollow : MonoBehaviour
         if (target == null) return;
 
         // Smoothly follow the target
-        SmoothFollow();
+        StartCoroutine(SmoothFollow());
     }
 
-    private void SmoothFollow()
+    IEnumerator SmoothFollow()
     {
-        if (target == null) return;
+        yield return new WaitForSeconds(delay);
 
-        // Keep the camera's Z position unaffected by the target's rotation or movement
+        // Calculate the target position with offset, ignoring any rotation from the target
         Vector3 targetPosition = new Vector3(target.position.x, target.position.y, transform.position.z) + offset;
 
         // Smoothly interpolate the camera's position towards the desired position
         Vector3 smoothedPosition = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothSpeed);
         transform.position = smoothedPosition;
 
-        // Ignore X and Y rotation by resetting rotation to default values for the camera
-        transform.rotation = Quaternion.Euler(0, 0, transform.rotation.eulerAngles.z);
-    }
-
-    private IEnumerator FindLocalPlayer()
-    {
-        // Wait until the player object is spawned
-        while (target == null)
-        {
-            // Find the player GameObject with an InputComponent belonging to the local player
-            var localPlayerInput = FindFirstObjectByType<InputComponent>();
-
-            if (localPlayerInput != null && localPlayerInput.IsOwner)
-            {
-                target = localPlayerInput.transform;
-                Debug.Log("Local player found: " + target.name);
-            }
-            else
-            {
-                Debug.Log("Local player not found yet, retrying...");
-            }
-
-            // Wait for a short duration before trying again
-            yield return new WaitForSeconds(0.5f);
-        }
+        // Ignore all rotations (X, Y, Z)
+        transform.rotation = Quaternion.identity;
     }
 }
