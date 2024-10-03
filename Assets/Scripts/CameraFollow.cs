@@ -18,25 +18,15 @@ public class CameraFollow : MonoBehaviour
 
     void LateUpdate()
     {
-        if (target == null)
-        {
-            // Try to find the player again if the target is lost
-            StartCoroutine(FindLocalPlayer());
-            return;
-        }
+        if (target == null) return;
 
         // Smoothly follow the target
-        StartCoroutine(SmoothFollow());
+        SmoothFollow();
     }
 
-    IEnumerator SmoothFollow()
+    private void SmoothFollow()
     {
-        yield return new WaitForSeconds(delay);
-
-        if (target == null)
-        {
-            yield break; // Stop the coroutine if the target is destroyed
-        }
+        if (target == null) return;
 
         // Keep the camera's Z position unaffected by the target's rotation or movement
         Vector3 targetPosition = new Vector3(target.position.x, target.position.y, transform.position.z) + offset;
@@ -44,6 +34,9 @@ public class CameraFollow : MonoBehaviour
         // Smoothly interpolate the camera's position towards the desired position
         Vector3 smoothedPosition = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothSpeed);
         transform.position = smoothedPosition;
+
+        // Ignore X and Y rotation by resetting rotation to default values for the camera
+        transform.rotation = Quaternion.Euler(0, 0, transform.rotation.eulerAngles.z);
     }
 
     private IEnumerator FindLocalPlayer()
@@ -57,6 +50,11 @@ public class CameraFollow : MonoBehaviour
             if (localPlayerInput != null && localPlayerInput.IsOwner)
             {
                 target = localPlayerInput.transform;
+                Debug.Log("Local player found: " + target.name);
+            }
+            else
+            {
+                Debug.Log("Local player not found yet, retrying...");
             }
 
             // Wait for a short duration before trying again
