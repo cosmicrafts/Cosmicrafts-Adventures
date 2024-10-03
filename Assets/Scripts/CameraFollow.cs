@@ -7,33 +7,22 @@ public class CameraFollow : MonoBehaviour
     public Vector3 offset; // Offset to maintain relative to the player
 
     private Vector3 velocity = Vector3.zero;
-    private Rigidbody rb;
 
-    private void Start()
-    {
-        rb = GetComponent<Rigidbody>();
+private void LateUpdate()
+{
+    if (target == null) return;
 
-        // Ensure the Rigidbody rotation constraints are set
-        if (rb != null)
-        {
-            rb.freezeRotation = true; // Locks all rotations
-        }
-    }
+    // Calculate the new target position based on the player's position
+    Vector3 targetPosition = target.position + offset;
 
-    private void FixedUpdate()
-    {
-        if (target == null) return;
+    // Ensure the camera's Z position remains fixed at -10
+    targetPosition.z = -10f;
 
-        // Calculate the new target position based on the player's position
-        Vector3 targetPosition = target.position + offset;
+    // Smoothly interpolate the camera's position towards the target position
+    Vector3 smoothedPosition = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothSpeed);
 
-        // Smoothly interpolate the camera's position towards the target position
-        Vector3 smoothedPosition = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothSpeed);
+    // Update the camera position
+    transform.position = smoothedPosition;
+}
 
-        // Ensure the camera's Z position remains fixed at -10
-        smoothedPosition.z = -10f;
-
-        // Update the camera position
-        rb.MovePosition(smoothedPosition);
-    }
 }

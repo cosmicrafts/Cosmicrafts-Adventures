@@ -129,6 +129,18 @@ public class MovementComponent : NetworkBehaviour
         }
     }
 
+    public Vector3 GetSmoothedPosition() 
+    {
+        // Return the raw position if not using client-side prediction
+        if (!isLocalOnly) 
+        {
+            return transform.position;
+        }
+
+        // Otherwise, calculate and return a smoothed/predicted position
+        return transform.position + new Vector3(moveInput.x, moveInput.y, 0f) * moveSpeed * Time.deltaTime; 
+    }
+
     private void SetVisibility(bool visible)
     {
         // Hide or show the renderer based on visibility flag

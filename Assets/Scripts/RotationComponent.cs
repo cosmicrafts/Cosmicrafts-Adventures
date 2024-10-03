@@ -11,15 +11,17 @@ public class RotationComponent : NetworkBehaviour
 
     private Vector3 mousePosition;
 
+    // Network variable to synchronize the rotation across clients
+    private NetworkVariable<Quaternion> networkRotation = new NetworkVariable<Quaternion>(
+        Quaternion.identity, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         movementComponent = GetComponent<MovementComponent>();
-    }
 
-    public void SetMousePosition(Vector3 mousePosition)
-    {
-        this.mousePosition = mousePosition;
+        // Subscribe to the network variable change to update non-owner clients
+        networkRotation.OnValueChanged += OnRotationChanged;
     }
 
     private void Update()
@@ -27,38 +29,59 @@ public class RotationComponent : NetworkBehaviour
         if (IsOwner)
         {
             Vector2 moveInput = movementComponent.MoveInput;
-            SendRotationInputServerRpc(mousePosition, moveInput);
+
+            // Perform local rotation
+            Quaternion newRotation = CalculateCombinedRotation(mousePosition, moveInput);
+            transform.rotation = newRotation;
+
+            // Send rotation to the server for synchronization if not the server
+            if (!IsServer)
+            {
+                UpdateRotationOnServerRpc(newRotation);
+            }
         }
-    }
-
-    [ServerRpc]
-    private void SendRotationInputServerRpc(Vector3 mousePosition, Vector2 moveInput)
-    {
-        HandleCombinedRotation(mousePosition, moveInput);
-        UpdateRotationClientRpc(mousePosition, moveInput);
-    }
-
-    [ClientRpc]
-    private void UpdateRotationClientRpc(Vector3 mousePosition, Vector2 moveInput)
-    {
-        if (!IsOwner)
+        else
         {
-            HandleCombinedRotation(mousePosition, moveInput);
+            // For non-owner clients, use the synchronized network variable for rotation
+            transform.rotation = networkRotation.Value;
         }
     }
 
-    private void HandleCombinedRotation(Vector3 mousePosition, Vector2 moveInput)
+    public void SetMousePosition(Vector3 mousePosition)
     {
+        this.mousePosition = mousePosition;
+    }
+
+    private Quaternion CalculateCombinedRotation(Vector3 mousePosition, Vector2 moveInput)
+    {
+        // Calculate direction towards the mouse
         Vector2 direction = (mousePosition - transform.position).normalized;
         float rotationZ = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
 
+        // Calculate tilt angles based on movement input and mouse direction
         float mouseTiltX = Mathf.Clamp(direction.y * maxTiltAngleX, -maxTiltAngleX, maxTiltAngleX);
         float mouseTiltY = Mathf.Clamp(-direction.x * maxTiltAngleY, -maxTiltAngleY, maxTiltAngleY);
 
         float tiltX = -moveInput.y * maxTiltAngleX + mouseTiltX;
         float tiltY = moveInput.x * maxTiltAngleY + mouseTiltY;
 
-        Quaternion tiltRotation = Quaternion.Euler(tiltX, tiltY, rotationZ);
-        transform.rotation = tiltRotation;
+        // Return the combined tilt and rotation as a quaternion
+        return Quaternion.Euler(tiltX, tiltY, rotationZ);
+    }
+
+    [ServerRpc]
+    private void UpdateRotationOnServerRpc(Quaternion rotation)
+    {
+        // Update the server-side rotation and synchronize with other clients
+        networkRotation.Value = rotation;
+    }
+
+    private void OnRotationChanged(Quaternion oldRotation, Quaternion newRotation)
+    {
+        // Update rotation for non-owner clients when the network variable changes
+        if (!IsOwner)
+        {
+            transform.rotation = newRotation;
+        }
     }
 }

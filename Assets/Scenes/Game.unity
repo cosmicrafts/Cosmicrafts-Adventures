@@ -225,7 +225,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
-  smoothSpeed: 0.125
+  smoothSpeed: 0.55
   offset: {x: 0, y: 0, z: 0}
 --- !u!54 &519420035
 Rigidbody:
@@ -293,7 +293,7 @@ MonoBehaviour:
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: 4140dc487344ac266a86ddf95f187f4e, type: 2}
-    TickRate: 15
+    TickRate: 10
     ClientConnectionBufferTimeout: 10
     ConnectionApproval: 0
     ConnectionData: 
