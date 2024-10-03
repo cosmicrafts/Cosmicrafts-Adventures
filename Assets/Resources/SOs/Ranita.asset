@@ -16,8 +16,10 @@ MonoBehaviour:
   moveSmoothTime: 0.1
   maxHealth: 100
   bulletSpeed: 20
+  bulletDamage: 1
+  bulletLifespan: 1
   shootingCooldown: 0.1
-  hasDashAbility: 0
+  hasDashAbility: 1
   dashSpeed: 15
   dashDuration: 0.2
   dashCooldown: 1

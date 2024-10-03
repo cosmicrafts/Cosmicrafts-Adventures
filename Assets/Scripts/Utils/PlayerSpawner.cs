@@ -22,11 +22,10 @@ public class PlayerSpawner : NetworkBehaviour
         }
     }
 
-    public void SetSelectedConfiguration(PlayerSO config)
+    public void SetSelectedConfigurationServer(ulong clientId, PlayerSO chosenConfig)
     {
-        ulong clientId = NetworkManager.Singleton.LocalClientId;
-        playerSelections[clientId] = config; // Simplified to always set the chosen config
-        Debug.Log($"Stored selected configuration for client {clientId}: {config.name}");
+        playerSelections[clientId] = chosenConfig;
+        Debug.Log($"[Server] Stored selected configuration for client {clientId}: {chosenConfig.name}");
     }
 
     private void OnClientConnected(ulong clientId)
@@ -42,9 +41,46 @@ public class PlayerSpawner : NetworkBehaviour
                 playerLoader.SetPlayerConfiguration(chosenConfig);
                 playerLoader.ApplyConfiguration(); // Apply the configuration immediately after setting
 
+                // Broadcast the configuration to all clients
+                ApplyConfigurationClientRpc(playerObject.GetComponent<NetworkObject>().NetworkObjectId, chosenConfig.name);
                 Debug.Log($"Assigned {chosenConfig.name} configuration to player {clientId}");
             }
         }
+        else
+        {
+            Debug.LogWarning($"No configuration selected for player {clientId}. Using default.");
+        }
+    }
+
+    [ClientRpc]
+    private void ApplyConfigurationClientRpc(ulong networkObjectId, string configName)
+    {
+        PlayerSO chosenConfig = FindPlayerSOByName(configName);
+        if (chosenConfig != null)
+        {
+            NetworkObject networkObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjectId];
+            if (networkObject != null)
+            {
+                PlayerLoader playerLoader = networkObject.GetComponent<PlayerLoader>();
+                if (playerLoader != null)
+                {
+                    playerLoader.SetPlayerConfiguration(chosenConfig);
+                    playerLoader.ApplyConfiguration();
+                }
+            }
+        }
+    }
+
+    public PlayerSO FindPlayerSOByName(string name)
+    {
+        foreach (var config in availableConfigurations)
+        {
+            if (config.name == name)
+            {
+                return config;
+            }
+        }
+        return null;
     }
 
     protected new void OnDestroy()

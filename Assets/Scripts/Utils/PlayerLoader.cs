@@ -8,8 +8,8 @@ public class PlayerLoader : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        // Do not automatically apply the default configuration from the prefab
-        if (IsOwner && playerConfiguration != null)
+        // Apply configuration for both local-only and networked instances
+        if (playerConfiguration != null)
         {
             ApplyConfiguration();
         }
@@ -18,6 +18,7 @@ public class PlayerLoader : NetworkBehaviour
     public void SetPlayerConfiguration(PlayerSO config)
     {
         playerConfiguration = config;
+        ApplyConfiguration(); // Apply the configuration as soon as it's set
     }
 
     public void ApplyConfiguration()

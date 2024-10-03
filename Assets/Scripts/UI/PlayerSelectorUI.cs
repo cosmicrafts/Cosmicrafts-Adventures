@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using Unity.Netcode;
 
 public class PlayerSelectorUI : MonoBehaviour
 {
@@ -22,7 +23,23 @@ public class PlayerSelectorUI : MonoBehaviour
         selectedConfiguration = availableConfigurations[index];
         Debug.Log($"Player selected configuration: {selectedConfiguration.name}");
 
-        // Store the selected configuration and inform the PlayerSpawner
-        PlayerSpawner.Instance.SetSelectedConfiguration(selectedConfiguration);
+        // Send the selection to the server via ServerRpc
+        SubmitSelectionServerRpc(index);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SubmitSelectionServerRpc(int selectionIndex, ServerRpcParams serverRpcParams = default)
+    {
+        ulong clientId = serverRpcParams.Receive.SenderClientId;
+
+        if (selectionIndex >= 0 && selectionIndex < availableConfigurations.Length)
+        {
+            PlayerSO chosenConfig = availableConfigurations[selectionIndex];
+            PlayerSpawner.Instance.SetSelectedConfigurationServer(clientId, chosenConfig);
+        }
+        else
+        {
+            Debug.LogWarning($"Invalid selection index {selectionIndex} from client {clientId}");
+        }
     }
 }
