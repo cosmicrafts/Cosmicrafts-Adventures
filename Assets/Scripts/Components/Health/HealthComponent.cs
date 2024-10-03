@@ -76,10 +76,9 @@ public class HealthComponent : NetworkBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (IsClient)
+        if (collision.gameObject.CompareTag("Bullet"))
         {
-            // Check if the collision object is a bullet
-            if (collision.gameObject.CompareTag("Bullet"))
+            if (IsClient)
             {
                 Bullet bullet = collision.gameObject.GetComponent<Bullet>();
                 if (bullet != null)
@@ -103,24 +102,14 @@ public class HealthComponent : NetworkBehaviour
                     }
                 }
             }
-            else
-            {
-                // Handle non-bullet collisions with default collision damage
-                Debug.Log($"{gameObject.name} [HealthComponent] collided with {collision.gameObject.name}. Predicted damage: {collisionDamage}");
+        }
+        else if (IsServer)
+        {
+            // Handle other types of collisions server-side
+            Debug.Log($"{gameObject.name} [HealthComponent] collided with {collision.gameObject.name}. Taking {collisionDamage} damage.");
 
-                // Client prediction
-                predictedHealth -= collisionDamage;
-                if (predictedHealth < 0)
-                    predictedHealth = 0;
-
-                UpdateHealthUI(predictedHealth);
-
-                // Request server to apply damage
-                if (IsOwner)
-                {
-                    TakeDamageServerRpc(collisionDamage);
-                }
-            }
+            // Directly apply damage server-side
+            ApplyDamage(collisionDamage);
         }
     }
 
