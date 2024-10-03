@@ -10,6 +10,24 @@ public class HealthComponent : NetworkBehaviour
     public float collisionDamage = 4f; // Damage taken upon collision
     private float predictedHealth; // For client-side prediction
 
+    public void ApplyConfiguration(PlayerSO config)
+{
+    maxHealth = config.maxHealth;
+
+    // Initialize health and setup slider
+    if (IsServer)
+    {
+        currentHealth.Value = maxHealth;
+    }
+
+    if (healthSlider != null)
+    {
+        healthSlider.maxValue = maxHealth;
+        healthSlider.value = currentHealth.Value;
+    }
+}
+
+
     private void Start()
     {
         // Initialize health and setup slider

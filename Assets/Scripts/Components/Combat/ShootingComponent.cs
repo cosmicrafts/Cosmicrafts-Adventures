@@ -12,6 +12,14 @@ public class ShootingComponent : NetworkBehaviour
 
     private float shootingCooldownTimer;
 
+    public void ApplyConfiguration(PlayerSO config)
+    {
+        bulletSpeed = config.bulletSpeed;
+        shootingCooldown = config.shootingCooldown;
+
+        // Bullet lifespan and damage can be applied to each bullet when instantiated
+    }
+
     private void Update()
     {
         if (!IsOwner) return;
