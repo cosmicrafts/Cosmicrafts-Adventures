@@ -6,8 +6,8 @@ public class RotationComponent : NetworkBehaviour
     private Rigidbody2D rb;
     private MovementComponent movementComponent;
 
-    public float maxTiltAngleX = 0f;
-    public float maxTiltAngleY = 0f;
+    public float maxTiltAngleX = 8f;
+    public float maxTiltAngleY = 8f;
 
     private Vector3 mousePosition;
 
