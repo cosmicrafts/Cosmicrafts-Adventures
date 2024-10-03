@@ -20,7 +20,7 @@ public class CameraFollow : MonoBehaviour
         }
     }
 
-    private void LateUpdate()
+    private void FixedUpdate()
     {
         if (target == null) return;
 
@@ -34,6 +34,6 @@ public class CameraFollow : MonoBehaviour
         smoothedPosition.z = -10f;
 
         // Update the camera position
-        transform.position = smoothedPosition;
+        rb.MovePosition(smoothedPosition);
     }
 }
