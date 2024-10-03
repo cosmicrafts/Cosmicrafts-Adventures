@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4439571766653248171}
   - component: {fileID: 7750239329544154421}
   - component: {fileID: 3894512252052835016}
+  - component: {fileID: -4863732073366480715}
   m_Layer: 10
   m_Name: Player
   m_TagString: Player
@@ -150,7 +151,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3926462412
+  GlobalObjectIdHash: 2753726425
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -340,7 +341,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  zoomSmoothSpeed: 4
+  zoomSmoothSpeed: 2
+--- !u!114 &-4863732073366480715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 628412359505069944}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c47439728cc2c3a3af665f0e8f5b98b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  blinkDistance: 5
+  blinkCooldown: 0.25
 --- !u!1 &754601458911427757
 GameObject:
   m_ObjectHideFlags: 0
