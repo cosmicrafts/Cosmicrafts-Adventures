@@ -219,8 +219,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1785939159}
-  - component: {fileID: 1785939158}
   - component: {fileID: 1785939160}
+  - component: {fileID: 1785939158}
   - component: {fileID: 1785939161}
   m_Layer: 0
   m_Name: NetworkManager
@@ -314,8 +314,8 @@ MonoBehaviour:
   m_ProtocolType: 0
   m_UseWebSockets: 1
   m_UseEncryption: 1
-  m_MaxPacketQueueSize: 4096
-  m_MaxPayloadSize: 8144
+  m_MaxPacketQueueSize: 65536
+  m_MaxPayloadSize: 16384
   m_HeartbeatTimeoutMS: 500
   m_ConnectTimeoutMS: 1000
   m_MaxConnectAttempts: 60
