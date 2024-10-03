@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 066fdad4cbb5a664b8088cdb7dafe8db, type: 3}
+  m_Name: Marauder
+  m_EditorClassIdentifier: 
+  moveSpeed: 5
+  moveSmoothTime: 0.1
+  maxHealth: 100
+  bulletSpeed: 20
+  shootingCooldown: 0.1
+  hasDashAbility: 0
+  dashSpeed: 15
+  dashDuration: 0.2
+  dashCooldown: 1
+  hasBlinkAbility: 0
+  blinkDistance: 10
+  blinkCooldown: 2
+  playerSprite: {fileID: 21300000, guid: 9ed292907455741e18c2333ceac65394, type: 3}

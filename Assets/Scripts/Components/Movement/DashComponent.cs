@@ -10,6 +10,16 @@ public class DashComponent : NetworkBehaviour
     private MovementComponent movementComponent;
     private Rigidbody2D rb;
 
+    public void ApplyConfiguration(PlayerSO config)
+    {
+        if (config.hasDashAbility)
+        {
+            dashSpeed = config.dashSpeed;
+            dashDuration = config.dashDuration;
+            dashCooldown = config.dashCooldown;
+        }
+    }
+
     private NetworkVariable<bool> isDashing = new NetworkVariable<bool>(
         false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 

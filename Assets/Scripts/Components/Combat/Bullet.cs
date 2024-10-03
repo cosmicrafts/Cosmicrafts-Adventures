@@ -6,7 +6,7 @@ public class Bullet : NetworkBehaviour
 {
     public float lifespan = 5f;
     public GameObject impactEffectPrefab; // Impact effect prefab for collision effect
-    public float bulletDamage = 1f; // Amount of damage each bullet deals
+    public float bulletDamage = 16f; // Amount of damage each bullet deals
     private ulong shooterClientId;
 
     // Components to hide

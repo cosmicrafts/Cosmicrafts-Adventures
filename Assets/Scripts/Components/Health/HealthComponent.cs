@@ -78,19 +78,48 @@ public class HealthComponent : NetworkBehaviour
     {
         if (IsClient)
         {
-            // Client prediction
-            Debug.Log($"{gameObject.name} [HealthComponent] collided with {collision.gameObject.name}. Predicted damage: {collisionDamage}");
-
-            predictedHealth -= collisionDamage;
-            if (predictedHealth < 0)
-                predictedHealth = 0;
-
-            UpdateHealthUI(predictedHealth);
-
-            // Request server to apply damage
-            if (IsOwner) // To avoid multiple clients requesting damage for the same object
+            // Check if the collision object is a bullet
+            if (collision.gameObject.CompareTag("Bullet"))
             {
-                TakeDamageServerRpc(collisionDamage);
+                Bullet bullet = collision.gameObject.GetComponent<Bullet>();
+                if (bullet != null)
+                {
+                    // Use bullet damage for prediction and server call
+                    float bulletDamage = bullet.bulletDamage;
+
+                    Debug.Log($"{gameObject.name} [HealthComponent] collided with {collision.gameObject.name}. Predicted damage: {bulletDamage}");
+
+                    // Client prediction
+                    predictedHealth -= bulletDamage;
+                    if (predictedHealth < 0)
+                        predictedHealth = 0;
+
+                    UpdateHealthUI(predictedHealth);
+
+                    // Request server to apply damage
+                    if (IsOwner)
+                    {
+                        TakeDamageServerRpc(bulletDamage);
+                    }
+                }
+            }
+            else
+            {
+                // Handle non-bullet collisions with default collision damage
+                Debug.Log($"{gameObject.name} [HealthComponent] collided with {collision.gameObject.name}. Predicted damage: {collisionDamage}");
+
+                // Client prediction
+                predictedHealth -= collisionDamage;
+                if (predictedHealth < 0)
+                    predictedHealth = 0;
+
+                UpdateHealthUI(predictedHealth);
+
+                // Request server to apply damage
+                if (IsOwner)
+                {
+                    TakeDamageServerRpc(collisionDamage);
+                }
             }
         }
     }
