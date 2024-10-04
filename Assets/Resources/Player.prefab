@@ -87,7 +87,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  playerConfiguration: {fileID: 11400000, guid: 972847b6be0e58f00ac559f597ae589b, type: 2}
+  playerConfiguration: {fileID: 11400000, guid: 8c0b4065e35d88022ba5e69cc33ffc0f, type: 2}
 --- !u!212 &628412359505069947
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -193,7 +193,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   NetworkTransformExpanded: 0
-  AuthorityMode: 0
+  AuthorityMode: 1
   TickSyncChildren: 0
   UseUnreliableDeltas: 0
   SyncPositionX: 1
@@ -214,7 +214,7 @@ MonoBehaviour:
   InLocalSpace: 0
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
-  SlerpPosition: 0
+  SlerpPosition: 1
 --- !u!50 &-8877122685938278519
 Rigidbody2D:
   serializedVersion: 5
@@ -273,7 +273,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   moveSpeed: 5
-  moveSmoothTime: 0.1
+  moveSmoothTime: 4
 --- !u!114 &8573646569859103987
 MonoBehaviour:
   m_ObjectHideFlags: 0
