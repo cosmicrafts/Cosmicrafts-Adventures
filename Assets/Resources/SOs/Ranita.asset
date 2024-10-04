@@ -12,18 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 066fdad4cbb5a664b8088cdb7dafe8db, type: 3}
   m_Name: Ranita
   m_EditorClassIdentifier: 
-  moveSpeed: 5
-  moveSmoothTime: 0.1
+  moveSpeed: 8
+  moveSmoothTime: 0.25
   maxHealth: 100
-  bulletSpeed: 20
+  bulletSpeed: 16
   bulletDamage: 1
   bulletLifespan: 1
-  shootingCooldown: 0.1
+  shootingCooldown: 0.38
   hasDashAbility: 1
   dashSpeed: 15
   dashDuration: 0.2
   dashCooldown: 1
-  hasBlinkAbility: 0
+  hasBlinkAbility: 1
   blinkDistance: 10
   blinkCooldown: 2
   playerSprite: {fileID: 3176249661713866604, guid: af2aaddb922d04f9e82902b438b0c22a, type: 3}

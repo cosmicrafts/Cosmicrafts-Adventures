@@ -1,57 +1,16 @@
 using UnityEngine;
 using Unity.Netcode;
-using Unity.Netcode.Components;
 
 public class Bullet : NetworkBehaviour
 {
     public float lifespan = 5f;
     public GameObject impactEffectPrefab; // Impact effect prefab for collision effect
-    public float bulletDamage = 16f; // Amount of damage each bullet deals
-    private ulong shooterClientId;
-
-    // Components to hide
-    private Renderer bulletRenderer;
-    private Collider2D bulletCollider;
-    private bool isLocalOnly = false; // Flag to differentiate between networked and local-only bullets
-
-    private void Awake()
-    {
-        bulletRenderer = GetComponent<Renderer>();
-        bulletCollider = GetComponent<Collider2D>();
-
-        // Set the bullet tag (optional, but removed tag comparison logic)
-        gameObject.tag = "Bullet";
-    }
-
-    public void Initialize(ulong shooterId)
-    {
-        shooterClientId = shooterId;
-    }
-
-    public void SetLocalOnly()
-    {
-        // Mark the bullet as local-only and disable network components
-        isLocalOnly = true;
-
-        // Remove or disable network components
-        if (TryGetComponent<NetworkObject>(out var netObj))
-        {
-            Destroy(netObj);
-        }
-
-        if (TryGetComponent<NetworkRigidbody2D>(out var netRigidbody))
-        {
-            Destroy(netRigidbody);
-        }
-    }
+    public float bulletDamage = 16f;
 
     private void Start()
     {
-        if (isLocalOnly)
-        {
-            Destroy(gameObject, lifespan);
-        }
-        else if (IsServer)
+        // Destroy bullet after lifespan (server should handle despawning)
+        if (IsServer)
         {
             Invoke(nameof(DespawnBullet), lifespan);
         }
@@ -59,36 +18,30 @@ public class Bullet : NetworkBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-
         HealthComponent healthComponent = collision.gameObject.GetComponent<HealthComponent>();
+
         if (healthComponent != null)
         {
-
-            if (IsServer)
+            if (IsOwner)
             {
-                if (healthComponent.NetworkObject != null)
-                {
-                    healthComponent.TakeDamageServerRpc(bulletDamage);
-                }
-                DespawnBullet();
-            }
-            else if (isLocalOnly)
-            {
-                HandleLocalCollision(collision.contacts[0].point);
+                // Only the owner can request to apply damage
+                healthComponent.TakeDamageServerRpc(bulletDamage);
+                RequestBulletDespawnServerRpc();
             }
         }
-        else
+        else if (IsOwner)
         {
-
-            if (isLocalOnly)
-            {
-                HandleLocalCollision(collision.contacts[0].point);
-            }
-            else if (IsServer)
-            {
-                DespawnBullet();
-            }
+            // Handle collision effects if bullet collides with something else
+            HandleCollision(collision.contacts[0].point);
+            RequestBulletDespawnServerRpc();
         }
+    }
+
+    [ServerRpc]
+    private void RequestBulletDespawnServerRpc()
+    {
+        // Server handles bullet despawn
+        DespawnBullet();
     }
 
     private void DespawnBullet()
@@ -99,30 +52,12 @@ public class Bullet : NetworkBehaviour
         }
     }
 
-    private void HandleLocalCollision(Vector2 impactPoint)
+    private void HandleCollision(Vector2 impactPoint)
     {
         if (impactEffectPrefab != null)
         {
             GameObject impactEffect = Instantiate(impactEffectPrefab, impactPoint, Quaternion.identity);
             Destroy(impactEffect, 0.1f);
-        }
-        Destroy(gameObject);
-    }
-
-    [ClientRpc]
-    public void HideForAllClientsClientRpc(ClientRpcParams clientRpcParams = default)
-    {
-        if (!IsServer)
-        {
-            if (bulletRenderer != null)
-            {
-                bulletRenderer.enabled = false;
-            }
-
-            if (bulletCollider != null)
-            {
-                bulletCollider.enabled = false;
-            }
         }
     }
 }

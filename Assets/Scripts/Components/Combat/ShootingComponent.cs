@@ -16,8 +16,6 @@ public class ShootingComponent : NetworkBehaviour
     {
         bulletSpeed = config.bulletSpeed;
         shootingCooldown = config.shootingCooldown;
-
-        // Bullet lifespan and damage can be applied to each bullet when instantiated
     }
 
     private void Update()
@@ -42,93 +40,51 @@ public class ShootingComponent : NetworkBehaviour
     {
         if (shootingCooldownTimer <= 0f)
         {
-            ClientShootPrediction(); // Immediate client-side prediction
-            ShootServerRpc(); // Send to server for authoritative handling
+            // ShootServerRpc() sends the shoot request to the server
+            ShootServerRpc();
             shootingCooldownTimer = shootingCooldown;
         }
     }
-
-    /// <summary>
-    /// Instantiates a local-only bullet for immediate visual feedback.
-    /// </summary>
-    private void ClientShootPrediction()
-{
-    foreach (Transform shootPoint in shootPoints)
-    {
-        // Spawn muzzle flash immediately on the client
-        if (muzzleFlashPrefab != null)
-        {
-            GameObject muzzleFlash = Instantiate(muzzleFlashPrefab, shootPoint.position, shootPoint.rotation, shootPoint);
-            Destroy(muzzleFlash, 0.1f);
-        }
-
-        // Instantiate a local-only bullet for visual feedback
-        GameObject clientBullet = Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
-
-        // Set the bullet to be local-only and remove network components
-        Bullet bulletScript = clientBullet.GetComponent<Bullet>();
-        if (bulletScript != null)
-        {
-            bulletScript.SetLocalOnly();
-            Destroy(clientBullet, bulletScript.lifespan); // Destroy after the defined lifespan
-        }
-
-        Rigidbody2D bulletRb = clientBullet.GetComponent<Rigidbody2D>();
-        if (bulletRb != null)
-        {
-            bulletRb.bodyType = RigidbodyType2D.Dynamic;
-            bulletRb.gravityScale = 0;
-            bulletRb.linearVelocity = shootPoint.up * bulletSpeed;
-        }
-    }
-}
-
 
     [ServerRpc]
     private void ShootServerRpc(ServerRpcParams rpcParams = default)
     {
         ulong shooterClientId = rpcParams.Receive.SenderClientId;
 
-        // Broadcast the shooting event to all clients except the shooter
-        BroadcastShootClientRpc(shooterClientId);
-
         foreach (Transform shootPoint in shootPoints)
         {
             // Instantiate the bullet on the server
             GameObject bulletObject = Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
 
-            // Initialize the bullet with the shooter's client ID
-            Bullet bulletScript = bulletObject.GetComponent<Bullet>();
-            if (bulletScript != null)
-            {
-                bulletScript.Initialize(shooterClientId);
-            }
-
-            // Set bullet velocity
+            // Set bullet velocity on the server initially
             Rigidbody2D bulletRb = bulletObject.GetComponent<Rigidbody2D>();
             if (bulletRb != null)
             {
-                bulletRb.linearVelocity = shootPoint.up * bulletSpeed;
+                bulletRb.bodyType = RigidbodyType2D.Dynamic; // Ensure it's dynamic
+                bulletRb.gravityScale = 0; // Ensure gravity does not affect the bullet
+                bulletRb.linearVelocity = shootPoint.up * bulletSpeed; // Set the velocity
             }
 
-            // Spawn the bullet over the network
+            // Spawn the bullet over the network with ownership to the client
             NetworkObject bulletNetworkObject = bulletObject.GetComponent<NetworkObject>();
             if (bulletNetworkObject != null)
             {
-                bulletNetworkObject.Spawn();
+                bulletNetworkObject.SpawnWithOwnership(shooterClientId);
 
-                // Hide the bullet for all clients
-                bulletScript.HideForAllClientsClientRpc();
+                // Notify the owning client to ensure bullet velocity is properly set
+                SetBulletVelocityClientRpc(bulletNetworkObject.NetworkObjectId, shootPoint.up * bulletSpeed);
             }
         }
     }
 
     [ClientRpc]
-    private void BroadcastShootClientRpc(ulong shooterClientId, ClientRpcParams clientRpcParams = default)
+    private void SetBulletVelocityClientRpc(ulong bulletNetworkObjectId, Vector2 velocity)
     {
-        if (NetworkManager.Singleton.LocalClientId == shooterClientId) return;
-
-        // Handle the shooting locally for other clients
-        ClientShootPrediction();
+        // Find the bullet by its NetworkObjectId and set the velocity
+        NetworkObject bulletNetworkObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[bulletNetworkObjectId];
+        if (bulletNetworkObject != null && bulletNetworkObject.TryGetComponent<Rigidbody2D>(out var bulletRb))
+        {
+            bulletRb.linearVelocity = velocity;
+        }
     }
 }
