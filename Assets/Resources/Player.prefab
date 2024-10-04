@@ -87,7 +87,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  playerConfiguration: {fileID: 11400000, guid: 8c0b4065e35d88022ba5e69cc33ffc0f, type: 2}
+  playerConfiguration: {fileID: 11400000, guid: 8e2120c4eba74af6e8cd2a7b9cf9c908, type: 2}
 --- !u!212 &628412359505069947
 SpriteRenderer:
   m_ObjectHideFlags: 0
