@@ -31,27 +31,23 @@ public class PlayerLoader : NetworkBehaviour
             return;
         }
 
-        Debug.Log($"[PlayerLoader] Applying configuration: {playerConfiguration.name} to {gameObject.name}");
 
         // Apply configuration to each relevant component
         var movementComponent = GetComponent<MovementComponent>();
         if (movementComponent != null)
         {
-            Debug.Log($"[PlayerLoader] Applying movement configuration for {gameObject.name}");
             movementComponent.ApplyConfiguration(playerConfiguration);
         }
 
         var healthComponent = GetComponent<HealthComponent>();
         if (healthComponent != null)
         {
-            Debug.Log($"[PlayerLoader] Applying health configuration for {gameObject.name}");
             healthComponent.ApplyConfiguration(playerConfiguration);
         }
 
         var shootingComponent = GetComponent<ShootingComponent>();
         if (shootingComponent != null)
         {
-            Debug.Log($"[PlayerLoader] Applying shooting configuration for {gameObject.name}");
             shootingComponent.ApplyConfiguration(playerConfiguration);
         }
 
@@ -60,7 +56,6 @@ public class PlayerLoader : NetworkBehaviour
         if (spriteRenderer != null && playerConfiguration.playerSprite != null)
         {
             spriteRenderer.sprite = playerConfiguration.playerSprite;
-            Debug.Log($"[PlayerLoader] Set sprite for {gameObject.name} to {playerConfiguration.playerSprite.name}");
         }
     }
 }

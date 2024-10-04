@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Healthbar
   - Bullet
+  - Minimap
   layers:
   - Default
   - TransparentFX
@@ -27,7 +28,7 @@ TagManager:
   - 
   - 
   - 
-  - 
+  - Minimap
   - 
   - 
   - 

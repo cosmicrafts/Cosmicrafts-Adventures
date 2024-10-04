@@ -6,6 +6,9 @@ using Unity.Networking.Transport.TLS; // Add this line
 
 public class NetworkStartUI : MonoBehaviour
 {
+    private float deltaTime = 0.0f;
+    private UnityTransport transport;
+
     void Start()
     {
         if (Application.isBatchMode)
@@ -17,76 +20,87 @@ public class NetworkStartUI : MonoBehaviour
             Debug.Log("Running in batch mode - Starting server automatically.");
             NetworkManager.Singleton.StartServer();
         }
+
+        // Cache the UnityTransport component for latency calculations
+        if (NetworkManager.Singleton != null)
+        {
+            transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        }
     }
 
-private void SetupSecureServer()
-{
-    // Create a NetworkSettings object and configure secure server parameters
-    var settings = new NetworkSettings();
-    settings.WithSecureServerParameters(
-        certificate: SecureParameters.MyGameServerCertificate,
-        privateKey: SecureParameters.MyGameServerPrivateKey);
-
-    // Get UnityTransport and configure it
-    if (NetworkManager.Singleton != null)
+    private void Update()
     {
-        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-        if (transport != null)
+        // Update deltaTime for FPS calculation
+        deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
+    }
+
+    private void SetupSecureServer()
+    {
+        // Create a NetworkSettings object and configure secure server parameters
+        var settings = new NetworkSettings();
+        settings.WithSecureServerParameters(
+            certificate: SecureParameters.MyGameServerCertificate,
+            privateKey: SecureParameters.MyGameServerPrivateKey);
+
+        // Get UnityTransport and configure it
+        if (NetworkManager.Singleton != null)
         {
-            // Set the bind address to 0.0.0.0 to listen on all network interfaces
-            transport.SetConnectionData("0.0.0.0", 7777);
+            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            if (transport != null)
+            {
+                // Set the bind address to 0.0.0.0 to listen on all network interfaces
+                transport.SetConnectionData("0.0.0.0", 7777);
 
-            // Set secure server parameters for encrypted communication
-            transport.SetServerSecrets(
-                SecureParameters.MyGameServerCertificate,
-                SecureParameters.MyGameServerPrivateKey);
+                // Set secure server parameters for encrypted communication
+                transport.SetServerSecrets(
+                    SecureParameters.MyGameServerCertificate,
+                    SecureParameters.MyGameServerPrivateKey);
 
-            Debug.Log("Secure server configured and bind address set to 0.0.0.0.");
+                Debug.Log("Secure server configured and bind address set to 0.0.0.0.");
+            }
+            else
+            {
+                Debug.LogWarning("UnityTransport component not found on NetworkManager.");
+            }
         }
         else
         {
-            Debug.LogWarning("UnityTransport component not found on NetworkManager.");
+            Debug.LogWarning("NetworkManager not found in the scene.");
         }
     }
-    else
-    {
-        Debug.LogWarning("NetworkManager not found in the scene.");
-    }
-}
 
-private void SetupSecureClient()
-{
-    // Create a NetworkSettings object and configure secure client parameters
-    var settings = new NetworkSettings();
-    settings.WithSecureClientParameters(
-        serverName: SecureParameters.ServerCommonName,
-        caCertificate: SecureParameters.MyGameClientCA);
-
-    // Get UnityTransport and configure it
-    if (NetworkManager.Singleton != null)
+    private void SetupSecureClient()
     {
-        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-        if (transport != null)
+        // Create a NetworkSettings object and configure secure client parameters
+        var settings = new NetworkSettings();
+        settings.WithSecureClientParameters(
+            serverName: SecureParameters.ServerCommonName,
+            caCertificate: SecureParameters.MyGameClientCA);
+
+        // Get UnityTransport and configure it
+        if (NetworkManager.Singleton != null)
         {
-            // Set the client to connect to the server IP address
-            transport.SetConnectionData("192.168.100.5", 7777);
+            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            if (transport != null)
+            {
+                // Set the client to connect to the server IP address
+                transport.SetConnectionData("192.168.100.5", 7777);
 
-            // Set client secure parameters for encrypted communication
-            transport.SetClientSecrets(SecureParameters.ServerCommonName, SecureParameters.MyGameClientCA);
+                // Set client secure parameters for encrypted communication
+                transport.SetClientSecrets(SecureParameters.ServerCommonName, SecureParameters.MyGameClientCA);
 
-            Debug.Log("Client connection data set to 192.168.100.5:7777 with encryption.");
+                Debug.Log("Client connection data set to 192.168.100.5:7777 with encryption.");
+            }
+            else
+            {
+                Debug.LogWarning("UnityTransport component not found on NetworkManager.");
+            }
         }
         else
         {
-            Debug.LogWarning("UnityTransport component not found on NetworkManager.");
+            Debug.LogWarning("NetworkManager not found in the scene.");
         }
     }
-    else
-    {
-        Debug.LogWarning("NetworkManager not found in the scene.");
-    }
-}
-
 
     void OnGUI()
     {
@@ -115,6 +129,17 @@ private void SetupSecureClient()
             }
 
             GUILayout.EndArea();
+        }
+
+        // Display FPS
+        int fps = Mathf.CeilToInt(1.0f / deltaTime);
+        GUI.Label(new Rect(10, 320, 150, 30), $"FPS: {fps}");
+
+        // Display network latency (ping)
+        if (transport != null && NetworkManager.Singleton.IsClient)
+        {
+            var rtt = transport.GetCurrentRtt(NetworkManager.Singleton.LocalClientId);
+            GUI.Label(new Rect(10, 350, 200, 30), $"Ping: {rtt} ms");
         }
     }
 }

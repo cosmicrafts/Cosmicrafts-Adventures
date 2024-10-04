@@ -88,7 +88,7 @@ public class HealthComponent : NetworkBehaviour
 
     private void HandleDeath()
     {
-        Debug.Log($"{gameObject.name} [HealthComponent] has died!");
+        // Debug.Log($"{gameObject.name} [HealthComponent] has died!");
         // Handle death logic here, like respawning or disabling the player
     }
 
