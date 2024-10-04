@@ -8,9 +8,10 @@ public class PlayerLoader : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        // Apply configuration for both local-only and networked instances
+        Debug.Log($"[PlayerLoader] OnNetworkSpawn called for {gameObject.name} - IsServer: {IsServer} - IsClient: {IsClient}");
         if (playerConfiguration != null)
         {
+            Debug.Log($"[PlayerLoader] Applying default configuration: {playerConfiguration.name} for {gameObject.name}");
             ApplyConfiguration();
         }
     }
@@ -18,6 +19,7 @@ public class PlayerLoader : NetworkBehaviour
     public void SetPlayerConfiguration(PlayerSO config)
     {
         playerConfiguration = config;
+        Debug.Log($"[PlayerLoader] SetPlayerConfiguration called for {gameObject.name} - New Configuration: {config.name}");
         ApplyConfiguration(); // Apply the configuration as soon as it's set
     }
 
@@ -29,24 +31,27 @@ public class PlayerLoader : NetworkBehaviour
             return;
         }
 
-        Debug.Log($"Applying configuration: {playerConfiguration.name} to {gameObject.name}");
+        Debug.Log($"[PlayerLoader] Applying configuration: {playerConfiguration.name} to {gameObject.name}");
 
         // Apply configuration to each relevant component
         var movementComponent = GetComponent<MovementComponent>();
         if (movementComponent != null)
         {
+            Debug.Log($"[PlayerLoader] Applying movement configuration for {gameObject.name}");
             movementComponent.ApplyConfiguration(playerConfiguration);
         }
 
         var healthComponent = GetComponent<HealthComponent>();
         if (healthComponent != null)
         {
+            Debug.Log($"[PlayerLoader] Applying health configuration for {gameObject.name}");
             healthComponent.ApplyConfiguration(playerConfiguration);
         }
 
         var shootingComponent = GetComponent<ShootingComponent>();
         if (shootingComponent != null)
         {
+            Debug.Log($"[PlayerLoader] Applying shooting configuration for {gameObject.name}");
             shootingComponent.ApplyConfiguration(playerConfiguration);
         }
 
@@ -55,7 +60,7 @@ public class PlayerLoader : NetworkBehaviour
         if (spriteRenderer != null && playerConfiguration.playerSprite != null)
         {
             spriteRenderer.sprite = playerConfiguration.playerSprite;
-            Debug.Log($"Set sprite for {gameObject.name} to {playerConfiguration.playerSprite.name}");
+            Debug.Log($"[PlayerLoader] Set sprite for {gameObject.name} to {playerConfiguration.playerSprite.name}");
         }
     }
 }

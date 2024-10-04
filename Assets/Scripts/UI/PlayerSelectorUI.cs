@@ -21,25 +21,56 @@ public class PlayerSelectorUI : MonoBehaviour
     private void OnConfigurationSelected(int index)
     {
         selectedConfiguration = availableConfigurations[index];
-        Debug.Log($"Player selected configuration: {selectedConfiguration.name}");
+        Debug.Log($"[PlayerSelectorUI] Player selected configuration: {selectedConfiguration.name}");
 
-        // Send the selection to the server via ServerRpc
-        SubmitSelectionServerRpc(index);
+        // Check the local client's ID before calling the ServerRpc
+        if (NetworkManager.Singleton.LocalClient != null)
+        {
+            ulong clientId = NetworkManager.Singleton.LocalClient.ClientId;
+            Debug.Log($"[PlayerSelectorUI] Local Client ID before ServerRpc: {clientId}");
+
+            // Send the selection to the server via ServerRpc, passing the client ID explicitly
+            SubmitSelectionServerRpc(index, clientId);
+        }
+        else
+        {
+            Debug.LogError("[PlayerSelectorUI] LocalClient is null, could not get Client ID.");
+        }
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    private void SubmitSelectionServerRpc(int selectionIndex, ServerRpcParams serverRpcParams = default)
+    [ServerRpc]
+    private void SubmitSelectionServerRpc(int selectionIndex, ulong clientId)
     {
-        ulong clientId = serverRpcParams.Receive.SenderClientId;
+        Debug.Log($"[PlayerSelectorUI] SubmitSelectionServerRpc called - Client ID: {clientId}, Selection Index: {selectionIndex}");
 
         if (selectionIndex >= 0 && selectionIndex < availableConfigurations.Length)
         {
             PlayerSO chosenConfig = availableConfigurations[selectionIndex];
-            PlayerSpawner.Instance.SetSelectedConfigurationServer(clientId, chosenConfig);
+
+            // Apply the chosen configuration directly to the player's object
+            if (NetworkManager.Singleton.ConnectedClients.ContainsKey(clientId))
+            {
+                GameObject playerObject = NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.gameObject;
+                PlayerLoader playerLoader = playerObject.GetComponent<PlayerLoader>();
+
+                if (playerLoader != null)
+                {
+                    Debug.Log($"[PlayerSelectorUI] Applying configuration {chosenConfig.name} to player {clientId}");
+                    playerLoader.SetPlayerConfiguration(chosenConfig);
+                }
+                else
+                {
+                    Debug.LogWarning($"[PlayerSelectorUI] PlayerLoader not found on player object for client {clientId}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[PlayerSelectorUI] Player object not found for client {clientId}");
+            }
         }
         else
         {
-            Debug.LogWarning($"Invalid selection index {selectionIndex} from client {clientId}");
+            Debug.LogWarning($"[PlayerSelectorUI] Invalid selection index {selectionIndex} from client {clientId}");
         }
     }
 }
