@@ -8,7 +8,7 @@ public class PlayerLoader : NetworkBehaviour
     public PlayerSO playerConfiguration;
 
     // NetworkVariable to synchronize the selected configuration index, defaulting to 1
-    private NetworkVariable<int> selectedConfigIndex = new NetworkVariable<int>(1);
+    private NetworkVariable<int> selectedConfigIndex = new NetworkVariable<int>(0);
 
     public override void OnNetworkSpawn()
     {
