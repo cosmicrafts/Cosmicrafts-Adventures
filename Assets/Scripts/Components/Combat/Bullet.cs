@@ -30,7 +30,7 @@ public class Bullet : NetworkBehaviour
         shooterTeamTag = teamTag;
 
         // Ignore collision between bullet and friendly team players
-        foreach (var player in FindObjectsOfType<TeamComponent>())
+        foreach (var player in FindObjectsByType<TeamComponent>(FindObjectsSortMode.None))
         {
             if (player.GetTeam() == shooterTeamTag && shooterTeamTag == TeamComponent.TeamTag.Friend)
             {

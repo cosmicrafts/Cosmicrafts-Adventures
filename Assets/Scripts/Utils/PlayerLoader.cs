@@ -1,25 +1,31 @@
 using UnityEngine;
 using Unity.Netcode;
+using System.Collections.Generic;
 
 public class PlayerLoader : NetworkBehaviour
 {
     [SerializeField]
     public PlayerSO playerConfiguration;
 
-    // NetworkVariable to synchronize the selected configuration index
-    private NetworkVariable<int> selectedConfigIndex = new NetworkVariable<int>(-1);
+    // NetworkVariable to synchronize the selected configuration index, defaulting to 1
+    private NetworkVariable<int> selectedConfigIndex = new NetworkVariable<int>(1);
 
     public override void OnNetworkSpawn()
     {
         Debug.Log($"[PlayerLoader] OnNetworkSpawn called for {gameObject.name} - IsServer: {IsServer} - IsClient: {IsClient}");
 
-        // If it's a client, subscribe to the NetworkVariable change
         if (IsClient)
         {
             selectedConfigIndex.OnValueChanged += OnConfigurationIndexChanged;
+
+            // Request server to send current configuration index if it's a new client joining
+            if (!IsServer)
+            {
+                RequestCurrentConfigurationServerRpc();
+            }
         }
 
-        // Apply the initial configuration if available
+        // Apply the initial configuration if available (for the server)
         if (IsServer && playerConfiguration != null)
         {
             Debug.Log($"[PlayerLoader] Applying default configuration: {playerConfiguration.name} for {gameObject.name}");
@@ -51,7 +57,7 @@ public class PlayerLoader : NetworkBehaviour
     {
         playerConfiguration = config;
         Debug.Log($"[PlayerLoader] SetPlayerConfiguration called for {gameObject.name} - New Configuration: {config.name}");
-        ApplyConfiguration(); 
+        ApplyConfiguration();
     }
 
     public void ApplyConfiguration()
@@ -94,5 +100,32 @@ public class PlayerLoader : NetworkBehaviour
     {
         Debug.Log($"[PlayerLoader] Received configuration index {index} from client {clientId}");
         selectedConfigIndex.Value = index; // Update the NetworkVariable
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestCurrentConfigurationServerRpc(ServerRpcParams rpcParams = default)
+    {
+        ulong requestingClientId = rpcParams.Receive.SenderClientId;
+        Debug.Log($"[PlayerLoader] RequestCurrentConfigurationServerRpc called - Client ID: {requestingClientId}");
+
+        // Send the current configuration index to the requesting client
+        SendCurrentConfigurationClientRpc(selectedConfigIndex.Value, new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new List<ulong> { requestingClientId }
+            }
+        });
+    }
+
+    [ClientRpc]
+    private void SendCurrentConfigurationClientRpc(int configIndex, ClientRpcParams clientRpcParams = default)
+    {
+        if (configIndex >= 0 && configIndex < PlayerSelectorUI.Instance.availableConfigurations.Length)
+        {
+            playerConfiguration = PlayerSelectorUI.Instance.availableConfigurations[configIndex];
+            Debug.Log($"[PlayerLoader] SendCurrentConfigurationClientRpc called for {gameObject.name} - Applying configuration: {playerConfiguration.name}");
+            ApplyConfiguration();
+        }
     }
 }
