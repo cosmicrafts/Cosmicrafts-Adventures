@@ -76,7 +76,7 @@ public class ShootingComponent : NetworkBehaviour
             Bullet bulletScript = clientBullet.GetComponent<Bullet>();
             if (bulletScript != null)
             {
-                bulletScript.Initialize(NetworkManager.Singleton.LocalClientId, shooterTeamTag); // Pass team tag
+                bulletScript.Initialize(NetworkManager.Singleton.LocalClientId, shooterTeamTag);
                 bulletScript.SetLocalOnly();
                 Destroy(clientBullet, bulletScript.lifespan); // Destroy after the defined lifespan
             }
@@ -97,6 +97,9 @@ public class ShootingComponent : NetworkBehaviour
         ulong shooterClientId = rpcParams.Receive.SenderClientId;
         TeamComponent.TeamTag shooterTeamTag = teamComponent != null ? teamComponent.GetTeam() : TeamComponent.TeamTag.Neutral;
 
+        // Broadcast the shooting event to all clients except the shooter
+        BroadcastShootClientRpc(shooterClientId);
+
         foreach (Transform shootPoint in shootPoints)
         {
             // Instantiate the bullet on the server
@@ -106,7 +109,7 @@ public class ShootingComponent : NetworkBehaviour
             Bullet bulletScript = bulletObject.GetComponent<Bullet>();
             if (bulletScript != null)
             {
-                bulletScript.Initialize(shooterClientId, shooterTeamTag); // Pass team tag
+                bulletScript.Initialize(shooterClientId, shooterTeamTag);
             }
 
             // Set bullet velocity
@@ -126,5 +129,14 @@ public class ShootingComponent : NetworkBehaviour
                 bulletScript.HideForAllClientsClientRpc();
             }
         }
+    }
+
+    [ClientRpc]
+    private void BroadcastShootClientRpc(ulong shooterClientId, ClientRpcParams clientRpcParams = default)
+    {
+        if (NetworkManager.Singleton.LocalClientId == shooterClientId) return;
+
+        // Handle the shooting locally for other clients
+        ClientShootPrediction();
     }
 }

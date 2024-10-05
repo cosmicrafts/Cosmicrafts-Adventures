@@ -19,6 +19,9 @@ public class Bullet : NetworkBehaviour
     {
         bulletRenderer = GetComponent<Renderer>();
         bulletCollider = GetComponent<Collider2D>();
+
+        // Set the bullet tag (optional, but removed tag comparison logic)
+        gameObject.tag = "Bullet";
     }
 
     public void Initialize(ulong shooterId, TeamComponent.TeamTag teamTag)
@@ -26,22 +29,8 @@ public class Bullet : NetworkBehaviour
         shooterClientId = shooterId;
         shooterTeamTag = teamTag;
 
-        // Set the layer for the bullet based on the team
-        switch (shooterTeamTag)
-        {
-            case TeamComponent.TeamTag.Friend:
-                gameObject.layer = LayerMask.NameToLayer("Friend");
-                break;
-            case TeamComponent.TeamTag.Enemy:
-                gameObject.layer = LayerMask.NameToLayer("Enemy");
-                break;
-            case TeamComponent.TeamTag.Neutral:
-                gameObject.layer = LayerMask.NameToLayer("Neutral");
-                break;
-        }
-
         // Ignore collision between bullet and friendly team players
-        foreach (var player in FindObjectsByType<TeamComponent>(FindObjectsSortMode.None))
+        foreach (var player in FindObjectsOfType<TeamComponent>())
         {
             if (player.GetTeam() == shooterTeamTag && shooterTeamTag == TeamComponent.TeamTag.Friend)
             {
@@ -83,56 +72,35 @@ public class Bullet : NetworkBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (isLocalOnly)
-        {
-            HandleLocalCollision(collision);
-        }
-        else if (IsServer)
-        {
-            HandleServerCollision(collision);
-        }
-    }
-
-    private void HandleLocalCollision(Collision2D collision)
-    {
-        TeamComponent targetTeamComponent = collision.gameObject.GetComponent<TeamComponent>();
-
-        // Ignore collision if it's a friend
-        if (targetTeamComponent != null && targetTeamComponent.GetTeam() == shooterTeamTag && shooterTeamTag == TeamComponent.TeamTag.Friend)
-        {
-            return;
-        }
-
-        HandleCollisionEffect(collision.contacts[0].point);
-        Destroy(gameObject);
-    }
-
-    private void HandleServerCollision(Collision2D collision)
-    {
-        TeamComponent targetTeamComponent = collision.gameObject.GetComponent<TeamComponent>();
-
-        // Ignore collision if the target is a friend of the shooter
-        if (targetTeamComponent != null && targetTeamComponent.GetTeam() == shooterTeamTag && shooterTeamTag == TeamComponent.TeamTag.Friend)
-        {
-            return;
-        }
 
         HealthComponent healthComponent = collision.gameObject.GetComponent<HealthComponent>();
         if (healthComponent != null)
         {
-            healthComponent.TakeDamageServerRpc(bulletDamage);
+
+            if (IsServer)
+            {
+                if (healthComponent.NetworkObject != null)
+                {
+                    healthComponent.TakeDamageServerRpc(bulletDamage);
+                }
+                DespawnBullet();
+            }
+            else if (isLocalOnly)
+            {
+                HandleLocalCollision(collision.contacts[0].point);
+            }
         }
-
-        HandleCollisionEffect(collision.contacts[0].point);
-        DespawnBullet();
-    }
-
-    private void HandleCollisionEffect(Vector2 impactPoint)
-    {
-        if (impactEffectPrefab != null)
+        else
         {
-            GameObject impactEffect = Instantiate(impactEffectPrefab, impactPoint, Quaternion.identity);
-            Destroy(impactEffect, 0.1f);
+
+            if (isLocalOnly)
+            {
+                HandleLocalCollision(collision.contacts[0].point);
+            }
+            else if (IsServer)
+            {
+                DespawnBullet();
+            }
         }
     }
 
@@ -142,6 +110,16 @@ public class Bullet : NetworkBehaviour
         {
             NetworkObject.Despawn(true);
         }
+    }
+
+    private void HandleLocalCollision(Vector2 impactPoint)
+    {
+        if (impactEffectPrefab != null)
+        {
+            GameObject impactEffect = Instantiate(impactEffectPrefab, impactPoint, Quaternion.identity);
+            Destroy(impactEffect, 0.1f);
+        }
+        Destroy(gameObject);
     }
 
     [ClientRpc]
