@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 7750239329544154421}
   - component: {fileID: 3894512252052835016}
   - component: {fileID: -4863732073366480715}
+  - component: {fileID: 5363122064442604197}
   m_Layer: 10
   m_Name: Player
   m_TagString: Player
@@ -373,6 +374,21 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   blinkDistance: 5
   blinkCooldown: 0.25
+--- !u!114 &5363122064442604197
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 628412359505069944}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cd78dee18308b2bcb5f3009f14b090c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  PlayerTeam:
+    m_InternalValue: 1
 --- !u!1 &754601458911427757
 GameObject:
   m_ObjectHideFlags: 0

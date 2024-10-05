@@ -11,6 +11,13 @@ public class ShootingComponent : NetworkBehaviour
     public GameObject muzzleFlashPrefab;
 
     private float shootingCooldownTimer;
+    private TeamComponent teamComponent;
+
+    private void Start()
+    {
+        // Get the TeamComponent attached to this player
+        teamComponent = GetComponent<TeamComponent>();
+    }
 
     public void ApplyConfiguration(PlayerSO config)
     {
@@ -50,56 +57,56 @@ public class ShootingComponent : NetworkBehaviour
     /// Instantiates a local-only bullet for immediate visual feedback.
     /// </summary>
     private void ClientShootPrediction()
-{
-    foreach (Transform shootPoint in shootPoints)
     {
-        // Spawn muzzle flash immediately on the client
-        if (muzzleFlashPrefab != null)
-        {
-            GameObject muzzleFlash = Instantiate(muzzleFlashPrefab, shootPoint.position, shootPoint.rotation, shootPoint);
-            Destroy(muzzleFlash, 0.1f);
-        }
+        TeamComponent.TeamTag shooterTeamTag = teamComponent != null ? teamComponent.GetTeam() : TeamComponent.TeamTag.Neutral;
 
-        // Instantiate a local-only bullet for visual feedback
-        GameObject clientBullet = Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
-
-        // Set the bullet to be local-only and remove network components
-        Bullet bulletScript = clientBullet.GetComponent<Bullet>();
-        if (bulletScript != null)
+        foreach (Transform shootPoint in shootPoints)
         {
-            bulletScript.SetLocalOnly();
-            Destroy(clientBullet, bulletScript.lifespan); // Destroy after the defined lifespan
-        }
+            // Spawn muzzle flash immediately on the client
+            if (muzzleFlashPrefab != null)
+            {
+                GameObject muzzleFlash = Instantiate(muzzleFlashPrefab, shootPoint.position, shootPoint.rotation, shootPoint);
+                Destroy(muzzleFlash, 0.1f);
+            }
 
-        Rigidbody2D bulletRb = clientBullet.GetComponent<Rigidbody2D>();
-        if (bulletRb != null)
-        {
-            bulletRb.bodyType = RigidbodyType2D.Dynamic;
-            bulletRb.gravityScale = 0;
-            bulletRb.linearVelocity = shootPoint.up * bulletSpeed;
+            // Instantiate a local-only bullet for visual feedback
+            GameObject clientBullet = Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
+
+            // Set the bullet to be local-only and remove network components
+            Bullet bulletScript = clientBullet.GetComponent<Bullet>();
+            if (bulletScript != null)
+            {
+                bulletScript.Initialize(NetworkManager.Singleton.LocalClientId, shooterTeamTag); // Pass team tag
+                bulletScript.SetLocalOnly();
+                Destroy(clientBullet, bulletScript.lifespan); // Destroy after the defined lifespan
+            }
+
+            Rigidbody2D bulletRb = clientBullet.GetComponent<Rigidbody2D>();
+            if (bulletRb != null)
+            {
+                bulletRb.bodyType = RigidbodyType2D.Dynamic;
+                bulletRb.gravityScale = 0;
+                bulletRb.linearVelocity = shootPoint.up * bulletSpeed;
+            }
         }
     }
-}
-
 
     [ServerRpc]
     private void ShootServerRpc(ServerRpcParams rpcParams = default)
     {
         ulong shooterClientId = rpcParams.Receive.SenderClientId;
-
-        // Broadcast the shooting event to all clients except the shooter
-        BroadcastShootClientRpc(shooterClientId);
+        TeamComponent.TeamTag shooterTeamTag = teamComponent != null ? teamComponent.GetTeam() : TeamComponent.TeamTag.Neutral;
 
         foreach (Transform shootPoint in shootPoints)
         {
             // Instantiate the bullet on the server
             GameObject bulletObject = Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
 
-            // Initialize the bullet with the shooter's client ID
+            // Initialize the bullet with the shooter's client ID and team tag
             Bullet bulletScript = bulletObject.GetComponent<Bullet>();
             if (bulletScript != null)
             {
-                bulletScript.Initialize(shooterClientId);
+                bulletScript.Initialize(shooterClientId, shooterTeamTag); // Pass team tag
             }
 
             // Set bullet velocity
@@ -119,14 +126,5 @@ public class ShootingComponent : NetworkBehaviour
                 bulletScript.HideForAllClientsClientRpc();
             }
         }
-    }
-
-    [ClientRpc]
-    private void BroadcastShootClientRpc(ulong shooterClientId, ClientRpcParams clientRpcParams = default)
-    {
-        if (NetworkManager.Singleton.LocalClientId == shooterClientId) return;
-
-        // Handle the shooting locally for other clients
-        ClientShootPrediction();
     }
 }
