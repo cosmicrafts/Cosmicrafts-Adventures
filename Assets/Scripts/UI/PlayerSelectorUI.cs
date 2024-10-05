@@ -4,10 +4,17 @@ using Unity.Netcode;
 
 public class PlayerSelectorUI : MonoBehaviour
 {
+    public static PlayerSelectorUI Instance; // Singleton instance for easy access
+
     public PlayerSO[] availableConfigurations;
     private PlayerSO selectedConfiguration;
 
     public Button[] selectionButtons;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -38,15 +45,13 @@ public class PlayerSelectorUI : MonoBehaviour
         }
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void SubmitSelectionServerRpc(int selectionIndex, ulong clientId)
     {
         Debug.Log($"[PlayerSelectorUI] SubmitSelectionServerRpc called - Client ID: {clientId}, Selection Index: {selectionIndex}");
 
         if (selectionIndex >= 0 && selectionIndex < availableConfigurations.Length)
         {
-            PlayerSO chosenConfig = availableConfigurations[selectionIndex];
-
             // Apply the chosen configuration directly to the player's object
             if (NetworkManager.Singleton.ConnectedClients.ContainsKey(clientId))
             {
@@ -55,8 +60,8 @@ public class PlayerSelectorUI : MonoBehaviour
 
                 if (playerLoader != null)
                 {
-                    Debug.Log($"[PlayerSelectorUI] Applying configuration {chosenConfig.name} to player {clientId}");
-                    playerLoader.SetPlayerConfiguration(chosenConfig);
+                    Debug.Log($"[PlayerSelectorUI] Applying configuration index {selectionIndex} to player {clientId}");
+                    playerLoader.SetConfigurationIndexServerRpc(selectionIndex, clientId); // Call the ServerRpc on PlayerLoader
                 }
                 else
                 {
