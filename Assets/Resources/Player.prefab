@@ -24,7 +24,6 @@ GameObject:
   - component: {fileID: 3894512252052835016}
   - component: {fileID: -4863732073366480715}
   - component: {fileID: 5363122064442604197}
-  - component: {fileID: 9191630514361412537}
   m_Layer: 10
   m_Name: Player
   m_TagString: Player
@@ -306,8 +305,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  maxTiltAngleX: 8
-  maxTiltAngleY: 8
 --- !u!114 &4439571766653248171
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -390,19 +387,6 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   PlayerTeam:
     m_InternalValue: 1
---- !u!114 &9191630514361412537
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 628412359505069944}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f7ba8c6cd20d6d769fed8e5b9fe97a5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerTransform: {fileID: 628412359505069940}
 --- !u!1 &754601458911427757
 GameObject:
   m_ObjectHideFlags: 0

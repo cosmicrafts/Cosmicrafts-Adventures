@@ -1,13 +1,16 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Unity.Netcode;
+using System;
 
 public class WorldGenerator : NetworkBehaviour
 {
     public static WorldGenerator Instance; // Singleton instance for easy access
     public int sectorSize = 10; // Size of each sector
-
     private Dictionary<Vector2Int, Sector> sectors = new Dictionary<Vector2Int, Sector>(); // Dictionary to store generated sectors
+
+    // Event to notify when a player enters a new sector
+    public event Action<ulong, Vector2Int> OnPlayerEnteredNewSector;
 
     private void Awake()
     {
@@ -48,7 +51,7 @@ public class WorldGenerator : NetworkBehaviour
         // Store the sector in the dictionary
         sectors.Add(coordinates, newSector);
 
-       // Debug.Log($"Generated new sector: {newSector.sectorName}");
+        Debug.Log($"Generated new sector: {newSector.sectorName}");
     }
 
     public bool SectorExists(Vector2Int coordinates)
@@ -58,10 +61,22 @@ public class WorldGenerator : NetworkBehaviour
 
     public Sector GetSector(Vector2Int coordinates)
     {
-        if (sectors.TryGetValue(coordinates, out Sector sector))
+        sectors.TryGetValue(coordinates, out Sector sector);
+        return sector;
+    }
+
+    // Call this method to track player movement and detect sector changes
+    public void TrackPlayerMovement(ulong clientId, Vector3 playerPosition)
+    {
+        Vector2Int newSector = new Vector2Int(
+            Mathf.FloorToInt(playerPosition.x / sectorSize),
+            Mathf.FloorToInt(playerPosition.y / sectorSize)
+        );
+
+        if (SectorExists(newSector))
         {
-            return sector;
+            // Fire the event if the player has entered a new sector
+            OnPlayerEnteredNewSector?.Invoke(clientId, newSector);
         }
-        return null;
     }
 }
