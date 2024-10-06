@@ -6,9 +6,6 @@ public class RotationComponent : NetworkBehaviour
     private Rigidbody2D rb;
     private MovementComponent movementComponent;
 
-    public float maxTiltAngleX = 8f;
-    public float maxTiltAngleY = 8f;
-
     private Vector3 mousePosition;
 
     // Network variable to synchronize the rotation across clients
@@ -28,46 +25,54 @@ public class RotationComponent : NetworkBehaviour
     {
         if (IsOwner)
         {
-            Vector2 moveInput = movementComponent.MoveInput;
-
             // Perform local rotation
-            Quaternion newRotation = CalculateCombinedRotation(mousePosition, moveInput);
-            transform.rotation = newRotation;
+            Quaternion newRotation = CalculateRotation(mousePosition);
+            
+            // Smoothly interpolate towards the new rotation
+            float rotationSmoothingSpeed = 12f; // Adjust as needed for smoothness
+            transform.rotation = Quaternion.Lerp(transform.rotation, newRotation, Time.deltaTime * rotationSmoothingSpeed);
 
             // Send rotation to the server for synchronization if not the server
             if (!IsServer)
             {
-                UpdateRotationOnServerRpc(newRotation);
+                UpdateRotationOnServerRpc(transform.rotation);
             }
         }
         else
         {
             // For non-owner clients, use the synchronized network variable for rotation
-            transform.rotation = networkRotation.Value;
+            transform.rotation = Quaternion.Lerp(transform.rotation, networkRotation.Value, Time.deltaTime * 10f);
         }
     }
+
 
     public void SetMousePosition(Vector3 mousePosition)
     {
         this.mousePosition = mousePosition;
     }
 
-    private Quaternion CalculateCombinedRotation(Vector3 mousePosition, Vector2 moveInput)
+    private Quaternion CalculateRotation(Vector3 mousePosition)
     {
         // Calculate direction towards the mouse
-        Vector2 direction = (mousePosition - transform.position).normalized;
+        Vector2 direction = (mousePosition - transform.position);
+        
+        // Define a minimum threshold distance to avoid jitter when the mouse is too close
+        float minDistance = 0.25f; // Adjust as needed to find a balance that prevents jitter
+        
+        if (direction.magnitude < minDistance)
+        {
+            // If the mouse is too close, return the current rotation to prevent jitter
+            return transform.rotation;
+        }
+
+        // Normalize the direction vector to calculate the new rotation
+        direction.Normalize();
         float rotationZ = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
 
-        // Calculate tilt angles based on movement input and mouse direction
-        float mouseTiltX = Mathf.Clamp(direction.y * maxTiltAngleX, -maxTiltAngleX, maxTiltAngleX);
-        float mouseTiltY = Mathf.Clamp(-direction.x * maxTiltAngleY, -maxTiltAngleY, maxTiltAngleY);
-
-        float tiltX = -moveInput.y * maxTiltAngleX + mouseTiltX;
-        float tiltY = moveInput.x * maxTiltAngleY + mouseTiltY;
-
-        // Return the combined tilt and rotation as a quaternion
-        return Quaternion.Euler(tiltX, tiltY, rotationZ);
+        // Return the rotation around the Z-axis as a quaternion
+        return Quaternion.Euler(0f, 0f, rotationZ);
     }
+
 
     [ServerRpc]
     private void UpdateRotationOnServerRpc(Quaternion rotation)

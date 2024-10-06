@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Crab
   m_EditorClassIdentifier: 
   moveSpeed: 12
-  moveSmoothTime: 0.15
+  moveSmoothTime: 0.25
   maxHealth: 100
   bulletSpeed: 20
   bulletDamage: 1

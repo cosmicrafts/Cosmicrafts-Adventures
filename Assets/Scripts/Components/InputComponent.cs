@@ -13,7 +13,7 @@ public class InputComponent : NetworkBehaviour
 
     [Header("Camera Zoom Settings")]
     public float zoomSmoothSpeed = 5f; // Smooth transition speed between zoom levels
-    private readonly float[] zoomLevels = { 16f, 21f, 28f, 36f }; // Predefined zoom levels
+    private readonly float[] zoomLevels = { 8f, 12f, 18f, 24f, 28f, 32f, 36f }; // Predefined zoom levels
     private int currentZoomIndex; // The current zoom level index
     private float zoomInput;
 
@@ -44,14 +44,8 @@ public class InputComponent : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-        // Handle Movement Input
-        Vector2 moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        movementComponent.SetMoveInput(moveInput);
-
-        // Handle Rotation Input
-        Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(new Vector3(
-            Input.mousePosition.x, Input.mousePosition.y, -mainCamera.transform.position.z));
-        rotationComponent.SetMousePosition(mouseWorldPosition);
+        // Handle Movement and Rotation together
+        UpdateMovementAndRotation();
 
         // Handle Dash Input
         if (Input.GetKeyDown(KeyCode.Space))
@@ -65,12 +59,23 @@ public class InputComponent : NetworkBehaviour
             shootingComponent.RequestShoot();
         }
 
-        // Handle Zoom Input (Mouse Scroll Wheel)
+        // Handle Zoom Input and Zoom Update
         HandleCameraZoomInput();
-
-        // Handle Camera Zoom (Smooth Transition)
         HandleCameraZoom();
     }
+
+    private void UpdateMovementAndRotation()
+    {
+        // Handle Movement Input
+        Vector2 moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        movementComponent.SetMoveInput(moveInput);
+
+        // Handle Rotation Input based on the current mouse position
+        Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(new Vector3(
+            Input.mousePosition.x, Input.mousePosition.y, -mainCamera.transform.position.z));
+        rotationComponent.SetMousePosition(mouseWorldPosition);
+    }
+
 
     private void HandleCameraZoomInput()
     {

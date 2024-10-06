@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 066fdad4cbb5a664b8088cdb7dafe8db, type: 3}
   m_Name: Marauder
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 50
   moveSmoothTime: 0.25
   maxHealth: 100
   bulletSpeed: 10

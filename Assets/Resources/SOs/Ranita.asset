@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Ranita
   m_EditorClassIdentifier: 
   moveSpeed: 8
-  moveSmoothTime: 0
+  moveSmoothTime: 0.25
   maxHealth: 100
   bulletSpeed: 16
   bulletDamage: 1

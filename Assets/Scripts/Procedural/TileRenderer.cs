@@ -20,8 +20,8 @@ public class SpaceProceduralGenerator : MonoBehaviour
     [Header("Customization Options")]
     public Color foregroundColor = Color.white; // Tint color for the foreground
     public Color backgroundColor = Color.white; // Tint color for the background
-    [Range(0.5f, 2f)] public float foregroundScaleFactor = 1f; // Scale factor for foreground
-    [Range(0.5f, 2f)] public float backgroundScaleFactor = 1f; // Scale factor for background
+    [Range(0.5f, 10f)] public float foregroundScaleFactor = 1f; // Scale factor for foreground
+    [Range(0.5f, 10f)] public float backgroundScaleFactor = 1f; // Scale factor for background
 
     private Transform player;
     private Vector2 playerPosition;
