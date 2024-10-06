@@ -1,20 +1,24 @@
 using UnityEngine;
 using TMPro;
 using Unity.Netcode;
+using System.Collections.Generic;
 
 public class MinimapController : MonoBehaviour
 {
+    public static MinimapController Instance; // Singleton for easy access
     public TextMeshProUGUI sectorNameText; // Reference to TMP UI to display the sector name
     private Transform playerTransform;
     private ulong localClientId;
+    private Dictionary<Vector2Int, string> sectors = new Dictionary<Vector2Int, string>(); // Store sector data locally
+    private Vector2Int currentSector;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
-        if (WorldGenerator.Instance != null)
-        {
-            WorldGenerator.Instance.OnPlayerEnteredNewSector += OnPlayerEnteredNewSector;
-        }
-
         // Find the player transform after spawning
         if (NetworkManager.Singleton != null)
         {
@@ -26,6 +30,7 @@ public class MinimapController : MonoBehaviour
     {
         if (NetworkManager.Singleton.LocalClientId == clientId)
         {
+            Debug.Log($"Client {clientId} connected.");
             localClientId = clientId;
 
             // Get the player's NetworkObject associated with the local client
@@ -33,9 +38,14 @@ public class MinimapController : MonoBehaviour
             if (playerObject != null)
             {
                 playerTransform = playerObject.transform;
+                Debug.Log($"Client {clientId} found player object and requesting all sectors.");
 
-                // Update sector information immediately after getting the player transform
-                UpdateSectorUI();
+                // Request all sector information from the server
+                RequestAllSectorsFromServer();
+            }
+            else
+            {
+                Debug.LogWarning($"Client {clientId} could not find player object.");
             }
         }
     }
@@ -45,46 +55,62 @@ public class MinimapController : MonoBehaviour
         if (playerTransform != null)
         {
             // Continuously track the player's movement to detect sector changes
-            WorldGenerator.Instance.TrackPlayerMovement(localClientId, playerTransform.position);
+            Vector2Int newSector = GetCurrentSector(playerTransform.position);
+
+            if (newSector != currentSector && sectors.ContainsKey(newSector))
+            {
+                currentSector = newSector;
+                UpdateSectorUI(sectors[newSector]);
+            }
         }
     }
 
-    private void OnPlayerEnteredNewSector(ulong clientId, Vector2Int newSector)
+    private void RequestAllSectorsFromServer()
     {
-        if (clientId == localClientId)
+        if (NetworkManager.Singleton.IsClient)
         {
-            UpdateSectorUI();
+            Debug.Log($"Client {localClientId} requesting all sector data from server.");
+            WorldGenerator.Instance.GetAllSectorsServerRpc();
         }
     }
 
-    private void UpdateSectorUI()
+    public void AddSectorData(Vector2Int sectorCoords, string sectorName)
     {
-        if (playerTransform == null)
+        if (!sectors.ContainsKey(sectorCoords))
         {
-            return;
-        }
+            sectors.Add(sectorCoords, sectorName);
+            Debug.Log($"Client added sector data: {sectorName} at {sectorCoords}");
 
-        // Calculate the current sector based on the player's position
-        Vector2Int currentSector = new Vector2Int(
-            Mathf.FloorToInt(playerTransform.position.x / WorldGenerator.Instance.sectorSize),
-            Mathf.FloorToInt(playerTransform.position.y / WorldGenerator.Instance.sectorSize)
+            // Update the UI if the player is in the newly received sector
+            if (playerTransform != null)
+            {
+                Vector2Int newSector = GetCurrentSector(playerTransform.position);
+                if (newSector == sectorCoords)
+                {
+                    currentSector = newSector;
+                    UpdateSectorUI(sectorName);
+                }
+            }
+        }
+    }
+
+    private Vector2Int GetCurrentSector(Vector3 position)
+    {
+        return new Vector2Int(
+            Mathf.FloorToInt(position.x / WorldGenerator.Instance.sectorSize),
+            Mathf.FloorToInt(position.y / WorldGenerator.Instance.sectorSize)
         );
+    }
 
-        // Get the current sector data from the WorldGenerator
-        Sector currentSectorData = WorldGenerator.Instance.GetSector(currentSector);
-        if (currentSectorData != null)
-        {
-            sectorNameText.text = currentSectorData.sectorName;
-        }
+    private void UpdateSectorUI(string sectorName)
+    {
+        Debug.Log($"Updating minimap for client {localClientId} with sector: {sectorName}");
+        // Update the sector name UI on the client
+        sectorNameText.text = sectorName;
     }
 
     private void OnDestroy()
     {
-        if (WorldGenerator.Instance != null)
-        {
-            WorldGenerator.Instance.OnPlayerEnteredNewSector -= OnPlayerEnteredNewSector;
-        }
-
         if (NetworkManager.Singleton != null)
         {
             NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;

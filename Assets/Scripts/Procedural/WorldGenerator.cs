@@ -9,9 +9,6 @@ public class WorldGenerator : NetworkBehaviour
     public int sectorSize = 10; // Size of each sector
     private Dictionary<Vector2Int, Sector> sectors = new Dictionary<Vector2Int, Sector>(); // Dictionary to store generated sectors
 
-    // Event to notify when a player enters a new sector
-    public event Action<ulong, Vector2Int> OnPlayerEnteredNewSector;
-
     private void Awake()
     {
         Instance = this;
@@ -54,29 +51,27 @@ public class WorldGenerator : NetworkBehaviour
         Debug.Log($"Generated new sector: {newSector.sectorName}");
     }
 
-    public bool SectorExists(Vector2Int coordinates)
+    // ServerRpc to handle client requests for all sector data
+    [ServerRpc(RequireOwnership = false)]
+    public void GetAllSectorsServerRpc(ServerRpcParams serverRpcParams = default)
     {
-        return sectors.ContainsKey(coordinates);
-    }
-
-    public Sector GetSector(Vector2Int coordinates)
-    {
-        sectors.TryGetValue(coordinates, out Sector sector);
-        return sector;
-    }
-
-    // Call this method to track player movement and detect sector changes
-    public void TrackPlayerMovement(ulong clientId, Vector3 playerPosition)
-    {
-        Vector2Int newSector = new Vector2Int(
-            Mathf.FloorToInt(playerPosition.x / sectorSize),
-            Mathf.FloorToInt(playerPosition.y / sectorSize)
-        );
-
-        if (SectorExists(newSector))
+        foreach (var sector in sectors)
         {
-            // Fire the event if the player has entered a new sector
-            OnPlayerEnteredNewSector?.Invoke(clientId, newSector);
+            SendSectorToClientRpc(sector.Key, sector.Value.sectorName, new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams
+                {
+                    TargetClientIds = new ulong[] { serverRpcParams.Receive.SenderClientId }
+                }
+            });
         }
+    }
+
+    // Sends sector data to the specific client
+    [ClientRpc]
+    private void SendSectorToClientRpc(Vector2Int sectorCoords, string sectorName, ClientRpcParams clientRpcParams = default)
+    {
+        Debug.Log($"ClientRpc: Sending sector info for sector '{sectorName}'");
+        MinimapController.Instance?.AddSectorData(sectorCoords, sectorName);
     }
 }
