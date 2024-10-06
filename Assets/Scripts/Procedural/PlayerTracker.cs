@@ -88,7 +88,7 @@ public class PlayerTracker : MonoBehaviour
                 Vector2Int sectorCoords = new Vector2Int(x, y);
                 if (!WorldGenerator.Instance.SectorExists(sectorCoords))
                 {
-                    Debug.Log($"Generating sector at: ({sectorCoords.x}, {sectorCoords.y})");
+                    //Debug.Log($"Generating sector at: ({sectorCoords.x}, {sectorCoords.y})");
                     WorldGenerator.Instance.GenerateSector(sectorCoords);
                 }
             }

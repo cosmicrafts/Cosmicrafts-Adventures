@@ -1,67 +1,115 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
-public class TileRenderer : MonoBehaviour
+public class SpaceProceduralGenerator : MonoBehaviour
 {
-    public Camera playerCamera;
-    public float renderDistance = 2000f; // Render tiles within this distance from the camera
-    private Dictionary<Vector2Int, Sector> renderedSectors = new Dictionary<Vector2Int, Sector>();
+    [Header("Space Tile Settings")]
+    public Sprite spaceTileSprite; // Use a sprite instead of a prefab
+    public float tileWorldSize = 16f; // Size of each space tile
+    public int renderDistance = 4; // How far the camera should render chunks
 
-    private void Update()
+    private Transform player;
+    private Vector2 playerPosition;
+    private Dictionary<Vector2, GameObject> chunks = new Dictionary<Vector2, GameObject>(); // Store generated chunks
+
+    private void Start()
     {
-        if (playerCamera == null)
+        player = Camera.main.transform; // Use the main camera's transform
+        if (player == null)
         {
-            Debug.LogWarning("PlayerCamera is not assigned in TileRenderer.");
+            Debug.LogWarning("Main camera not found.");
             return;
         }
 
-        // Calculate the camera's current sector
-        Vector2Int currentSector = new Vector2Int(
-            Mathf.FloorToInt(playerCamera.transform.position.x / WorldGenerator.Instance.sectorSize),
-            Mathf.FloorToInt(playerCamera.transform.position.y / WorldGenerator.Instance.sectorSize)
-        );
-
-        // Render tiles from sectors within range
-        RenderTilesInRange(currentSector);
+        GenerateInitialChunks();
     }
 
-    private void RenderTilesInRange(Vector2Int currentSector)
+    private void Update()
     {
-        for (int x = currentSector.x - 1; x <= currentSector.x + 1; x++)
+        UpdateChunksAroundPlayer();
+        RemoveDistantChunks();
+    }
+
+    void GenerateInitialChunks()
+    {
+        // Calculate the player's initial chunk position
+        playerPosition = new Vector2(Mathf.FloorToInt(player.position.x / tileWorldSize), Mathf.FloorToInt(player.position.y / tileWorldSize));
+
+        // Generate chunks within the render distance around the player
+        for (int x = -renderDistance; x <= renderDistance; x++)
         {
-            for (int y = currentSector.y - 1; y <= currentSector.y + 1; y++)
+            for (int y = -renderDistance; y <= renderDistance; y++)
             {
-                Vector2Int sectorCoords = new Vector2Int(x, y);
-                
-                if (WorldGenerator.Instance.SectorExists(sectorCoords))
+                GenerateChunk(new Vector2(playerPosition.x + x, playerPosition.y + y));
+            }
+        }
+    }
+
+    void GenerateChunk(Vector2 chunkCoord)
+    {
+        // Check if the chunk has already been generated
+        if (chunks.ContainsKey(chunkCoord)) return;
+
+        // Create a new GameObject with a SpriteRenderer to use the given sprite
+        GameObject newChunk = new GameObject($"Chunk_{chunkCoord.x}_{chunkCoord.y}");
+        newChunk.transform.position = new Vector3(chunkCoord.x * tileWorldSize, chunkCoord.y * tileWorldSize, 0);
+        newChunk.layer = 6; // Assign directly to Layer 6 (Space tiles layer)
+
+        // Add a SpriteRenderer component and set the sprite
+        SpriteRenderer spriteRenderer = newChunk.AddComponent<SpriteRenderer>();
+        spriteRenderer.sprite = spaceTileSprite;
+
+        // Set the size of the sprite to match the tileWorldSize
+        newChunk.transform.localScale = new Vector3(tileWorldSize / spaceTileSprite.bounds.size.x, tileWorldSize / spaceTileSprite.bounds.size.y, 1);
+
+        // Add the new chunk to the dictionary
+        chunks.Add(chunkCoord, newChunk);
+    }
+
+    void UpdateChunksAroundPlayer()
+    {
+        // Calculate the player's current chunk position
+        Vector2 newPlayerPos = new Vector2(Mathf.FloorToInt(player.position.x / tileWorldSize), Mathf.FloorToInt(player.position.y / tileWorldSize));
+
+        // Only update if the player has moved to a new chunk
+        if (newPlayerPos != playerPosition)
+        {
+            playerPosition = newPlayerPos;
+
+            // Generate new chunks within the render distance
+            for (int x = -renderDistance; x <= renderDistance; x++)
+            {
+                for (int y = -renderDistance; y <= renderDistance; y++)
                 {
-                    Sector sector = WorldGenerator.Instance.GetSector(sectorCoords);
-                    if (!renderedSectors.ContainsKey(sectorCoords))
+                    Vector2 chunkCoord = new Vector2(playerPosition.x + x, playerPosition.y + y);
+                    if (!chunks.ContainsKey(chunkCoord))
                     {
-                        Debug.Log($"Rendering sector: {sector.sectorName}");
-                        RenderSector(sector);
-                        renderedSectors[sectorCoords] = sector;
+                        GenerateChunk(chunkCoord);
                     }
                 }
             }
         }
     }
 
-    private void RenderSector(Sector sector)
+    void RemoveDistantChunks()
     {
-        foreach (var tileData in sector.tiles)
+        List<Vector2> chunksToRemove = new List<Vector2>();
+
+        // Find chunks that are beyond the render distance and mark them for removal
+        foreach (var chunk in chunks)
         {
-            GameObject tile = new GameObject($"Tile_{tileData.position}");
-            tile.transform.position = new Vector3(tileData.position.x, tileData.position.y, 0);
-            tile.transform.rotation = tileData.rotation;
+            float distanceToPlayer = Vector2.Distance(playerPosition, chunk.Key);
+            if (distanceToPlayer > renderDistance + 1)
+            {
+                chunksToRemove.Add(chunk.Key);
+            }
+        }
 
-            SpriteRenderer renderer = tile.AddComponent<SpriteRenderer>();
-            renderer.sprite = tileData.sprite;
-
-            // Set parent to this object for better organization
-            tile.transform.SetParent(transform);
-
-            Debug.Log($"Rendered tile at {tile.transform.position} with sprite {tileData.sprite.name}");
+        // Remove and destroy distant chunks
+        foreach (var chunkCoord in chunksToRemove)
+        {
+            Destroy(chunks[chunkCoord]);
+            chunks.Remove(chunkCoord);
         }
     }
 }

@@ -13,7 +13,7 @@ public class InputComponent : NetworkBehaviour
 
     [Header("Camera Zoom Settings")]
     public float zoomSmoothSpeed = 5f; // Smooth transition speed between zoom levels
-    private readonly float[] zoomLevels = { 2f, 4f, 8f, 16f, 24f, 36f }; // Predefined zoom levels
+    private readonly float[] zoomLevels = { 16f, 21f, 28f, 36f }; // Predefined zoom levels
     private int currentZoomIndex; // The current zoom level index
     private float zoomInput;
 
