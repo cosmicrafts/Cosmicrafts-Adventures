@@ -64,21 +64,21 @@ public class Bullet : NetworkBehaviour
         {
             Destroy(gameObject, lifespan);
         }
-        else if (IsServer)
+        else if (IsServer && !IsHost)
         {
+            // Only despawn the bullet on the server if it is not the host
             Invoke(nameof(DespawnBullet), lifespan);
         }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-
         HealthComponent healthComponent = collision.gameObject.GetComponent<HealthComponent>();
         if (healthComponent != null)
         {
-
-            if (IsServer)
+            if (IsServer && !IsHost)
             {
+                // Only despawn on the server if it is not the host
                 if (healthComponent.NetworkObject != null)
                 {
                     healthComponent.TakeDamageServerRpc(bulletDamage);
@@ -92,13 +92,13 @@ public class Bullet : NetworkBehaviour
         }
         else
         {
-
             if (isLocalOnly)
             {
                 HandleLocalCollision(collision.contacts[0].point);
             }
-            else if (IsServer)
+            else if (IsServer && !IsHost)
             {
+                // Only despawn on the server if it is not the host
                 DespawnBullet();
             }
         }
@@ -108,7 +108,11 @@ public class Bullet : NetworkBehaviour
     {
         if (IsServer && NetworkObject != null && NetworkObject.IsSpawned)
         {
-            NetworkObject.Despawn(true);
+            // Only despawn if not the host
+            if (!IsHost)
+            {
+                NetworkObject.Despawn(true);
+            }
         }
     }
 
@@ -125,7 +129,7 @@ public class Bullet : NetworkBehaviour
     [ClientRpc]
     public void HideForAllClientsClientRpc(ClientRpcParams clientRpcParams = default)
     {
-        if (!IsServer)
+        if (!IsServer || IsHost)
         {
             if (bulletRenderer != null)
             {
