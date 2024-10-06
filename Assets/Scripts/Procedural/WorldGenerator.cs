@@ -77,7 +77,7 @@ public class WorldGenerator : NetworkBehaviour
             if (asteroidPosition != Vector3.zero)
             {
                 sector.asteroidPositions.Add(asteroidPosition);
-                SpawnAsteroid(asteroidPosition);
+                SpawnAsteroid(asteroidPosition, true);
             }
         }
     }
@@ -92,7 +92,7 @@ public class WorldGenerator : NetworkBehaviour
             if (enemyPosition != Vector3.zero)
             {
                 sector.enemyPositions.Add(enemyPosition);
-                SpawnEnemy(enemyPosition);
+                SpawnEnemy(enemyPosition, true);
             }
         }
     }
@@ -117,7 +117,7 @@ public class WorldGenerator : NetworkBehaviour
         return potentialPosition;
     }
 
-    private void SpawnAsteroid(Vector3 position)
+    private void SpawnAsteroid(Vector3 position, bool isServerSpawn)
     {
         GameObject asteroid = Instantiate(asteroidPrefab, position, Quaternion.identity);
         asteroid.layer = LayerMask.NameToLayer("Neutral");
@@ -133,9 +133,14 @@ public class WorldGenerator : NetworkBehaviour
         {
             teamComponent.SetTeam(TeamComponent.TeamTag.Neutral);
         }
+
+        if (isServerSpawn)
+        {
+            AsteroidSpawnedClientRpc(position);
+        }
     }
 
-    private void SpawnEnemy(Vector3 position)
+    private void SpawnEnemy(Vector3 position, bool isServerSpawn)
     {
         GameObject enemy = Instantiate(enemyPrefab, position, Quaternion.identity);
         enemy.layer = LayerMask.NameToLayer("Enemy");
@@ -151,9 +156,31 @@ public class WorldGenerator : NetworkBehaviour
         {
             teamComponent.SetTeam(TeamComponent.TeamTag.Enemy);
         }
+
+        if (isServerSpawn)
+        {
+            EnemySpawnedClientRpc(position);
+        }
     }
 
-    // ServerRpc to handle client requests for all sector data
+    [ClientRpc]
+    private void AsteroidSpawnedClientRpc(Vector3 position, ClientRpcParams clientRpcParams = default)
+    {
+        if (!IsServer)
+        {
+            Instantiate(asteroidPrefab, position, Quaternion.identity);
+        }
+    }
+
+    [ClientRpc]
+    private void EnemySpawnedClientRpc(Vector3 position, ClientRpcParams clientRpcParams = default)
+    {
+        if (!IsServer)
+        {
+            Instantiate(enemyPrefab, position, Quaternion.identity);
+        }
+    }
+
     [ServerRpc(RequireOwnership = false)]
     public void GetAllSectorsServerRpc(ServerRpcParams serverRpcParams = default)
     {
@@ -205,14 +232,14 @@ public class WorldGenerator : NetworkBehaviour
         for (int i = 0; i < asteroidX.Length; i++)
         {
             Vector3 position = new Vector3(asteroidX[i], asteroidY[i], asteroidZ[i]);
-            Instantiate(asteroidPrefab, position, Quaternion.identity);
+            SpawnAsteroid(position, false);
         }
 
         // Spawn enemies locally on the client
         for (int i = 0; i < enemyX.Length; i++)
         {
             Vector3 position = new Vector3(enemyX[i], enemyY[i], enemyZ[i]);
-            Instantiate(enemyPrefab, position, Quaternion.identity);
+            SpawnEnemy(position, false);
         }
     }
 
