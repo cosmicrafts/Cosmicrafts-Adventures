@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class CameraFollow : MonoBehaviour
 {
@@ -8,21 +9,31 @@ public class CameraFollow : MonoBehaviour
 
     private Vector3 velocity = Vector3.zero;
 
-private void LateUpdate()
-{
-    if (target == null) return;
+    public float delay = 0.25f;
 
-    // Calculate the new target position based on the player's position
-    Vector3 targetPosition = target.position + offset;
+    private void LateUpdate()
+    {
+        if (target == null) return;
+        StartCoroutine(SmoothFollow());
+    }
 
-    // Ensure the camera's Z position remains fixed at -10
-    targetPosition.z = -10f;
+    IEnumerator SmoothFollow()
+    {
+        yield return new WaitForSeconds(delay);
 
-    // Smoothly interpolate the camera's position towards the target position
-    Vector3 smoothedPosition = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothSpeed);
+        // Check if the target is still valid before accessing it
+        if (target == null) yield break;
 
-    // Update the camera position
-    transform.position = smoothedPosition;
-}
+        // Calculate the new target position based on the player's position
+        Vector3 targetPosition = target.position + offset;
 
+        // Ensure the camera's Z position remains fixed at -10
+        targetPosition.z = -10f;
+
+        // Smoothly interpolate the camera's position towards the target position
+        Vector3 smoothedPosition = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothSpeed);
+
+        // Update the camera position
+        transform.position = smoothedPosition;
+    }
 }

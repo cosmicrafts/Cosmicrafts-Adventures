@@ -512,6 +512,7 @@ MonoBehaviour:
   target: {fileID: 0}
   smoothSpeed: 0.5
   offset: {x: 0, y: 0, z: 0}
+  delay: 0.15
 --- !u!54 &519420035
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -6321,7 +6322,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  sectorSize: 10
+  sectorSize: 100
 --- !u!114 &1458642474
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6329,12 +6330,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1458642469}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ec3730de743dcb9b58d944a497902bfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sectorSize: 10
+  sectorSize: 100
   gridColor: {r: 0, g: 1, b: 0, a: 1}
   lineWidth: 0.1
 --- !u!1 &1473140041
@@ -6453,9 +6454,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf9117a613c2e6284b50c9e34e6aa725, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spaceTileSprite: {fileID: 21300000, guid: 8df60219e0fb91b45ac3feca8b72bf9b, type: 3}
+  spaceTileSpriteForeground: {fileID: 2884288314312988557, guid: be84a871dd496d1a6b19c5695632b9e3, type: 3}
+  spaceTileSpriteBackground: {fileID: 21300000, guid: 8df60219e0fb91b45ac3feca8b72bf9b, type: 3}
   tileWorldSize: 64
-  renderDistance: 1
+  renderDistance: 4
+  foregroundMovementDirection: {x: -1, y: 1}
+  minForegroundMovementSpeed: 5
+  maxForegroundMovementSpeed: 0.1
+  additiveMaterialForeground: {fileID: 2100000, guid: c61ac908fe43b384fb405c5311be3195, type: 2}
+  foregroundColor: {r: 1, g: 1, b: 1, a: 1}
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  foregroundScaleFactor: 2
+  backgroundScaleFactor: 1
 --- !u!4 &1474598984
 Transform:
   m_ObjectHideFlags: 0
