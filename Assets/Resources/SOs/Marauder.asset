@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 066fdad4cbb5a664b8088cdb7dafe8db, type: 3}
   m_Name: Marauder
   m_EditorClassIdentifier: 
-  moveSpeed: 50
+  moveSpeed: 6
   moveSmoothTime: 0.25
-  maxHealth: 100
-  bulletSpeed: 10
-  bulletDamage: 1
+  maxHealth: 250
+  bulletSpeed: 40
+  bulletDamage: 20
   bulletLifespan: 1
   shootingCooldown: 0.5
   hasDashAbility: 1
-  dashSpeed: 15
-  dashDuration: 0.25
+  dashSpeed: 90
+  dashDuration: 0.1
   dashCooldown: 1
   hasBlinkAbility: 0
   blinkDistance: 10

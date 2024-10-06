@@ -3,7 +3,7 @@ using Unity.Netcode;
 
 public class DashComponent : NetworkBehaviour
 {
-    public float dashSpeed = 15f;
+    public float dashSpeed = 40f;
     public float dashDuration = 0.2f;
     public float dashCooldown = 1f;
 

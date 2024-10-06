@@ -14,15 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 12
   moveSmoothTime: 0.25
-  maxHealth: 100
-  bulletSpeed: 20
-  bulletDamage: 1
+  maxHealth: 80
+  bulletSpeed: 24
+  bulletDamage: 8
   bulletLifespan: 1
-  shootingCooldown: 0.1
+  shootingCooldown: 0.15
   hasDashAbility: 1
   dashSpeed: 25
   dashDuration: 0.25
-  dashCooldown: 0.75
+  dashCooldown: 1.5
   hasBlinkAbility: 0
   blinkDistance: 10
   blinkCooldown: 2
