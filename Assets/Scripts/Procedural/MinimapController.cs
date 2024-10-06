@@ -1,3 +1,4 @@
+// Minimap Script
 using UnityEngine;
 using TMPro;
 using Unity.Netcode;
@@ -30,7 +31,7 @@ public class MinimapController : MonoBehaviour
     {
         if (NetworkManager.Singleton.LocalClientId == clientId)
         {
-            Debug.Log($"Client {clientId} connected.");
+           // Debug.Log($"Client {clientId} connected.");
             localClientId = clientId;
 
             // Get the player's NetworkObject associated with the local client
@@ -79,7 +80,7 @@ public class MinimapController : MonoBehaviour
         if (!sectors.ContainsKey(sectorCoords))
         {
             sectors.Add(sectorCoords, sectorName);
-            Debug.Log($"Client added sector data: {sectorName} at {sectorCoords}");
+            //Debug.Log($"Client added sector data: {sectorName} at {sectorCoords}");
 
             // Update the UI if the player is in the newly received sector
             if (playerTransform != null)
@@ -104,7 +105,7 @@ public class MinimapController : MonoBehaviour
 
     private void UpdateSectorUI(string sectorName)
     {
-        Debug.Log($"Updating minimap for client {localClientId} with sector: {sectorName}");
+        //Debug.Log($"Updating minimap for client {localClientId} with sector: {sectorName}");
         // Update the sector name UI on the client
         sectorNameText.text = sectorName;
     }

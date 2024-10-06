@@ -1,3 +1,4 @@
+// World Generator Script
 using UnityEngine;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -59,7 +60,7 @@ public class WorldGenerator : NetworkBehaviour
         // Store the sector in the dictionary
         sectors.Add(coordinates, newSector);
 
-        Debug.Log($"Generated new sector: {newSector.sectorName}");
+        // Log($"Generated new sector: {newSector.sectorName}");
 
         // Generate asteroids and enemies in the sector
         GenerateAsteroids(coordinates);
@@ -68,11 +69,14 @@ public class WorldGenerator : NetworkBehaviour
 
     private void GenerateAsteroids(Vector2Int sectorCoords)
     {
+        Sector sector = sectors[sectorCoords];
+
         for (int i = 0; i < asteroidsPerSector; i++)
         {
             Vector3 asteroidPosition = GetRandomPositionInSector(sectorCoords);
             if (asteroidPosition != Vector3.zero)
             {
+                sector.asteroidPositions.Add(asteroidPosition);
                 SpawnAsteroid(asteroidPosition);
             }
         }
@@ -80,11 +84,14 @@ public class WorldGenerator : NetworkBehaviour
 
     private void GenerateEnemies(Vector2Int sectorCoords)
     {
+        Sector sector = sectors[sectorCoords];
+
         for (int i = 0; i < enemiesPerSector; i++)
         {
             Vector3 enemyPosition = GetRandomPositionInSector(sectorCoords, enemySpawnDistance);
             if (enemyPosition != Vector3.zero)
             {
+                sector.enemyPositions.Add(enemyPosition);
                 SpawnEnemy(enemyPosition);
             }
         }
@@ -152,7 +159,32 @@ public class WorldGenerator : NetworkBehaviour
     {
         foreach (var sector in sectors)
         {
-            SendSectorToClientRpc(sector.Key, sector.Value.sectorName, new ClientRpcParams
+            var asteroidPositions = sector.Value.asteroidPositions;
+            var enemyPositions = sector.Value.enemyPositions;
+
+            float[] asteroidX = new float[asteroidPositions.Count];
+            float[] asteroidY = new float[asteroidPositions.Count];
+            float[] asteroidZ = new float[asteroidPositions.Count];
+
+            for (int i = 0; i < asteroidPositions.Count; i++)
+            {
+                asteroidX[i] = asteroidPositions[i].x;
+                asteroidY[i] = asteroidPositions[i].y;
+                asteroidZ[i] = asteroidPositions[i].z;
+            }
+
+            float[] enemyX = new float[enemyPositions.Count];
+            float[] enemyY = new float[enemyPositions.Count];
+            float[] enemyZ = new float[enemyPositions.Count];
+
+            for (int i = 0; i < enemyPositions.Count; i++)
+            {
+                enemyX[i] = enemyPositions[i].x;
+                enemyY[i] = enemyPositions[i].y;
+                enemyZ[i] = enemyPositions[i].z;
+            }
+
+            SendSectorToClientRpc(sector.Key, sector.Value.sectorName, asteroidX, asteroidY, asteroidZ, enemyX, enemyY, enemyZ, new ClientRpcParams
             {
                 Send = new ClientRpcSendParams
                 {
@@ -164,9 +196,73 @@ public class WorldGenerator : NetworkBehaviour
 
     // Sends sector data to the specific client
     [ClientRpc]
-    private void SendSectorToClientRpc(Vector2Int sectorCoords, string sectorName, ClientRpcParams clientRpcParams = default)
+    private void SendSectorToClientRpc(Vector2Int sectorCoords, string sectorName, float[] asteroidX, float[] asteroidY, float[] asteroidZ, float[] enemyX, float[] enemyY, float[] enemyZ, ClientRpcParams clientRpcParams = default)
     {
-        Debug.Log($"ClientRpc: Sending sector info for sector '{sectorName}'");
+        //Log($"ClientRpc: Sending sector info for sector '{sectorName}'");
         MinimapController.Instance?.AddSectorData(sectorCoords, sectorName);
+
+        // Spawn asteroids locally on the client
+        for (int i = 0; i < asteroidX.Length; i++)
+        {
+            Vector3 position = new Vector3(asteroidX[i], asteroidY[i], asteroidZ[i]);
+            Instantiate(asteroidPrefab, position, Quaternion.identity);
+        }
+
+        // Spawn enemies locally on the client
+        for (int i = 0; i < enemyX.Length; i++)
+        {
+            Vector3 position = new Vector3(enemyX[i], enemyY[i], enemyZ[i]);
+            Instantiate(enemyPrefab, position, Quaternion.identity);
+        }
     }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestAllWorldDataFromServerRpc(ServerRpcParams rpcParams = default)
+    {
+        foreach (var sector in sectors)
+        {
+            var asteroidPositions = sector.Value.asteroidPositions;
+            var enemyPositions = sector.Value.enemyPositions;
+
+            float[] asteroidX = new float[asteroidPositions.Count];
+            float[] asteroidY = new float[asteroidPositions.Count];
+            float[] asteroidZ = new float[asteroidPositions.Count];
+
+            for (int i = 0; i < asteroidPositions.Count; i++)
+            {
+                asteroidX[i] = asteroidPositions[i].x;
+                asteroidY[i] = asteroidPositions[i].y;
+                asteroidZ[i] = asteroidPositions[i].z;
+            }
+
+            float[] enemyX = new float[enemyPositions.Count];
+            float[] enemyY = new float[enemyPositions.Count];
+            float[] enemyZ = new float[enemyPositions.Count];
+
+            for (int i = 0; i < enemyPositions.Count; i++)
+            {
+                enemyX[i] = enemyPositions[i].x;
+                enemyY[i] = enemyPositions[i].y;
+                enemyZ[i] = enemyPositions[i].z;
+            }
+
+            SendSectorToClientRpc(sector.Key, sector.Value.sectorName, asteroidX, asteroidY, asteroidZ, enemyX, enemyY, enemyZ, new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams
+                {
+                    TargetClientIds = new ulong[] { rpcParams.Receive.SenderClientId }
+                }
+            });
+        }
+    }
+
+    private void Log(string message)
+    {
+        if (debugLoggingEnabled)
+        {
+            Debug.Log(message);
+        }
+    }
+
+    private bool debugLoggingEnabled = false;
 }
