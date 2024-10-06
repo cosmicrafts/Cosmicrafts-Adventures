@@ -87,6 +87,12 @@ public class PlayerLoader : NetworkBehaviour
             shootingComponent.ApplyConfiguration(playerConfiguration);
         }
 
+        var dashComponent = GetComponent<DashComponent>();
+        if (dashComponent != null)
+        {
+            dashComponent.ApplyConfiguration(playerConfiguration);
+        }
+
         // Set the player sprite from the PlayerSO
         var spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null && playerConfiguration.playerSprite != null)
