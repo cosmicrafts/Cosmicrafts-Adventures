@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: Marauder
   m_EditorClassIdentifier: 
   moveSpeed: 5
-  moveSmoothTime: 0.1
+  moveSmoothTime: 0.25
   maxHealth: 100
   bulletSpeed: 10
   bulletDamage: 1
   bulletLifespan: 1
   shootingCooldown: 0.5
   hasDashAbility: 1
-  dashSpeed: 40
-  dashDuration: 0.2
+  dashSpeed: 15
+  dashDuration: 0.25
   dashCooldown: 1
   hasBlinkAbility: 0
   blinkDistance: 10

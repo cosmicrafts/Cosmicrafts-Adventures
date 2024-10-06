@@ -12,15 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 066fdad4cbb5a664b8088cdb7dafe8db, type: 3}
   m_Name: Algo
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 8
   moveSmoothTime: 0.1
   maxHealth: 100
   bulletSpeed: 20
+  bulletDamage: 1
+  bulletLifespan: 1
   shootingCooldown: 0.1
-  hasDashAbility: 0
+  hasDashAbility: 1
   dashSpeed: 15
-  dashDuration: 0.2
-  dashCooldown: 1
+  dashDuration: 0.1
+  dashCooldown: 0.25
   hasBlinkAbility: 0
   blinkDistance: 10
   blinkCooldown: 2

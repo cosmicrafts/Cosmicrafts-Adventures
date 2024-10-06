@@ -13,16 +13,16 @@ MonoBehaviour:
   m_Name: Ranita
   m_EditorClassIdentifier: 
   moveSpeed: 8
-  moveSmoothTime: 0.25
+  moveSmoothTime: 0
   maxHealth: 100
   bulletSpeed: 16
   bulletDamage: 1
   bulletLifespan: 1
   shootingCooldown: 0.38
   hasDashAbility: 1
-  dashSpeed: 15
-  dashDuration: 0.2
-  dashCooldown: 1
+  dashSpeed: 40
+  dashDuration: 0.1
+  dashCooldown: 0.5
   hasBlinkAbility: 1
   blinkDistance: 10
   blinkCooldown: 2
