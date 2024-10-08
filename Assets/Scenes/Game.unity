@@ -6321,14 +6321,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   sectorSize: 10
-  baseObjectPrefab: {fileID: 628412359505069944, guid: ad33e971f997cc8e185e15748d3b13ea, type: 3}
+  baseObjectPrefab: {fileID: 628412359505069944, guid: f40ecf204176849b2a3d0067c43049f4, type: 3}
   asteroidConfigurations:
-  - {fileID: 11400000, guid: 596f3488663b5471ca0401223b2e762c, type: 2}
-  - {fileID: 11400000, guid: a88d8976168db40848c0734ff1e84422, type: 2}
+  - {fileID: 11400000, guid: 094f3a343d9ca48e4a1f705248c20caa, type: 2}
   asteroidsPerSector: 1
   enemyConfigurations:
-  - {fileID: 11400000, guid: 3e6a52fc876c04439be08dd83da30a51, type: 2}
-  - {fileID: 11400000, guid: 6403337dd8a784a2e8158ed892ae5b38, type: 2}
+  - {fileID: 11400000, guid: 7e48ec0fa0375497b8753193fb2b1182, type: 2}
   enemiesPerSector: 1
   enemySpawnDistance: 2
 --- !u!114 &1458642474

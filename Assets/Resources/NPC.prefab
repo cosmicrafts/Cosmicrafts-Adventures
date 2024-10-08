@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 628412359505069940}
   - component: {fileID: 628412359505069941}
-  - component: {fileID: 854840182681927330}
+  - component: {fileID: 1235715499178512559}
   - component: {fileID: 628412359505069947}
   - component: {fileID: 628412359505069946}
   - component: {fileID: -750335812954170873}
@@ -21,12 +21,12 @@ GameObject:
   - component: {fileID: 485975579305716041}
   - component: {fileID: 4439571766653248171}
   - component: {fileID: 7750239329544154421}
+  - component: {fileID: 5363122064442604197}
   - component: {fileID: 3894512252052835016}
   - component: {fileID: -4863732073366480715}
-  - component: {fileID: 5363122064442604197}
   m_Layer: 10
-  m_Name: Player
-  m_TagString: Player
+  m_Name: NPC
+  m_TagString: Asteroid
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -63,10 +63,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3926462412
+  GlobalObjectIdHash: 2754538681
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
-  Ownership: 1
+  Ownership: -1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
   ActiveSceneSynchronization: 1
@@ -76,7 +76,7 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 1
---- !u!114 &854840182681927330
+--- !u!114 &1235715499178512559
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -85,11 +85,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 628412359505069944}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 03e99388ffa231ca69f46c1dc401d3cd, type: 3}
+  m_Script: {fileID: 11500000, guid: 40da03147ba72442abc5983c5f381560, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  playerConfiguration: {fileID: 11400000, guid: 8e2120c4eba74af6e8cd2a7b9cf9c908, type: 2}
+  objectConfiguration: {fileID: 11400000, guid: 094f3a343d9ca48e4a1f705248c20caa, type: 2}
 --- !u!212 &628412359505069947
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -195,7 +195,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   NetworkTransformExpanded: 0
-  AuthorityMode: 1
+  AuthorityMode: 0
   TickSyncChildren: 0
   UseUnreliableDeltas: 0
   SyncPositionX: 1
@@ -216,7 +216,7 @@ MonoBehaviour:
   InLocalSpace: 0
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
-  SlerpPosition: 1
+  SlerpPosition: 0
 --- !u!50 &-8877122685938278519
 Rigidbody2D:
   serializedVersion: 5
@@ -343,7 +343,7 @@ MonoBehaviour:
     m_InternalValue: 100
   healthSlider: {fileID: 1045440782311064407}
   collisionDamage: 4
---- !u!114 &3894512252052835016
+--- !u!114 &5363122064442604197
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -351,6 +351,21 @@ MonoBehaviour:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 628412359505069944}
   m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cd78dee18308b2bcb5f3009f14b090c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  PlayerTeam:
+    m_InternalValue: 1
+--- !u!114 &3894512252052835016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 628412359505069944}
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5df3347dfdb6c64c4b2ace2daf565078, type: 3}
   m_Name: 
@@ -372,21 +387,6 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   blinkDistance: 5
   blinkCooldown: 0.25
---- !u!114 &5363122064442604197
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 628412359505069944}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3cd78dee18308b2bcb5f3009f14b090c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  PlayerTeam:
-    m_InternalValue: 1
 --- !u!1 &754601458911427757
 GameObject:
   m_ObjectHideFlags: 0

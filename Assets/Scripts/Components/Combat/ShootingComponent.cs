@@ -25,6 +25,12 @@ public class ShootingComponent : NetworkBehaviour
         shootingCooldown = config.shootingCooldown;
     }
 
+    public void ApplyConfiguration(ObjectSO config)
+    {
+        bulletSpeed = config.bulletSpeed;
+        shootingCooldown = config.shootingCooldown;
+    }
+
     private void Update()
     {
         if (!IsOwner) return;

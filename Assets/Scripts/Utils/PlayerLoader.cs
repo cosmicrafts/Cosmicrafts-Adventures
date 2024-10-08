@@ -7,7 +7,6 @@ public class PlayerLoader : NetworkBehaviour
     [SerializeField]
     public PlayerSO playerConfiguration;
 
-    // NetworkVariable to synchronize the selected configuration index, defaulting to 1
     private NetworkVariable<int> selectedConfigIndex = new NetworkVariable<int>(0);
 
     public override void OnNetworkSpawn()
@@ -18,14 +17,12 @@ public class PlayerLoader : NetworkBehaviour
         {
             selectedConfigIndex.OnValueChanged += OnConfigurationIndexChanged;
 
-            // Request server to send current configuration index if it's a new client joining
             if (!IsServer)
             {
                 RequestCurrentConfigurationServerRpc();
             }
         }
 
-        // Apply the initial configuration if available (for the server)
         if (IsServer && playerConfiguration != null)
         {
             Debug.Log($"[PlayerLoader] Applying default configuration: {playerConfiguration.name} for {gameObject.name}");
@@ -42,7 +39,6 @@ public class PlayerLoader : NetworkBehaviour
         }
     }
 
-    // Called when the selectedConfigIndex NetworkVariable changes
     private void OnConfigurationIndexChanged(int previousIndex, int newIndex)
     {
         if (newIndex >= 0 && newIndex < PlayerSelectorUI.Instance.availableConfigurations.Length)
@@ -68,11 +64,14 @@ public class PlayerLoader : NetworkBehaviour
             return;
         }
 
-        // Apply configuration to each relevant component
         var movementComponent = GetComponent<MovementComponent>();
         if (movementComponent != null)
         {
-            movementComponent.ApplyConfiguration(playerConfiguration);
+            movementComponent.enabled = playerConfiguration.hasMovement;
+            if (movementComponent.enabled)
+            {
+                movementComponent.ApplyConfiguration(playerConfiguration);
+            }
         }
 
         var healthComponent = GetComponent<HealthComponent>();
@@ -84,16 +83,23 @@ public class PlayerLoader : NetworkBehaviour
         var shootingComponent = GetComponent<ShootingComponent>();
         if (shootingComponent != null)
         {
-            shootingComponent.ApplyConfiguration(playerConfiguration);
+            shootingComponent.enabled = playerConfiguration.hasShooting;
+            if (shootingComponent.enabled)
+            {
+                shootingComponent.ApplyConfiguration(playerConfiguration);
+            }
         }
 
         var dashComponent = GetComponent<DashComponent>();
         if (dashComponent != null)
         {
-            dashComponent.ApplyConfiguration(playerConfiguration);
+            dashComponent.enabled = playerConfiguration.hasDashAbility;
+            if (dashComponent.enabled)
+            {
+                dashComponent.ApplyConfiguration(playerConfiguration);
+            }
         }
 
-        // Set the player sprite from the PlayerSO
         var spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null && playerConfiguration.playerSprite != null)
         {
@@ -105,7 +111,7 @@ public class PlayerLoader : NetworkBehaviour
     public void SetConfigurationIndexServerRpc(int index, ulong clientId)
     {
         Debug.Log($"[PlayerLoader] Received configuration index {index} from client {clientId}");
-        selectedConfigIndex.Value = index; // Update the NetworkVariable
+        selectedConfigIndex.Value = index;
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -114,7 +120,6 @@ public class PlayerLoader : NetworkBehaviour
         ulong requestingClientId = rpcParams.Receive.SenderClientId;
         Debug.Log($"[PlayerLoader] RequestCurrentConfigurationServerRpc called - Client ID: {requestingClientId}");
 
-        // Send the current configuration index to the requesting client
         SendCurrentConfigurationClientRpc(selectedConfigIndex.Value, new ClientRpcParams
         {
             Send = new ClientRpcSendParams

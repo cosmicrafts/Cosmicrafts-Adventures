@@ -8,6 +8,19 @@ public class BlinkComponent : NetworkBehaviour
 
     private float blinkCooldownTimer;
 
+    public void ApplyConfiguration(PlayerSO config)
+    {
+        blinkDistance = config.blinkDistance;
+        blinkCooldown = config.blinkCooldown;
+    }
+
+    public void ApplyConfiguration(ObjectSO config)
+    {
+        blinkDistance = config.blinkDistance;
+        blinkCooldown = config.blinkCooldown;
+    }
+
+
     private void Update()
     {
         if (IsOwner && blinkCooldownTimer > 0f)

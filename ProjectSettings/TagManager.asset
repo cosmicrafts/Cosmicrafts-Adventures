@@ -7,6 +7,10 @@ TagManager:
   - Healthbar
   - Bullet
   - Minimap
+  - Asteroid
+  - Enemy
+  - Friend
+  - Neutral
   layers:
   - Default
   - TransparentFX

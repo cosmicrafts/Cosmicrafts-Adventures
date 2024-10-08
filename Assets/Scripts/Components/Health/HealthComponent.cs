@@ -10,22 +10,23 @@ public class HealthComponent : NetworkBehaviour
     public float collisionDamage = 4f; // Damage taken upon collision
     private float predictedHealth; // For client-side prediction
 
-    public void ApplyConfiguration(PlayerSO config)
-{
-    maxHealth = config.maxHealth;
-
-    // Initialize health and setup slider
-    if (IsServer)
+// Unified ApplyConfiguration method
+    public void ApplyConfiguration(object config)
     {
-        currentHealth.Value = maxHealth;
+        if (config is PlayerSO playerConfig)
+        {
+            maxHealth = playerConfig.maxHealth;
+        }
+        else if (config is ObjectSO objectConfig)
+        {
+            maxHealth = objectConfig.maxHealth;
+        }
+        else
+        {
+            Debug.LogWarning("Invalid configuration type.");
+            return;
+        }
     }
-
-    if (healthSlider != null)
-    {
-        healthSlider.maxValue = maxHealth;
-        healthSlider.value = currentHealth.Value;
-    }
-}
 
 
     private void Start()
@@ -60,11 +61,20 @@ public class HealthComponent : NetworkBehaviour
         UpdateHealthUI(predictedHealth);
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    public void TakeDamageServerRpc(float amount)
+[ServerRpc(RequireOwnership = false)]
+public void TakeDamageServerRpc(float amount)
+{
+    // Check if the network object is initialized
+    if (IsSpawned)
     {
         ApplyDamage(amount);
     }
+    else
+    {
+        Debug.LogWarning($"{gameObject.name} [HealthComponent] Tried to apply damage but object is not fully spawned.");
+    }
+}
+
 
     private void ApplyDamage(float amount)
     {

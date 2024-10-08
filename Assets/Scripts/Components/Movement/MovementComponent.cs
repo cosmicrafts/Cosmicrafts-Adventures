@@ -18,6 +18,13 @@ public class MovementComponent : NetworkBehaviour
         moveSmoothTime = config.moveSmoothTime;
     }
 
+    public void ApplyConfiguration(ObjectSO config)
+    {
+        moveSpeed = config.moveSpeed;
+        moveSmoothTime = config.moveSmoothTime;
+    }
+
+
     // Expose moveInput for external access
     public Vector2 MoveInput => moveInput;
 

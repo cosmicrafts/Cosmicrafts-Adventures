@@ -20,6 +20,17 @@ public class DashComponent : NetworkBehaviour
         }
     }
 
+        public void ApplyConfiguration(ObjectSO config)
+    {
+        if (config.hasDashAbility)
+        {
+            dashSpeed = config.dashSpeed;
+            dashDuration = config.dashDuration;
+            dashCooldown = config.dashCooldown;
+        }
+    }
+
+
     private NetworkVariable<bool> isDashing = new NetworkVariable<bool>(
         false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 

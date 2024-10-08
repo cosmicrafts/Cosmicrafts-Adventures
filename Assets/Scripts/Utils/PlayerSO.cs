@@ -3,6 +3,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "PlayerConfiguration", menuName = "Players/Player Configuration")]
 public class PlayerSO : ScriptableObject
 {
+    // TeamComponent settings
+    public TeamComponent.TeamTag teamTag = TeamComponent.TeamTag.Neutral;
     public bool isEnemy = false;
 
     // Base attributes
