@@ -10,24 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 066fdad4cbb5a664b8088cdb7dafe8db, type: 3}
-  m_Name: Ranita
+  m_Name: Enemy1
   m_EditorClassIdentifier: 
-  isEnemy: 0
-  moveSpeed: 8
+  isEnemy: 1
+  moveSpeed: 10
   moveSmoothTime: 0.25
-  maxHealth: 100
+  maxHealth: 250
   hasMovement: 1
   hasRotation: 1
   hasShooting: 1
   hasDashAbility: 1
   hasBlinkAbility: 1
-  bulletSpeed: 16
-  bulletDamage: 12
-  bulletLifespan: 1
-  shootingCooldown: 0.4
-  dashSpeed: 40
-  dashDuration: 0.1
-  dashCooldown: 0.5
+  hasInput: 1
+  bulletSpeed: 35
+  bulletDamage: 10
+  bulletLifespan: 2
+  shootingCooldown: 0.35
+  dashSpeed: 25
+  dashDuration: 0.5
+  dashCooldown: 1
   blinkDistance: 10
   blinkCooldown: 2
-  playerSprite: {fileID: 3176249661713866604, guid: af2aaddb922d04f9e82902b438b0c22a, type: 3}
+  playerSprite: {fileID: -4260756745080484681, guid: a9062266415ada69b96bb6ef62220a19, type: 3}

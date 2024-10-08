@@ -12,6 +12,12 @@ public class MovementComponent : NetworkBehaviour
 
     private bool canMove = true;
 
+    public void ApplyConfiguration(PlayerSO config)
+    {
+        moveSpeed = config.moveSpeed;
+        moveSmoothTime = config.moveSmoothTime;
+    }
+
     // Expose moveInput for external access
     public Vector2 MoveInput => moveInput;
 
@@ -74,9 +80,5 @@ public class MovementComponent : NetworkBehaviour
         canMove = value;
     }
 
-    public void ApplyConfiguration(PlayerSO config)
-    {
-        moveSpeed = config.moveSpeed;
-        moveSmoothTime = config.moveSmoothTime;
-    }
+
 }

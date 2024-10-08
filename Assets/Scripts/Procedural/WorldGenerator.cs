@@ -11,15 +11,14 @@ public class WorldGenerator : NetworkBehaviour
     private Dictionary<Vector2Int, Sector> sectors = new Dictionary<Vector2Int, Sector>(); // Dictionary to store generated sectors
 
     [Header("Asteroid Settings")]
-    public GameObject asteroidPrefab;
+    public GameObject baseObjectPrefab; // Single base prefab for both asteroids and enemies
+    public PlayerSO[] asteroidConfigurations;
     public int asteroidsPerSector = 5;
-    public float noiseScale = 0.1f;
-    public float asteroidDensity = 0.5f;
 
     [Header("Enemy Settings")]
-    public GameObject enemyPrefab;        // Prefab for enemies
-    public int enemiesPerSector = 2;      // Number of enemies per sector
-    public float enemySpawnDistance = 10; // Distance from player before spawning enemies
+    public PlayerSO[] enemyConfigurations;
+    public int enemiesPerSector = 2;
+    public float enemySpawnDistance = 10;
 
     private void Awake()
     {
@@ -60,8 +59,6 @@ public class WorldGenerator : NetworkBehaviour
         // Store the sector in the dictionary
         sectors.Add(coordinates, newSector);
 
-        // Log($"Generated new sector: {newSector.sectorName}");
-
         // Generate asteroids and enemies in the sector
         GenerateAsteroids(coordinates);
         GenerateEnemies(coordinates);
@@ -77,7 +74,8 @@ public class WorldGenerator : NetworkBehaviour
             if (asteroidPosition != Vector3.zero)
             {
                 sector.asteroidPositions.Add(asteroidPosition);
-                SpawnAsteroid(asteroidPosition, true);
+                int configIndex = UnityEngine.Random.Range(0, asteroidConfigurations.Length);
+                SpawnObject(asteroidPosition, asteroidConfigurations[configIndex], true);
             }
         }
     }
@@ -92,7 +90,8 @@ public class WorldGenerator : NetworkBehaviour
             if (enemyPosition != Vector3.zero)
             {
                 sector.enemyPositions.Add(enemyPosition);
-                SpawnEnemy(enemyPosition, true);
+                int configIndex = UnityEngine.Random.Range(0, enemyConfigurations.Length);
+                SpawnObject(enemyPosition, enemyConfigurations[configIndex], true);
             }
         }
     }
@@ -117,69 +116,121 @@ public class WorldGenerator : NetworkBehaviour
         return potentialPosition;
     }
 
-    private void SpawnAsteroid(Vector3 position, bool isServerSpawn)
+private NetworkVariable<int> configIndex = new NetworkVariable<int>();
+
+private void SpawnObject(Vector3 position, PlayerSO configuration, bool isServerSpawn)
+{
+    GameObject obj = Instantiate(baseObjectPrefab, position, Quaternion.identity);
+    obj.layer = configuration.isEnemy ? LayerMask.NameToLayer("Enemy") : LayerMask.NameToLayer("Neutral");
+    NetworkObject networkObject = obj.GetComponent<NetworkObject>();
+
+    // Only the server should spawn network objects
+    if (IsServer && networkObject != null)
     {
-        GameObject asteroid = Instantiate(asteroidPrefab, position, Quaternion.identity);
-        asteroid.layer = LayerMask.NameToLayer("Neutral");
-        NetworkObject networkObject = asteroid.GetComponent<NetworkObject>();
+        networkObject.Spawn(); // Network-spawn the object on the server only
+    }
 
-        if (networkObject != null)
-        {
-            networkObject.Spawn(); // Network-spawn the asteroid
-        }
+    ApplyConfigurationToObject(obj, configuration); // Apply config on both server and clients
 
-        var teamComponent = asteroid.GetComponent<TeamComponent>();
-        if (teamComponent != null)
-        {
-            teamComponent.SetTeam(TeamComponent.TeamTag.Neutral);
-        }
+    // Notify clients to apply the configuration via ClientRpc
+    if (isServerSpawn)
+    {
+        ObjectSpawnedClientRpc(position, configIndex.Value, configuration.isEnemy);
+    }
+}
 
-        if (isServerSpawn)
+[ClientRpc]
+private void ObjectSpawnedClientRpc(Vector3 position, int configIndexValue, bool isEnemy, ClientRpcParams clientRpcParams = default)
+{
+    if (!IsServer)
+    {
+        // Clients should instantiate only visual objects for local representation
+        PlayerSO configuration = isEnemy
+            ? enemyConfigurations[configIndexValue]
+            : asteroidConfigurations[configIndexValue];
+
+        GameObject obj = Instantiate(baseObjectPrefab, position, Quaternion.identity);
+        ApplyConfigurationToObject(obj, configuration);  // Apply the configuration
+    }
+}
+
+
+private void ApplyConfigurationToObject(GameObject obj, PlayerSO configuration)
+{
+    // Health Component
+    var healthComponent = obj.GetComponent<HealthComponent>();
+    if (healthComponent != null)
+    {
+        healthComponent.ApplyConfiguration(configuration);
+    }
+
+    // Conditionally add movement
+    if (configuration.hasMovement)
+    {
+        var movementComponent = obj.GetComponent<MovementComponent>() ?? obj.AddComponent<MovementComponent>();
+        movementComponent.ApplyConfiguration(configuration);
+    }
+    else
+    {
+        var movementComponent = obj.GetComponent<MovementComponent>();
+        if (movementComponent != null)
         {
-            AsteroidSpawnedClientRpc(position);
+            Destroy(movementComponent);
         }
     }
 
-    private void SpawnEnemy(Vector3 position, bool isServerSpawn)
+    // Conditionally add shooting
+    if (configuration.hasShooting)
     {
-        GameObject enemy = Instantiate(enemyPrefab, position, Quaternion.identity);
-        enemy.layer = LayerMask.NameToLayer("Enemy");
-        NetworkObject networkObject = enemy.GetComponent<NetworkObject>();
-
-        if (networkObject != null)
+        var shootingComponent = obj.GetComponent<ShootingComponent>() ?? obj.AddComponent<ShootingComponent>();
+        shootingComponent.ApplyConfiguration(configuration);
+    }
+    else
+    {
+        var shootingComponent = obj.GetComponent<ShootingComponent>();
+        if (shootingComponent != null)
         {
-            networkObject.Spawn(); // Network-spawn the enemy
-        }
-
-        var teamComponent = enemy.GetComponent<TeamComponent>();
-        if (teamComponent != null)
-        {
-            teamComponent.SetTeam(TeamComponent.TeamTag.Enemy);
-        }
-
-        if (isServerSpawn)
-        {
-            EnemySpawnedClientRpc(position);
+            Destroy(shootingComponent);
         }
     }
 
-    [ClientRpc]
-    private void AsteroidSpawnedClientRpc(Vector3 position, ClientRpcParams clientRpcParams = default)
+    // Conditionally add rotation
+    if (configuration.hasRotation)
     {
-        if (!IsServer)
+        var rotationComponent = obj.GetComponent<RotationComponent>() ?? obj.AddComponent<RotationComponent>();
+        rotationComponent.ApplyConfiguration(configuration);
+    }
+    else
+    {
+        var rotationComponent = obj.GetComponent<RotationComponent>();
+        if (rotationComponent != null)
         {
-            Instantiate(asteroidPrefab, position, Quaternion.identity);
+            Destroy(rotationComponent);
         }
     }
 
-    [ClientRpc]
-    private void EnemySpawnedClientRpc(Vector3 position, ClientRpcParams clientRpcParams = default)
+    // Conditionally add or remove input
+    if (configuration.hasInput)
     {
-        if (!IsServer)
+        var inputComponent = obj.GetComponent<InputComponent>() ?? obj.AddComponent<InputComponent>();
+    }
+    else
+    {
+        var inputComponent = obj.GetComponent<InputComponent>();
+        if (inputComponent != null)
         {
-            Instantiate(enemyPrefab, position, Quaternion.identity);
+            Destroy(inputComponent);
         }
     }
+
+    // Apply the sprite
+    var spriteRenderer = obj.GetComponent<SpriteRenderer>();
+    if (spriteRenderer != null && configuration.playerSprite != null)
+    {
+        spriteRenderer.sprite = configuration.playerSprite;
+    }
+}
+
 
     [ServerRpc(RequireOwnership = false)]
     public void GetAllSectorsServerRpc(ServerRpcParams serverRpcParams = default)
@@ -221,27 +272,28 @@ public class WorldGenerator : NetworkBehaviour
         }
     }
 
-    // Sends sector data to the specific client
-    [ClientRpc]
-    private void SendSectorToClientRpc(Vector2Int sectorCoords, string sectorName, float[] asteroidX, float[] asteroidY, float[] asteroidZ, float[] enemyX, float[] enemyY, float[] enemyZ, ClientRpcParams clientRpcParams = default)
+    // Sends sector data  in batch to the specific client
+[ClientRpc]
+private void SendSectorToClientRpc(Vector2Int sectorCoords, string sectorName, float[] asteroidX, float[] asteroidY, float[] asteroidZ, float[] enemyX, float[] enemyY, float[] enemyZ, ClientRpcParams clientRpcParams = default)
+{
+    // Update minimap or other UI
+    MinimapController.Instance?.AddSectorData(sectorCoords, sectorName);
+
+    // Spawn all asteroids in one batch
+    for (int i = 0; i < asteroidX.Length; i++)
     {
-        //Log($"ClientRpc: Sending sector info for sector '{sectorName}'");
-        MinimapController.Instance?.AddSectorData(sectorCoords, sectorName);
-
-        // Spawn asteroids locally on the client
-        for (int i = 0; i < asteroidX.Length; i++)
-        {
-            Vector3 position = new Vector3(asteroidX[i], asteroidY[i], asteroidZ[i]);
-            SpawnAsteroid(position, false);
-        }
-
-        // Spawn enemies locally on the client
-        for (int i = 0; i < enemyX.Length; i++)
-        {
-            Vector3 position = new Vector3(enemyX[i], enemyY[i], enemyZ[i]);
-            SpawnEnemy(position, false);
-        }
+        Vector3 position = new Vector3(asteroidX[i], asteroidY[i], asteroidZ[i]);
+        SpawnObject(position, asteroidConfigurations[UnityEngine.Random.Range(0, asteroidConfigurations.Length)], false);
     }
+
+    // Spawn all enemies in one batch
+    for (int i = 0; i < enemyX.Length; i++)
+    {
+        Vector3 position = new Vector3(enemyX[i], enemyY[i], enemyZ[i]);
+        SpawnObject(position, enemyConfigurations[UnityEngine.Random.Range(0, enemyConfigurations.Length)], false);
+    }
+}
+
 
     [ServerRpc(RequireOwnership = false)]
     public void RequestAllWorldDataFromServerRpc(ServerRpcParams rpcParams = default)

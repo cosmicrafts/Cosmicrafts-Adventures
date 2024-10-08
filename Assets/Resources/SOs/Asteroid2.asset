@@ -10,24 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 066fdad4cbb5a664b8088cdb7dafe8db, type: 3}
-  m_Name: Marauder
+  m_Name: Asteroid2
   m_EditorClassIdentifier: 
-  isEnemy: 0
-  moveSpeed: 6
-  moveSmoothTime: 0.25
-  maxHealth: 250
+  isEnemy: 1
+  moveSpeed: 2
+  moveSmoothTime: 0.5
+  maxHealth: 4
   hasMovement: 1
   hasRotation: 1
-  hasShooting: 1
-  hasDashAbility: 1
-  hasBlinkAbility: 1
-  bulletSpeed: 40
-  bulletDamage: 20
-  bulletLifespan: 1
-  shootingCooldown: 0.5
-  dashSpeed: 25
-  dashDuration: 0.5
-  dashCooldown: 1
-  blinkDistance: 10
-  blinkCooldown: 2
-  playerSprite: {fileID: 21300000, guid: 9ed292907455741e18c2333ceac65394, type: 3}
+  hasShooting: 0
+  hasDashAbility: 0
+  hasBlinkAbility: 0
+  hasInput: 0
+  bulletSpeed: 0
+  bulletDamage: 0
+  bulletLifespan: 0
+  shootingCooldown: 0
+  dashSpeed: 0
+  dashDuration: 0
+  dashCooldown: 0
+  blinkDistance: 0
+  blinkCooldown: 0
+  playerSprite: {fileID: 21300000, guid: a2cee9d052e59de49b7be65115aa2e46, type: 3}

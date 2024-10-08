@@ -12,18 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 066fdad4cbb5a664b8088cdb7dafe8db, type: 3}
   m_Name: Algo
   m_EditorClassIdentifier: 
+  isEnemy: 0
   moveSpeed: 9
   moveSmoothTime: 0.25
   maxHealth: 125
+  hasMovement: 1
+  hasRotation: 1
+  hasShooting: 1
+  hasDashAbility: 1
+  hasBlinkAbility: 1
   bulletSpeed: 20
   bulletDamage: 32
   bulletLifespan: 1
   shootingCooldown: 0.65
-  hasDashAbility: 1
   dashSpeed: 20
   dashDuration: 0.1
   dashCooldown: 0.5
-  hasBlinkAbility: 0
   blinkDistance: 10
   blinkCooldown: 2
   playerSprite: {fileID: -3708377168491533583, guid: 6ef6d92357c8bb98699c6f6087d33358, type: 3}

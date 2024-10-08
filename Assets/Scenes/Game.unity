@@ -6149,10 +6149,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1458642471}
-  - component: {fileID: 1458642470}
   - component: {fileID: 1458642472}
   - component: {fileID: 1458642473}
   - component: {fileID: 1458642474}
+  - component: {fileID: 1458642470}
   m_Layer: 0
   m_Name: WorldGenerator
   m_TagString: Untagged
@@ -6168,7 +6168,7 @@ LineRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1458642469}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -6321,13 +6321,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   sectorSize: 10
-  asteroidPrefab: {fileID: 2376172856132117595, guid: 229c84a3d7cddfe498cbbd73c2b904fd, type: 3}
-  asteroidsPerSector: 5
-  noiseScale: 0.1
-  asteroidDensity: 0.5
-  enemyPrefab: {fileID: 5404665903994802104, guid: 2a66b9695367e524fbf74f98e46c5026, type: 3}
-  enemiesPerSector: 2
-  enemySpawnDistance: 10
+  baseObjectPrefab: {fileID: 628412359505069944, guid: ad33e971f997cc8e185e15748d3b13ea, type: 3}
+  asteroidConfigurations:
+  - {fileID: 11400000, guid: 596f3488663b5471ca0401223b2e762c, type: 2}
+  - {fileID: 11400000, guid: a88d8976168db40848c0734ff1e84422, type: 2}
+  asteroidsPerSector: 1
+  enemyConfigurations:
+  - {fileID: 11400000, guid: 3e6a52fc876c04439be08dd83da30a51, type: 2}
+  - {fileID: 11400000, guid: 6403337dd8a784a2e8158ed892ae5b38, type: 2}
+  enemiesPerSector: 1
+  enemySpawnDistance: 2
 --- !u!114 &1458642474
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6425,6 +6428,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8e2120c4eba74af6e8cd2a7b9cf9c908, type: 2}
   - {fileID: 11400000, guid: 8c0b4065e35d88022ba5e69cc33ffc0f, type: 2}
   - {fileID: 11400000, guid: 972847b6be0e58f00ac559f597ae589b, type: 2}
+  - {fileID: 11400000, guid: 3e6a52fc876c04439be08dd83da30a51, type: 2}
+  - {fileID: 11400000, guid: 6403337dd8a784a2e8158ed892ae5b38, type: 2}
   selectionButtons:
   - {fileID: 536929890}
   - {fileID: 323153738}
@@ -6597,7 +6602,7 @@ MonoBehaviour:
   m_MaxConnectAttempts: 60
   m_DisconnectTimeoutMS: 30000
   ConnectionData:
-    Address: 192.168.100.5
+    Address: 0.0.0.0
     Port: 7777
     ServerListenAddress: 127.0.0.1
   DebugSimulator:

@@ -12,6 +12,15 @@ public class RotationComponent : NetworkBehaviour
     private NetworkVariable<Quaternion> networkRotation = new NetworkVariable<Quaternion>(
         Quaternion.identity, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    public void ApplyConfiguration(PlayerSO config)
+    {
+        // If your PlayerSO ever includes rotation-specific settings, apply them here.
+        // For now, we'll leave it simple and use default settings.
+
+        // Example: If you had a rotation speed in PlayerSO, you could apply it here:
+        // this.rotationSmoothingSpeed = config.rotationSmoothingSpeed;
+    }
+    
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
