@@ -6,6 +6,8 @@ public class PlayerSelectorUI : MonoBehaviour
 {
     public static PlayerSelectorUI Instance;
     public Button[] selectionButtons;
+    public ObjectSO[] buttonConfigurations;  // Add this to assign ObjectSO to each button via the inspector
+
     private ObjectSO selectedConfiguration;
 
     private void Awake()
@@ -24,13 +26,15 @@ public class PlayerSelectorUI : MonoBehaviour
 
     private void OnConfigurationSelected(int index)
     {
-        selectedConfiguration = ObjectManager.Instance.GetObjectSOByIndex(index);
+        // Assign specific ObjectSO for this button from the inspector
+        selectedConfiguration = buttonConfigurations[index];
+        int configIndex = ObjectManager.Instance.GetObjectSOIndex(selectedConfiguration);  // Get the index of the selected ObjectSO
         Debug.Log($"[PlayerSelectorUI] Player selected configuration: {selectedConfiguration.name}");
 
         if (NetworkManager.Singleton.LocalClient != null)
         {
             ulong clientId = NetworkManager.Singleton.LocalClient.ClientId;
-            SubmitSelectionServerRpc(index, clientId);
+            SubmitSelectionServerRpc(configIndex, clientId);
         }
         else
         {

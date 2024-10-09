@@ -13,10 +13,8 @@ MonoBehaviour:
   m_Name: Asteroid
   m_EditorClassIdentifier: 
   objectSprite: {fileID: 21300000, guid: a2cee9d052e59de49b7be65115aa2e46, type: 3}
-  hasNetworkOwnership: 1
-  colliderRadius: 0.5
+  colliderRadius: 3
   isTrigger: 0
-  interpolateTransform: 1
   bodyType: 0
   physicsMaterial: {fileID: 6200000, guid: a0c43d290e2d3f492bf3458f97f022c5, type: 2}
   isKinematic: 0

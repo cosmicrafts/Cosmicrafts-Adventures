@@ -365,7 +365,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 628412359505069944}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5df3347dfdb6c64c4b2ace2daf565078, type: 3}
   m_Name: 
@@ -659,14 +659,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 628412359505069940}
     m_Modifications:
-    - target: {fileID: 389836868830953970, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
-      propertyPath: m_Layer
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 905547371098381180, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
-      propertyPath: m_Layer
-      value: 30
-      objectReference: {fileID: 0}
     - target: {fileID: 1054950294264597543, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -747,29 +739,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1558522031610483207, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2766816208795412317, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
-      propertyPath: m_Layer
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 4731550738214483384, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
-      propertyPath: m_PresetInfoIsWorld
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5077535734357111452, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
       propertyPath: m_Name
       value: Healthbar
-      objectReference: {fileID: 0}
-    - target: {fileID: 5077535734357111452, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
-      propertyPath: m_Layer
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 6274300619826020187, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
-      propertyPath: m_Value
-      value: 0.243
       objectReference: {fileID: 0}
     - target: {fileID: 7205504579877206552, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
       propertyPath: m_AnchorMax.x
@@ -778,10 +750,6 @@ PrefabInstance:
     - target: {fileID: 7205504579877206552, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7765503370053134932, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
-      propertyPath: m_Layer
-      value: 30
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

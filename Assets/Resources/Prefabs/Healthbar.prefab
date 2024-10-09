@@ -259,8 +259,8 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 1554655663
-  m_SortingOrder: 7
+  m_SortingLayerID: -1719359689
+  m_SortingOrder: 30
   m_TargetDisplay: 0
 --- !u!114 &4731550738214483384
 MonoBehaviour:
@@ -292,7 +292,7 @@ Animation:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5077535734357111452}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   m_Animation: {fileID: 7400000, guid: 26e2aa5f72faed440a82158808a0270f, type: 2}
   m_Animations:

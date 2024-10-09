@@ -13,10 +13,8 @@ MonoBehaviour:
   m_Name: Enemy
   m_EditorClassIdentifier: 
   objectSprite: {fileID: 21300000, guid: a9a0662d6790b4a4285709b54a0de0e8, type: 3}
-  hasNetworkOwnership: 1
-  colliderRadius: 0.5
+  colliderRadius: 3
   isTrigger: 0
-  interpolateTransform: 1
   bodyType: 0
   physicsMaterial: {fileID: 6200000, guid: a0c43d290e2d3f492bf3458f97f022c5, type: 2}
   isKinematic: 0

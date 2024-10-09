@@ -14,6 +14,10 @@ public class WorldGenerator : NetworkBehaviour
     public int enemiesPerSector = 2;
     public float enemySpawnDistance = 10;
 
+    // Assignable ObjectSO fields for custom configurations
+    public ObjectSO asteroidConfiguration; // You can set a specific ObjectSO for asteroids
+    public ObjectSO enemyConfiguration;    // You can set a specific ObjectSO for enemies
+
     private void Awake()
     {
         Instance = this;
@@ -46,21 +50,19 @@ public class WorldGenerator : NetworkBehaviour
         newSector.sectorName = $"Sector ({coordinates.x}, {coordinates.y})";
         sectors.Add(coordinates, newSector);
 
-        GenerateObjectsInSector(coordinates, asteroidsPerSector, false);
-        GenerateObjectsInSector(coordinates, enemiesPerSector, true);
+        GenerateObjectsInSector(coordinates, asteroidsPerSector, false, asteroidConfiguration);
+        GenerateObjectsInSector(coordinates, enemiesPerSector, true, enemyConfiguration);
     }
 
-    private void GenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy)
+    // Add parameter for ObjectSO configuration, so we can directly use custom configurations
+    private void GenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration)
     {
         for (int i = 0; i < objectCount; i++)
         {
             Vector3 position = GetRandomPositionInSector(sectorCoords, isEnemy ? enemySpawnDistance : 0);
             if (position != Vector3.zero)
             {
-                // Get index from ObjectManager
-                int configIndex = UnityEngine.Random.Range(0, ObjectManager.Instance.allConfigurations.Length);
-
-                // Spawn with the correct index
+                int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration); // Get the index of the specified ObjectSO
                 SpawnObject(position, configIndex, isEnemy);
             }
         }
@@ -102,7 +104,7 @@ public class WorldGenerator : NetworkBehaviour
             loader?.SetConfigurationFromWorldGenerator(configuration, configIndex);
         }
     }
-    
+
     [ClientRpc]
     private void SendSectorToClientRpc(Vector2Int sectorCoords, string sectorName, ulong clientId)
     {
