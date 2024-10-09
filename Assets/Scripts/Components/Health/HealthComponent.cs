@@ -11,23 +11,10 @@ public class HealthComponent : NetworkBehaviour
     private float predictedHealth; // For client-side prediction
 
 // Unified ApplyConfiguration method
-    public void ApplyConfiguration(object config)
+    public void ApplyConfiguration(ObjectSO config)
     {
-        if (config is PlayerSO playerConfig)
-        {
-            maxHealth = playerConfig.maxHealth;
-        }
-        else if (config is ObjectSO objectConfig)
-        {
-            maxHealth = objectConfig.maxHealth;
-        }
-        else
-        {
-            Debug.LogWarning("Invalid configuration type.");
-            return;
-        }
+            maxHealth = config.maxHealth;
     }
-
 
     private void Start()
     {

@@ -36,13 +36,6 @@ public class TeamComponent : NetworkBehaviour
         SetTeam(config.teamTag);
     }
 
-
-    public void ApplyConfiguration(PlayerSO config)
-    {
-        // Set the team based on the ScriptableObject configuration
-        SetTeam(config.teamTag);
-    }
-
     // Change the team and update the corresponding layer
     public void SetTeam(TeamTag team)
     {

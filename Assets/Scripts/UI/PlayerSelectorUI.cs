@@ -6,8 +6,8 @@ public class PlayerSelectorUI : MonoBehaviour
 {
     public static PlayerSelectorUI Instance; // Singleton instance for easy access
 
-    public PlayerSO[] availableConfigurations;
-    private PlayerSO selectedConfiguration;
+    public ObjectSO[] availableConfigurations; // Refactored to use ObjectSO
+    private ObjectSO selectedConfiguration; // Refactored to use ObjectSO
 
     public Button[] selectionButtons;
 
@@ -56,16 +56,16 @@ public class PlayerSelectorUI : MonoBehaviour
             if (NetworkManager.Singleton.ConnectedClients.ContainsKey(clientId))
             {
                 GameObject playerObject = NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.gameObject;
-                PlayerLoader playerLoader = playerObject.GetComponent<PlayerLoader>();
+                ObjectLoader objectLoader = playerObject.GetComponent<ObjectLoader>(); // Changed to ObjectLoader
 
-                if (playerLoader != null)
+                if (objectLoader != null)
                 {
                     Debug.Log($"[PlayerSelectorUI] Applying configuration index {selectionIndex} to player {clientId}");
-                    playerLoader.SetConfigurationIndexServerRpc(selectionIndex, clientId); // Call the ServerRpc on PlayerLoader
+                    objectLoader.SetConfigurationIndexServerRpc(selectionIndex, clientId); // Call the ServerRpc on ObjectLoader
                 }
                 else
                 {
-                    Debug.LogWarning($"[PlayerSelectorUI] PlayerLoader not found on player object for client {clientId}");
+                    Debug.LogWarning($"[PlayerSelectorUI] ObjectLoader not found on player object for client {clientId}");
                 }
             }
             else

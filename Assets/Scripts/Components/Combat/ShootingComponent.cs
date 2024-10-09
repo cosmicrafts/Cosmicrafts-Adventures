@@ -19,12 +19,6 @@ public class ShootingComponent : NetworkBehaviour
         teamComponent = GetComponent<TeamComponent>();
     }
 
-    public void ApplyConfiguration(PlayerSO config)
-    {
-        bulletSpeed = config.bulletSpeed;
-        shootingCooldown = config.shootingCooldown;
-    }
-
     public void ApplyConfiguration(ObjectSO config)
     {
         bulletSpeed = config.bulletSpeed;

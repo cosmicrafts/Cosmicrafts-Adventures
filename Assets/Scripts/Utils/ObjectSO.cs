@@ -3,23 +3,23 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ObjectConfiguration", menuName = "Objects/Object Configuration")]
 public class ObjectSO : ScriptableObject
 {
-    // General object attributes
-    public Sprite objectSprite; // Visual representation for SpriteRenderer
+    public Sprite objectSprite;
 
-    // NetworkObject settings
-    public bool hasNetworkOwnership = true; // If true, the object can have ownership transferred
-
-    // CircleCollider2D settings
+    // Collider settings
     public float colliderRadius = 1f;
     public bool isTrigger = false;
-
-    // NetworkTransform settings (removed deprecated settings)
-    public bool interpolateTransform = true; // If true, interpolation is enabled
-
+    
     // Rigidbody2D settings
     public RigidbodyType2D bodyType = RigidbodyType2D.Dynamic;
     public PhysicsMaterial2D physicsMaterial;
     public bool isKinematic = false;
+
+    // NetworkTransform ownership authority settings
+    public enum AuthorityType
+    {
+        Server,
+        Owner
+    }
 
     // MovementComponent settings
     public bool hasMovement = true;

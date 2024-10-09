@@ -6375,9 +6375,9 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 536929889}
-  - {fileID: 323153737}
   - {fileID: 2099789702}
   - {fileID: 2121547758}
+  - {fileID: 323153737}
   m_Father: {fileID: 1946204459}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
@@ -6422,17 +6422,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   availableConfigurations:
-  - {fileID: 11400000, guid: 106a0d11124d4d1029624c781b0e957e, type: 2}
-  - {fileID: 11400000, guid: 8e2120c4eba74af6e8cd2a7b9cf9c908, type: 2}
-  - {fileID: 11400000, guid: 8c0b4065e35d88022ba5e69cc33ffc0f, type: 2}
-  - {fileID: 11400000, guid: 972847b6be0e58f00ac559f597ae589b, type: 2}
-  - {fileID: 11400000, guid: 3e6a52fc876c04439be08dd83da30a51, type: 2}
-  - {fileID: 11400000, guid: 6403337dd8a784a2e8158ed892ae5b38, type: 2}
+  - {fileID: 11400000, guid: 3415f5bfd0864460aa7f34d8b88df6df, type: 2}
+  - {fileID: 11400000, guid: 551d2d8bb87214ade865df7126b52bc5, type: 2}
+  - {fileID: 11400000, guid: 17dd8daf4dcfa4cb4b7d0a527613a33d, type: 2}
+  - {fileID: 11400000, guid: c3b552e52264d4bc5a07e4c8817794bb, type: 2}
+  - {fileID: 11400000, guid: 094f3a343d9ca48e4a1f705248c20caa, type: 2}
+  - {fileID: 11400000, guid: 7e48ec0fa0375497b8753193fb2b1182, type: 2}
   selectionButtons:
   - {fileID: 536929890}
-  - {fileID: 323153738}
   - {fileID: 2099789703}
   - {fileID: 2121547759}
+  - {fileID: 323153738}
 --- !u!1 &1474598980
 GameObject:
   m_ObjectHideFlags: 0
@@ -6524,7 +6524,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 1785939161}
-    PlayerPrefab: {fileID: 628412359505069944, guid: ad33e971f997cc8e185e15748d3b13ea, type: 3}
+    PlayerPrefab: {fileID: 628412359505069944, guid: a1bdf3eb7489f4563a1421c2d152552a, type: 3}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: 4140dc487344ac266a86ddf95f187f4e, type: 2}

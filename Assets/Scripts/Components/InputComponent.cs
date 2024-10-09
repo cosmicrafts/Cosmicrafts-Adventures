@@ -17,7 +17,7 @@ public class InputComponent : NetworkBehaviour
     private int currentZoomIndex; // The current zoom level index
     private float zoomInput;
 
-    public void ApplyConfiguration(PlayerSO config)
+    public void ApplyConfiguration(ObjectSO config)
     {
         // default settings
     }

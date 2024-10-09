@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c4ee91495e7d416bb5a7476be1825ea, type: 3}
+  m_Name: 4
+  m_EditorClassIdentifier: 
+  objectSprite: {fileID: -2704229953061288984, guid: 760980c57b7658908a7ad89bc959945a, type: 3}
+  hasNetworkOwnership: 1
+  colliderRadius: 0.5
+  isTrigger: 0
+  interpolateTransform: 1
+  bodyType: 0
+  physicsMaterial: {fileID: 6200000, guid: a0c43d290e2d3f492bf3458f97f022c5, type: 2}
+  isKinematic: 0
+  hasMovement: 1
+  moveSpeed: 5
+  moveSmoothTime: 0.1
+  hasRotation: 1
+  rotationSpeed: 120
+  hasShooting: 1
+  bulletSpeed: 20
+  shootingCooldown: 0.1
+  bulletDamage: 1
+  bulletLifespan: 1
+  maxHealth: 100
+  hasInput: 1
+  teamTag: 0
+  hasDashAbility: 1
+  dashSpeed: 15
+  dashDuration: 0.2
+  dashCooldown: 1
+  hasBlinkAbility: 1
+  blinkDistance: 10
+  blinkCooldown: 2

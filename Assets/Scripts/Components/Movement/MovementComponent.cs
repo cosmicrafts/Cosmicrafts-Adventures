@@ -12,12 +12,6 @@ public class MovementComponent : NetworkBehaviour
 
     private bool canMove = true;
 
-    public void ApplyConfiguration(PlayerSO config)
-    {
-        moveSpeed = config.moveSpeed;
-        moveSmoothTime = config.moveSmoothTime;
-    }
-
     public void ApplyConfiguration(ObjectSO config)
     {
         moveSpeed = config.moveSpeed;

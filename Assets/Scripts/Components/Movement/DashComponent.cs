@@ -10,16 +10,6 @@ public class DashComponent : NetworkBehaviour
     private MovementComponent movementComponent;
     private Rigidbody2D rb;
 
-    public void ApplyConfiguration(PlayerSO config)
-    {
-        if (config.hasDashAbility)
-        {
-            dashSpeed = config.dashSpeed;
-            dashDuration = config.dashDuration;
-            dashCooldown = config.dashCooldown;
-        }
-    }
-
         public void ApplyConfiguration(ObjectSO config)
     {
         if (config.hasDashAbility)

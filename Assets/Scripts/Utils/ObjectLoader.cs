@@ -1,16 +1,61 @@
 using UnityEngine;
 using Unity.Netcode;
 using Unity.Netcode.Components;
+using System.Collections.Generic;
 
 public class ObjectLoader : NetworkBehaviour
 {
     [SerializeField]
     public ObjectSO objectConfiguration;
+    private NetworkVariable<int> selectedConfigIndex = new NetworkVariable<int>(0);
 
     public override void OnNetworkSpawn()
     {
+        Debug.Log($"[ObjectLoader] OnNetworkSpawn called for {gameObject.name} - IsServer: {IsServer} - IsClient: {IsClient}");
+
+        if (IsClient)
+        {
+            selectedConfigIndex.OnValueChanged += OnConfigurationIndexChanged;
+
+            if (!IsServer)
+            {
+                RequestCurrentConfigurationServerRpc();
+            }
+        }
+
         if (IsServer && objectConfiguration != null)
         {
+            Debug.Log($"[ObjectLoader] Applying default configuration: {objectConfiguration.name} for {gameObject.name}");
+            ApplyConfiguration();
+        }
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+        if (IsClient)
+        {
+            selectedConfigIndex.OnValueChanged -= OnConfigurationIndexChanged;
+        }
+    }
+
+    private void ChangeOwnershipToClient()
+    {
+        if (IsServer && NetworkManager.Singleton.ConnectedClientsList.Count > 0)
+        {
+            ulong clientId = NetworkManager.Singleton.LocalClientId;  // Modify based on the desired owner
+            NetworkObject.ChangeOwnership(clientId);
+            Debug.Log($"Ownership of {gameObject.name} transferred to client with ID: {clientId}");
+        }
+    }
+
+    // Handles configuration changes when the index changes
+    private void OnConfigurationIndexChanged(int previousIndex, int newIndex)
+    {
+        if (newIndex >= 0 && newIndex < PlayerSelectorUI.Instance.availableConfigurations.Length)
+        {
+            objectConfiguration = PlayerSelectorUI.Instance.availableConfigurations[newIndex];
+            Debug.Log($"[ObjectLoader] OnConfigurationIndexChanged called for {gameObject.name} - Applying configuration: {objectConfiguration.name}");
             ApplyConfiguration();
         }
     }
@@ -30,26 +75,12 @@ public class ObjectLoader : NetworkBehaviour
             spriteRenderer.sprite = objectConfiguration.objectSprite;
         }
 
-        // Apply NetworkObject ownership configuration
-        var networkObject = GetComponent<NetworkObject>();
-        if (networkObject != null && objectConfiguration.hasNetworkOwnership)
-        {
-            networkObject.ChangeOwnership(NetworkManager.Singleton.LocalClientId);
-        }
-
         // Apply CircleCollider2D configuration
         var collider = GetComponent<CircleCollider2D>();
         if (collider != null)
         {
             collider.radius = objectConfiguration.colliderRadius;
             collider.isTrigger = objectConfiguration.isTrigger;
-        }
-
-        // Apply NetworkTransform configuration
-        var networkTransform = GetComponent<NetworkTransform>();
-        if (networkTransform != null)
-        {
-            networkTransform.Interpolate = objectConfiguration.interpolateTransform;
         }
 
         // Apply Rigidbody2D configuration
@@ -126,6 +157,42 @@ public class ObjectLoader : NetworkBehaviour
             {
                 blinkComponent.ApplyConfiguration(objectConfiguration);
             }
+        }
+    }
+
+    // ServerRpc for setting configuration index
+    [ServerRpc(RequireOwnership = false)]
+    public void SetConfigurationIndexServerRpc(int index, ulong clientId)
+    {
+        Debug.Log($"[ObjectLoader] Received configuration index {index} from client {clientId}");
+        selectedConfigIndex.Value = index;
+    }
+
+    // ServerRpc to request current configuration from the server
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestCurrentConfigurationServerRpc(ServerRpcParams rpcParams = default)
+    {
+        ulong requestingClientId = rpcParams.Receive.SenderClientId;
+        Debug.Log($"[ObjectLoader] RequestCurrentConfigurationServerRpc called - Client ID: {requestingClientId}");
+
+        SendCurrentConfigurationClientRpc(selectedConfigIndex.Value, new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new List<ulong> { requestingClientId }
+            }
+        });
+    }
+
+    // ClientRpc to send current configuration index to the client
+    [ClientRpc]
+    private void SendCurrentConfigurationClientRpc(int configIndex, ClientRpcParams clientRpcParams = default)
+    {
+        if (configIndex >= 0 && configIndex < PlayerSelectorUI.Instance.availableConfigurations.Length)
+        {
+            objectConfiguration = PlayerSelectorUI.Instance.availableConfigurations[configIndex];
+            Debug.Log($"[ObjectLoader] SendCurrentConfigurationClientRpc called for {gameObject.name} - Applying configuration: {objectConfiguration.name}");
+            ApplyConfiguration();
         }
     }
 }
