@@ -8,10 +8,8 @@ public class WorldGenerator : NetworkBehaviour
     public int sectorSize = 10;
     private Dictionary<Vector2Int, Sector> sectors = new Dictionary<Vector2Int, Sector>();
 
-    [Header("Asteroid and Enemy Settings")]
+    [Header("Settings")]
     public GameObject baseObjectPrefab;
-    public ObjectSO[] asteroidConfigurations;
-    public ObjectSO[] enemyConfigurations;
     public int asteroidsPerSector = 5;
     public int enemiesPerSector = 2;
     public float enemySpawnDistance = 10;
@@ -48,19 +46,22 @@ public class WorldGenerator : NetworkBehaviour
         newSector.sectorName = $"Sector ({coordinates.x}, {coordinates.y})";
         sectors.Add(coordinates, newSector);
 
-        GenerateObjectsInSector(coordinates, asteroidsPerSector, asteroidConfigurations, false);
-        GenerateObjectsInSector(coordinates, enemiesPerSector, enemyConfigurations, true);
+        GenerateObjectsInSector(coordinates, asteroidsPerSector, false);
+        GenerateObjectsInSector(coordinates, enemiesPerSector, true);
     }
 
-    private void GenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, ObjectSO[] configurations, bool isEnemy)
+    private void GenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy)
     {
         for (int i = 0; i < objectCount; i++)
         {
             Vector3 position = GetRandomPositionInSector(sectorCoords, isEnemy ? enemySpawnDistance : 0);
             if (position != Vector3.zero)
             {
-                int configIndex = UnityEngine.Random.Range(0, configurations.Length);
-                SpawnObject(position, configurations[configIndex], true, configIndex);
+                // Get index from ObjectManager
+                int configIndex = UnityEngine.Random.Range(0, ObjectManager.Instance.allConfigurations.Length);
+
+                // Spawn with the correct index
+                SpawnObject(position, configIndex, isEnemy);
             }
         }
     }
@@ -74,7 +75,7 @@ public class WorldGenerator : NetworkBehaviour
         return (minDistance > 0 && Vector3.Distance(Vector3.zero, position) < minDistance) ? Vector3.zero : position;
     }
 
-    private void SpawnObject(Vector3 position, ObjectSO configuration, bool isServerSpawn, int configIndex)
+    private void SpawnObject(Vector3 position, int configIndex, bool isEnemy)
     {
         if (IsServer)
         {
@@ -82,13 +83,11 @@ public class WorldGenerator : NetworkBehaviour
             NetworkObject netObj = obj.GetComponent<NetworkObject>();
             if (netObj != null) netObj.Spawn();
 
+            ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
             var objectLoader = obj.GetComponent<ObjectLoader>();
             objectLoader?.SetConfigurationFromWorldGenerator(configuration, configIndex);
 
-            if (isServerSpawn)
-            {
-                ObjectSpawnedClientRpc(position, configIndex, configuration.teamTag == TeamComponent.TeamTag.Enemy);
-            }
+            ObjectSpawnedClientRpc(position, configIndex, isEnemy);
         }
     }
 
@@ -97,14 +96,20 @@ public class WorldGenerator : NetworkBehaviour
     {
         if (!IsServer)
         {
-            ObjectSO config = isEnemy ? enemyConfigurations[configIndex] : asteroidConfigurations[configIndex];
+            ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
             GameObject obj = Instantiate(baseObjectPrefab, position, Quaternion.identity);
             var loader = obj.GetComponent<ObjectLoader>();
-            loader?.SetConfigurationFromWorldGenerator(config, configIndex);
+            loader?.SetConfigurationFromWorldGenerator(configuration, configIndex);
         }
     }
+    
+    [ClientRpc]
+    private void SendSectorToClientRpc(Vector2Int sectorCoords, string sectorName, ulong clientId)
+    {
+        // Update the minimap or any other UI with sector data
+        MinimapController.Instance?.AddSectorData(sectorCoords, sectorName);
+    }
 
-    // Add this method to handle sector data requests from clients
     [ServerRpc(RequireOwnership = false)]
     public void GetAllSectorsServerRpc(ServerRpcParams rpcParams = default)
     {
@@ -116,12 +121,5 @@ public class WorldGenerator : NetworkBehaviour
             // Send the sector data to the requesting client
             SendSectorToClientRpc(sectorCoords, sectorName, rpcParams.Receive.SenderClientId);
         }
-    }
-
-    [ClientRpc]
-    private void SendSectorToClientRpc(Vector2Int sectorCoords, string sectorName, ulong clientId)
-    {
-        // Update the minimap or any other UI with sector data
-        MinimapController.Instance?.AddSectorData(sectorCoords, sectorName);
     }
 }
