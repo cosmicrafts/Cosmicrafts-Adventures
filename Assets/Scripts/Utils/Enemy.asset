@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c4ee91495e7d416bb5a7476be1825ea, type: 3}
   m_Name: Enemy
   m_EditorClassIdentifier: 
-  objectSprite: {fileID: 21300000, guid: 8b240617f5d9df2a78a8cce0319d470b, type: 3}
+  objectSprite: {fileID: 21300000, guid: a9a0662d6790b4a4285709b54a0de0e8, type: 3}
   hasNetworkOwnership: 1
   colliderRadius: 0.5
   isTrigger: 0

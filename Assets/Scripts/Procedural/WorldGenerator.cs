@@ -23,6 +23,12 @@ public class WorldGenerator : NetworkBehaviour
     {
         Instance = this;
     }
+    public enum ConfigurationType
+    {
+        Player,
+        Object
+    }
+
 
     public override void OnNetworkSpawn()
     {
@@ -74,7 +80,7 @@ public class WorldGenerator : NetworkBehaviour
             {
                 sector.asteroidPositions.Add(asteroidPosition);
                 int configIndex = UnityEngine.Random.Range(0, asteroidConfigurations.Length);
-                SpawnObject(asteroidPosition, asteroidConfigurations[configIndex], true);
+                SpawnObject(asteroidPosition, asteroidConfigurations[configIndex], true, configIndex);
             }
         }
     }
@@ -90,7 +96,7 @@ public class WorldGenerator : NetworkBehaviour
             {
                 sector.enemyPositions.Add(enemyPosition);
                 int configIndex = UnityEngine.Random.Range(0, enemyConfigurations.Length);
-                SpawnObject(enemyPosition, enemyConfigurations[configIndex], true);
+                SpawnObject(enemyPosition, enemyConfigurations[configIndex], true, configIndex);
             }
         }
     }
@@ -115,10 +121,20 @@ public class WorldGenerator : NetworkBehaviour
         return potentialPosition;
     }
 
-private void SpawnObject(Vector3 position, ObjectSO configuration, bool isServerSpawn)
-{
-    // Only the server should spawn network objects
-    if (IsServer)
+    private void SpawnObject(Vector3 position, ObjectSO configuration, bool isServerSpawn, int configIndex = -1)
+    {
+        // Find the index of the configuration if not provided
+        if (configIndex == -1)
+        {
+            configIndex = Array.IndexOf(asteroidConfigurations, configuration);
+            if (configIndex == -1)
+            {
+                configIndex = Array.IndexOf(enemyConfigurations, configuration);
+            }
+        }
+
+        // Only the server should spawn network objects
+       if (IsServer)
     {
         GameObject obj = Instantiate(baseObjectPrefab, position, Quaternion.identity);
         NetworkObject networkObject = obj.GetComponent<NetworkObject>();
@@ -133,25 +149,39 @@ private void SpawnObject(Vector3 position, ObjectSO configuration, bool isServer
         // Notify clients to apply the configuration via ClientRpc
         if (isServerSpawn)
         {
-            ObjectSpawnedClientRpc(position, configuration.teamTag == TeamComponent.TeamTag.Enemy);
+            ObjectSpawnedClientRpc(position, configIndex, configuration.teamTag == TeamComponent.TeamTag.Enemy, ConfigurationType.Object);
+        }
+    }
+    }
+
+[ClientRpc]
+private void ObjectSpawnedClientRpc(Vector3 position, int configIndex, bool isEnemy, ConfigurationType configType, ClientRpcParams clientRpcParams = default)
+{
+    if (!IsServer)
+    {
+        ObjectSO configuration = null;
+
+        // Differentiate between PlayerSO and ObjectSO
+        if (configType == ConfigurationType.Object)
+        {
+            configuration = isEnemy ? enemyConfigurations[configIndex] : asteroidConfigurations[configIndex];
+        }
+        else
+        {
+            Debug.LogWarning("PlayerSO should not be used in ObjectSpawnedClientRpc.");
+        }
+
+        if (configuration != null)
+        {
+            Debug.Log($"Client is spawning object at position {position} with config index {configIndex}, isEnemy: {isEnemy}");
+
+            GameObject obj = Instantiate(baseObjectPrefab, position, Quaternion.identity);
+            ApplyConfigurationToObject(obj, configuration);  // Apply the ObjectSO configuration
+            Debug.Log($"Client applied configuration: {configuration.name}");
         }
     }
 }
 
-[ClientRpc]
-private void ObjectSpawnedClientRpc(Vector3 position, bool isEnemy, ClientRpcParams clientRpcParams = default)
-{
-    if (!IsServer)
-    {
-        // Clients instantiate only visual objects for local representation
-        ObjectSO configuration = isEnemy
-            ? enemyConfigurations[UnityEngine.Random.Range(0, enemyConfigurations.Length)]
-            : asteroidConfigurations[UnityEngine.Random.Range(0, asteroidConfigurations.Length)];
-
-        GameObject obj = Instantiate(baseObjectPrefab, position, Quaternion.identity);
-        ApplyConfigurationToObject(obj, configuration);  // Apply the configuration
-    }
-}
 
     private void ApplyConfigurationToObject(GameObject obj, ObjectSO configuration)
     {
@@ -276,18 +306,22 @@ private void ObjectSpawnedClientRpc(Vector3 position, bool isEnemy, ClientRpcPar
         // Update minimap or other UI
         MinimapController.Instance?.AddSectorData(sectorCoords, sectorName);
 
-        // Spawn all asteroids in one batch
+        // Spawn all asteroids in one batch using consistent configuration
         for (int i = 0; i < asteroidX.Length; i++)
         {
             Vector3 position = new Vector3(asteroidX[i], asteroidY[i], asteroidZ[i]);
-            SpawnObject(position, asteroidConfigurations[UnityEngine.Random.Range(0, asteroidConfigurations.Length)], false);
+            int configIndex = i % asteroidConfigurations.Length; // Ensure consistent config index across clients
+            Debug.Log($"Client is spawning asteroid at position {position} with config index {configIndex}");
+            SpawnObject(position, asteroidConfigurations[configIndex], false, configIndex);
         }
 
-        // Spawn all enemies in one batch
+        // Spawn all enemies in one batch using consistent configuration
         for (int i = 0; i < enemyX.Length; i++)
         {
             Vector3 position = new Vector3(enemyX[i], enemyY[i], enemyZ[i]);
-            SpawnObject(position, enemyConfigurations[UnityEngine.Random.Range(0, enemyConfigurations.Length)], false);
+            int configIndex = i % enemyConfigurations.Length; // Ensure consistent config index across clients
+            Debug.Log($"Client is spawning enemy at position {position} with config index {configIndex}");
+            SpawnObject(position, enemyConfigurations[configIndex], false, configIndex);
         }
     }
 
