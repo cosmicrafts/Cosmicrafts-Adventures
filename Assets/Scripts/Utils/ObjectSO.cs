@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEditor;
 
 [CreateAssetMenu(fileName = "ObjectConfiguration", menuName = "Objects/Object Configuration")]
 public class ObjectSO : ScriptableObject
@@ -55,4 +56,7 @@ public class ObjectSO : ScriptableObject
     public bool hasBlinkAbility = false;
     public float blinkDistance = 10f;
     public float blinkCooldown = 2f;
+
+    // New field for behavior selection in the Inspector
+    public BehaviorSO behavior;
 }

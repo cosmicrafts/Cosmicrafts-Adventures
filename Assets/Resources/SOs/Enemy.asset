@@ -38,3 +38,4 @@ MonoBehaviour:
   hasBlinkAbility: 0
   blinkDistance: 10
   blinkCooldown: 2
+  behavior: {fileID: 11400000, guid: 740e34e26501742a19ec43ffa8ae2db0, type: 2}

@@ -100,5 +100,11 @@ public static class ConfigurationApplier
                 blinkComponent.ApplyConfiguration(objectConfiguration);
             }
         }
+
+        // Apply behavior if assigned
+        if (objectConfiguration.behavior != null)
+        {
+            objectConfiguration.behavior.ApplyBehavior(gameObject);
+        }
     }
 }

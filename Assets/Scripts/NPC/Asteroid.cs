@@ -1,22 +1,55 @@
 using UnityEngine;
+using Unity.Netcode;
 
-public class Asteroid : MonoBehaviour
+public class AsteroidBehavior : NetworkBehaviour
 {
     public GameObject explosionPrefab; // Reference to explosion prefab
     public float explosionDestroyDelay = 0.5f; // Time to destroy the explosion effect
-    public int maxHealth = 4; // Maximum health of the asteroid
+    private HealthComponent healthComponent;
+    private MovementComponent movementComponent;
+    private RotationComponent rotationComponent;
+
     private int currentHealth;
-    
-    public GameObject healthBarUI; // Health bar UI
-    public UnityEngine.UI.Slider healthSlider; // Health bar slider
 
     private void Start()
     {
-        // Set a random health between 1 and 4
-        currentHealth = Random.Range(1, maxHealth + 1);
-        healthSlider.maxValue = currentHealth;
-        healthSlider.value = currentHealth;
-        healthBarUI.SetActive(false); // Hide health bar initially
+        healthComponent = GetComponent<HealthComponent>();
+        movementComponent = GetComponent<MovementComponent>();
+        rotationComponent = GetComponent<RotationComponent>();
+
+        // Get ObjectLoader to apply the ObjectSO configuration
+        ObjectLoader objectLoader = GetComponent<ObjectLoader>();
+
+        if (healthComponent != null && objectLoader != null)
+        {
+            // Apply health configuration from ObjectSO
+            healthComponent.ApplyConfiguration(objectLoader.objectConfiguration);
+            if (IsServer)
+            {
+                currentHealth = (int)healthComponent.maxHealth;
+            }
+        }
+
+        // Apply movement and rotation configuration from ObjectSO
+        if (movementComponent != null && objectLoader != null)
+        {
+            movementComponent.ApplyConfiguration(objectLoader.objectConfiguration);
+        }
+
+        if (rotationComponent != null && objectLoader != null)
+        {
+            rotationComponent.ApplyConfiguration(objectLoader.objectConfiguration);
+        }
+    }
+
+    private void Update()
+    {
+        if (IsServer)
+        {
+            // Optional: You can implement asteroid movement here if required for AI-like behavior
+            Vector2 randomDirection = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
+            movementComponent.SetMoveInput(randomDirection);  // Use the movement component to apply random movement
+        }
     }
 
     public void TakeDamage(int damage)
@@ -24,16 +57,20 @@ public class Asteroid : MonoBehaviour
         currentHealth -= damage;
         if (currentHealth <= 0)
         {
-            // Instantiate the explosion effect and destroy it after a fixed delay
+            Explode();
+        }
+    }
+
+    private void Explode()
+    {
+        // Instantiate the explosion effect and destroy it after a fixed delay
+        if (explosionPrefab != null)
+        {
             GameObject explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
             Destroy(explosion, explosionDestroyDelay); // Destroy the explosion effect after delay
-            Destroy(gameObject); // Destroy the asteroid
         }
-        else
-        {
-            healthBarUI.SetActive(true); // Show health bar if damaged
-            healthSlider.value = currentHealth; // Update health bar
-        }
+
+        Destroy(gameObject); // Destroy the asteroid
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
