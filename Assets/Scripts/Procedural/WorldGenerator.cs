@@ -121,20 +121,18 @@ public class WorldGenerator : NetworkBehaviour
         return potentialPosition;
     }
 
-    private void SpawnObject(Vector3 position, ObjectSO configuration, bool isServerSpawn, int configIndex = -1)
+private void SpawnObject(Vector3 position, ObjectSO configuration, bool isServerSpawn, int configIndex = -1)
+{
+    if (configIndex == -1)
     {
-        // Find the index of the configuration if not provided
+        configIndex = Array.IndexOf(asteroidConfigurations, configuration);
         if (configIndex == -1)
         {
-            configIndex = Array.IndexOf(asteroidConfigurations, configuration);
-            if (configIndex == -1)
-            {
-                configIndex = Array.IndexOf(enemyConfigurations, configuration);
-            }
+            configIndex = Array.IndexOf(enemyConfigurations, configuration);
         }
+    }
 
-        // Only the server should spawn network objects
-       if (IsServer)
+    if (IsServer)
     {
         GameObject obj = Instantiate(baseObjectPrefab, position, Quaternion.identity);
         NetworkObject networkObject = obj.GetComponent<NetworkObject>();
@@ -144,15 +142,16 @@ public class WorldGenerator : NetworkBehaviour
             networkObject.Spawn(); // Network-spawn the object on the server only
         }
 
-        ApplyConfigurationToObject(obj, configuration); // Apply config on both server and clients
+        // Apply configuration on the server
+        ApplyConfigurationToObject(obj, configuration);
 
-        // Notify clients to apply the configuration via ClientRpc
+        // Notify clients to apply the configuration via ClientRpc, passing the correct configuration index
         if (isServerSpawn)
         {
             ObjectSpawnedClientRpc(position, configIndex, configuration.teamTag == TeamComponent.TeamTag.Enemy, ConfigurationType.Object);
         }
     }
-    }
+}
 
 [ClientRpc]
 private void ObjectSpawnedClientRpc(Vector3 position, int configIndex, bool isEnemy, ConfigurationType configType, ClientRpcParams clientRpcParams = default)
@@ -161,14 +160,9 @@ private void ObjectSpawnedClientRpc(Vector3 position, int configIndex, bool isEn
     {
         ObjectSO configuration = null;
 
-        // Differentiate between PlayerSO and ObjectSO
         if (configType == ConfigurationType.Object)
         {
             configuration = isEnemy ? enemyConfigurations[configIndex] : asteroidConfigurations[configIndex];
-        }
-        else
-        {
-            Debug.LogWarning("PlayerSO should not be used in ObjectSpawnedClientRpc.");
         }
 
         if (configuration != null)
@@ -176,8 +170,13 @@ private void ObjectSpawnedClientRpc(Vector3 position, int configIndex, bool isEn
             Debug.Log($"Client is spawning object at position {position} with config index {configIndex}, isEnemy: {isEnemy}");
 
             GameObject obj = Instantiate(baseObjectPrefab, position, Quaternion.identity);
-            ApplyConfigurationToObject(obj, configuration);  // Apply the ObjectSO configuration
-            Debug.Log($"Client applied configuration: {configuration.name}");
+
+            // Store the configuration index in the ObjectLoader
+            var objectLoader = obj.GetComponent<ObjectLoader>();
+            if (objectLoader != null)
+            {
+                objectLoader.SetConfigurationFromWorldGenerator(configuration, configIndex);
+            }
         }
     }
 }
