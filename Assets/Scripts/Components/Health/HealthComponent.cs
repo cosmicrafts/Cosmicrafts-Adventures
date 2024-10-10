@@ -113,27 +113,18 @@ public class HealthComponent : NetworkBehaviour
     {
         if (collision.gameObject.CompareTag("Bullet"))
         {
-            if (IsClient)
+            Bullet bullet = collision.gameObject.GetComponent<Bullet>();
+            if (bullet != null)
             {
-                Bullet bullet = collision.gameObject.GetComponent<Bullet>();
-                if (bullet != null)
-                {
-                    // Use bullet damage for prediction and server call
-                    float bulletDamage = bullet.bulletDamage;
+                // Client prediction
+                predictedHealth -= bullet.bulletDamage;
+                if (predictedHealth < 0)
+                    predictedHealth = 0;
 
-                    // Client prediction
-                    predictedHealth -= bulletDamage;
-                    if (predictedHealth < 0)
-                        predictedHealth = 0;
+                UpdateHealthUI(predictedHealth);
 
-                    UpdateHealthUI(predictedHealth);
-
-                    // Request server to apply damage
-                    if (IsOwner)
-                    {
-                        TakeDamageServerRpc(bulletDamage);
-                    }
-                }
+                // Request server to apply damage (remove IsOwner check here)
+                TakeDamageServerRpc(bullet.bulletDamage);  // Always request server to apply damage
             }
         }
         else if (IsServer)
@@ -142,6 +133,7 @@ public class HealthComponent : NetworkBehaviour
             ApplyDamage(collisionDamage);
         }
     }
+
 
     private void UpdateHealthUI(float healthValue)
     {
