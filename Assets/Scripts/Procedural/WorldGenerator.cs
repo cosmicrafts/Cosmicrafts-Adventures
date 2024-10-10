@@ -117,21 +117,41 @@ public class WorldGenerator : NetworkBehaviour
                 objectLoader.SetConfigurationFromWorldGenerator(configuration, configIndex);
             }
 
-            ObjectSpawnedClientRpc(position, configIndex);
+            // Notify clients about the spawned object without instantiating on client
+            InformClientAboutSpawnedObjectClientRpc(position, configIndex);
         }
     }
 
     [ClientRpc]
-    private void ObjectSpawnedClientRpc(Vector3 position, int configIndex)
+    private void InformClientAboutSpawnedObjectClientRpc(Vector3 position, int configIndex)
     {
         if (!IsServer)
         {
             ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
 
-            GameObject obj = Instantiate(objectPrefab, position, Quaternion.identity);
-            var loader = obj.GetComponent<ObjectLoader>();
-            loader?.SetConfigurationFromWorldGenerator(configuration, configIndex);
+            // Find a pre-existing inactive object instead of instantiating a new one
+            GameObject obj = FindInactiveObject(objectPrefab); // Custom method to find an inactive object
+            if (obj != null)
+            {
+                obj.SetActive(true); // Activate the object
+                var loader = obj.GetComponent<ObjectLoader>();
+                loader?.SetConfigurationFromWorldGenerator(configuration, configIndex);
+            }
         }
+    }
+
+    private GameObject FindInactiveObject(GameObject prefab)
+    {
+        // This method searches for an inactive object of the given prefab in the scene
+        GameObject[] objects = GameObject.FindGameObjectsWithTag(prefab.tag); // Adjust the tag accordingly
+        foreach (GameObject obj in objects)
+        {
+            if (!obj.activeInHierarchy)
+            {
+                return obj;
+            }
+        }
+        return null;
     }
 
     private IEnumerator RegenerateObjectsCoroutine()

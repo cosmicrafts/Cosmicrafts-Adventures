@@ -29,7 +29,7 @@ MonoBehaviour:
   shootingCooldown: 0.25
   bulletDamage: 1
   bulletLifespan: 1
-  maxHealth: 14
+  maxHealth: 100
   hasInput: 0
   teamTag: 2
   hasDashAbility: 0
