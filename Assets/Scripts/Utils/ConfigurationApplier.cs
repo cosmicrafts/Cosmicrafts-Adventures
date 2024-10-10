@@ -44,7 +44,7 @@ public static class ConfigurationApplier
             }
         }
 
-        // Apply RotationComponent configuration
+        // Apply rotation settings
         var rotationComponent = gameObject.GetComponent<RotationComponent>();
         if (rotationComponent != null)
         {

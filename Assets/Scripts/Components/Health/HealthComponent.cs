@@ -101,7 +101,7 @@ public void TakeDamageServerRpc(float amount)
                     // Use bullet damage for prediction and server call
                     float bulletDamage = bullet.bulletDamage;
 
-                    Debug.Log($"{gameObject.name} [HealthComponent] collided with {collision.gameObject.name}. Predicted damage: {bulletDamage}");
+                   // Debug.Log($"{gameObject.name} [HealthComponent] collided with {collision.gameObject.name}. Predicted damage: {bulletDamage}");
 
                     // Client prediction
                     predictedHealth -= bulletDamage;
@@ -121,7 +121,7 @@ public void TakeDamageServerRpc(float amount)
         else if (IsServer)
         {
             // Handle other types of collisions server-side
-            Debug.Log($"{gameObject.name} [HealthComponent] collided with {collision.gameObject.name}. Taking {collisionDamage} damage.");
+         //   Debug.Log($"{gameObject.name} [HealthComponent] collided with {collision.gameObject.name}. Taking {collisionDamage} damage.");
 
             // Directly apply damage server-side
             ApplyDamage(collisionDamage);

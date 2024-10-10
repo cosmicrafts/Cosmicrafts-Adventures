@@ -30,6 +30,7 @@ public class ObjectSO : ScriptableObject
     // RotationComponent settings
     public bool hasRotation = false;
     public float rotationSpeed = 120f; // Optional, if rotation is enabled
+    public bool usePointerRotation = true;
 
     // ShootingComponent settings
     public bool hasShooting = true;

@@ -12,10 +12,16 @@ public class RotationComponent : NetworkBehaviour
     private NetworkVariable<Quaternion> networkRotation = new NetworkVariable<Quaternion>(
         Quaternion.identity, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    private float rotationSpeed;
+    private bool usePointerRotation;  // NEW: Local flag for controlling pointer-based rotation
+
     public void ApplyConfiguration(ObjectSO config)
     {
+        // Apply rotation settings from the ObjectSO
+        rotationSpeed = config.rotationSpeed;
+        usePointerRotation = config.usePointerRotation;  // Apply the pointer rotation setting
     }
-    
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -27,28 +33,45 @@ public class RotationComponent : NetworkBehaviour
 
     private void Update()
     {
-        if (IsOwner)
+        if (usePointerRotation)
         {
-            // Perform local rotation
-            Quaternion newRotation = CalculateRotation(mousePosition);
-            
-            // Smoothly interpolate towards the new rotation
-            float rotationSmoothingSpeed = 12f; // Adjust as needed for smoothness
-            transform.rotation = Quaternion.Lerp(transform.rotation, newRotation, Time.deltaTime * rotationSmoothingSpeed);
-
-            // Send rotation to the server for synchronization if not the server
-            if (!IsServer)
+            // Handle pointer-based rotation (for players)
+            if (IsOwner)
             {
-                UpdateRotationOnServerRpc(transform.rotation);
+                HandlePointerRotation();
+            }
+            else
+            {
+                // Synchronize rotation for non-owner clients
+                transform.rotation = Quaternion.Lerp(transform.rotation, networkRotation.Value, Time.deltaTime * 10f);
             }
         }
         else
         {
-            // For non-owner clients, use the synchronized network variable for rotation
-            transform.rotation = Quaternion.Lerp(transform.rotation, networkRotation.Value, Time.deltaTime * 10f);
+            // Automatic rotation for non-pointer-based objects (like asteroids)
+            HandleAutomaticRotation();
         }
     }
 
+    private void HandlePointerRotation()
+    {
+        Quaternion newRotation = CalculateRotation(mousePosition);
+
+        // Smoothly interpolate towards the new rotation
+        float rotationSmoothingSpeed = 12f;
+        transform.rotation = Quaternion.Lerp(transform.rotation, newRotation, Time.deltaTime * rotationSmoothingSpeed);
+
+        if (!IsServer)
+        {
+            UpdateRotationOnServerRpc(transform.rotation);
+        }
+    }
+
+    private void HandleAutomaticRotation()
+    {
+        // Apply automatic rotation on the Z-axis based on the configured speed
+        transform.Rotate(Vector3.forward, rotationSpeed * Time.deltaTime);
+    }
 
     public void SetMousePosition(Vector3 mousePosition)
     {
@@ -57,37 +80,24 @@ public class RotationComponent : NetworkBehaviour
 
     private Quaternion CalculateRotation(Vector3 mousePosition)
     {
-        // Calculate direction towards the mouse
         Vector2 direction = (mousePosition - transform.position);
-        
-        // Define a minimum threshold distance to avoid jitter when the mouse is too close
-        float minDistance = 0.25f; // Adjust as needed to find a balance that prevents jitter
-        
-        if (direction.magnitude < minDistance)
+        if (direction.magnitude < 0.25f)
         {
-            // If the mouse is too close, return the current rotation to prevent jitter
             return transform.rotation;
         }
-
-        // Normalize the direction vector to calculate the new rotation
         direction.Normalize();
         float rotationZ = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
-
-        // Return the rotation around the Z-axis as a quaternion
         return Quaternion.Euler(0f, 0f, rotationZ);
     }
-
 
     [ServerRpc]
     private void UpdateRotationOnServerRpc(Quaternion rotation)
     {
-        // Update the server-side rotation and synchronize with other clients
         networkRotation.Value = rotation;
     }
 
     private void OnRotationChanged(Quaternion oldRotation, Quaternion newRotation)
     {
-        // Update rotation for non-owner clients when the network variable changes
         if (!IsOwner)
         {
             transform.rotation = newRotation;

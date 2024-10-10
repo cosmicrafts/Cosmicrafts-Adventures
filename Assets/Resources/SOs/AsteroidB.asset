@@ -10,6 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 433de92c65ee249e6893dba0da27624e, type: 3}
-  m_Name: AsteroidBehavior
+  m_Name: AsteroidB
   m_EditorClassIdentifier: 
-  rotationSpeed: 50
+  driftSpeed: 0.5
+  rotationSpeed: 45

@@ -18,14 +18,15 @@ MonoBehaviour:
   bodyType: 0
   physicsMaterial: {fileID: 6200000, guid: a0c43d290e2d3f492bf3458f97f022c5, type: 2}
   isKinematic: 0
-  hasMovement: 1
+  hasMovement: 0
   moveSpeed: 5
   moveSmoothTime: 0.1
   hasRotation: 1
   rotationSpeed: 120
+  usePointerRotation: 0
   hasShooting: 1
   bulletSpeed: 20
-  shootingCooldown: 0.1
+  shootingCooldown: 1
   bulletDamage: 1
   bulletLifespan: 1
   maxHealth: 100
