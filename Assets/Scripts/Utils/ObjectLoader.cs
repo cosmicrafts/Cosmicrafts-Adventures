@@ -10,13 +10,16 @@ public class ObjectLoader : NetworkBehaviour
 
     public ObjectSO objectConfiguration;
 
+    // New field to store the pool index
+    private int poolIndex;
+
     public void SetConfigurationFromWorldGenerator(ObjectSO configuration, int configIndex)
     {
         objectConfiguration = configuration;
         selectedConfigIndex.Value = configIndex;
         isConfigFromWorldGenerator = true;
 
-        Debug.Log($"[ObjectLoader] Setting configuration from WorldGenerator with index {configIndex} and configuration {configuration.name}");
+        //Debug.Log($"[ObjectLoader] Setting configuration from WorldGenerator with index {configIndex} and configuration {configuration.name}");
         ConfigurationApplier.ApplyConfiguration(gameObject, objectConfiguration);
     }
 
@@ -58,7 +61,7 @@ public class ObjectLoader : NetworkBehaviour
             if (config != null)
             {
                 objectConfiguration = config;
-                Debug.Log($"[ObjectLoader] Applying configuration index {index}: {config.name}");
+                //Debug.Log($"[ObjectLoader] Applying configuration index {index}: {config.name}");
                 ConfigurationApplier.ApplyConfiguration(gameObject, objectConfiguration);
             }
         }
@@ -101,5 +104,17 @@ public class ObjectLoader : NetworkBehaviour
             objectConfiguration = config;
             ConfigurationApplier.ApplyConfiguration(gameObject, objectConfiguration);
         }
+    }
+
+    // Method to set the pool index when this object is spawned from the pool
+    public void SetPoolIndex(int index)
+    {
+        poolIndex = index;
+    }
+
+    // Method to get the pool index when returning the object to the pool
+    public int GetPoolIndex()
+    {
+        return poolIndex;
     }
 }

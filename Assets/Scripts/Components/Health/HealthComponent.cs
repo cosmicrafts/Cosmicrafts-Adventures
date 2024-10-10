@@ -10,10 +10,12 @@ public class HealthComponent : NetworkBehaviour
     public float collisionDamage = 4f; // Damage taken upon collision
     private float predictedHealth; // For client-side prediction
 
-// Unified ApplyConfiguration method
+    private ObjectLoader objectLoader; // Reference to ObjectLoader for getting pool index
+
+    // Unified ApplyConfiguration method
     public void ApplyConfiguration(ObjectSO config)
     {
-            maxHealth = config.maxHealth;
+        maxHealth = config.maxHealth;
     }
 
     private void Start()
@@ -33,6 +35,9 @@ public class HealthComponent : NetworkBehaviour
             healthSlider.maxValue = maxHealth;
             healthSlider.value = currentHealth.Value;
         }
+
+        // Reference to ObjectLoader for pooling purposes
+        objectLoader = GetComponent<ObjectLoader>();
     }
 
     private new void OnDestroy()
@@ -48,20 +53,19 @@ public class HealthComponent : NetworkBehaviour
         UpdateHealthUI(predictedHealth);
     }
 
-[ServerRpc(RequireOwnership = false)]
-public void TakeDamageServerRpc(float amount)
-{
-    // Check if the network object is initialized
-    if (IsSpawned)
+    [ServerRpc(RequireOwnership = false)]
+    public void TakeDamageServerRpc(float amount)
     {
-        ApplyDamage(amount);
+        // Check if the network object is initialized
+        if (IsSpawned)
+        {
+            ApplyDamage(amount);
+        }
+        else
+        {
+            Debug.LogWarning($"{gameObject.name} [HealthComponent] Tried to apply damage but object is not fully spawned.");
+        }
     }
-    else
-    {
-        Debug.LogWarning($"{gameObject.name} [HealthComponent] Tried to apply damage but object is not fully spawned.");
-    }
-}
-
 
     private void ApplyDamage(float amount)
     {
@@ -85,8 +89,24 @@ public void TakeDamageServerRpc(float amount)
 
     private void HandleDeath()
     {
-        // Debug.Log($"{gameObject.name} [HealthComponent] has died!");
-        // Handle death logic here, like respawning or disabling the player
+        // Instead of destroying, return the object to the pool
+        if (objectLoader != null)
+        {
+            int poolIndex = objectLoader.GetPoolIndex(); // Get pool index from the ObjectLoader
+            ObjectPooler.Instance.ReturnToPool(gameObject, poolIndex); // Return object to pool
+        }
+        else
+        {
+            Debug.LogWarning("ObjectLoader is not found on this object.");
+        }
+
+        // Optionally, disable health slider and any other visuals related to the object before pooling
+        if (healthSlider != null)
+        {
+            healthSlider.gameObject.SetActive(false);
+        }
+
+        // Perform any other cleanup needed before returning to the pool (e.g., resetting position)
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -100,8 +120,6 @@ public void TakeDamageServerRpc(float amount)
                 {
                     // Use bullet damage for prediction and server call
                     float bulletDamage = bullet.bulletDamage;
-
-                   // Debug.Log($"{gameObject.name} [HealthComponent] collided with {collision.gameObject.name}. Predicted damage: {bulletDamage}");
 
                     // Client prediction
                     predictedHealth -= bulletDamage;
@@ -121,9 +139,6 @@ public void TakeDamageServerRpc(float amount)
         else if (IsServer)
         {
             // Handle other types of collisions server-side
-         //   Debug.Log($"{gameObject.name} [HealthComponent] collided with {collision.gameObject.name}. Taking {collisionDamage} damage.");
-
-            // Directly apply damage server-side
             ApplyDamage(collisionDamage);
         }
     }

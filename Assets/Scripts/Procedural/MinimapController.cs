@@ -71,7 +71,7 @@ public class MinimapController : MonoBehaviour
         if (NetworkManager.Singleton.IsClient)
         {
             Debug.Log($"Client {localClientId} requesting all sector data from server.");
-            WorldGenerator.Instance.GetAllSectorsServerRpc();
+           // WorldGenerator.Instance.GetAllSectorsServerRpc();
         }
     }
 

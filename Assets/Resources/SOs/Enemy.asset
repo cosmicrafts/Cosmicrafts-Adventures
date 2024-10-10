@@ -21,7 +21,7 @@ MonoBehaviour:
   hasMovement: 0
   moveSpeed: 5
   moveSmoothTime: 0.1
-  hasRotation: 1
+  hasRotation: 0
   rotationSpeed: 120
   usePointerRotation: 0
   hasShooting: 1
@@ -29,7 +29,7 @@ MonoBehaviour:
   shootingCooldown: 1
   bulletDamage: 1
   bulletLifespan: 1
-  maxHealth: 100
+  maxHealth: 2
   hasInput: 0
   teamTag: 2
   hasDashAbility: 0

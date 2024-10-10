@@ -13,10 +13,11 @@ public class WorldGenerator : NetworkBehaviour
     public int asteroidsPerSector = 5;
     public int enemiesPerSector = 2;
     public float enemySpawnDistance = 10;
+    public int poolSizePerType = 20; // Pool size for each object type
 
     // Assignable ObjectSO fields for custom configurations
-    public ObjectSO asteroidConfiguration; // You can set a specific ObjectSO for asteroids
-    public ObjectSO enemyConfiguration;    // You can set a specific ObjectSO for enemies
+    public ObjectSO asteroidConfiguration;
+    public ObjectSO enemyConfiguration;
 
     private void Awake()
     {
@@ -27,6 +28,12 @@ public class WorldGenerator : NetworkBehaviour
     {
         if (IsServer)
         {
+            // Pre-pool asteroids and enemies
+            int asteroidIndex = ObjectManager.Instance.GetObjectSOIndex(asteroidConfiguration);
+            int enemyIndex = ObjectManager.Instance.GetObjectSOIndex(enemyConfiguration);
+            ObjectPooler.Instance.CreatePool(baseObjectPrefab, poolSizePerType, asteroidIndex);
+            ObjectPooler.Instance.CreatePool(baseObjectPrefab, poolSizePerType, enemyIndex);
+
             GenerateInitialSectors();
         }
     }
@@ -54,7 +61,6 @@ public class WorldGenerator : NetworkBehaviour
         GenerateObjectsInSector(coordinates, enemiesPerSector, true, enemyConfiguration);
     }
 
-    // Add parameter for ObjectSO configuration, so we can directly use custom configurations
     private void GenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration)
     {
         for (int i = 0; i < objectCount; i++)
@@ -62,8 +68,8 @@ public class WorldGenerator : NetworkBehaviour
             Vector3 position = GetRandomPositionInSector(sectorCoords, isEnemy ? enemySpawnDistance : 0);
             if (position != Vector3.zero)
             {
-                int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration); // Get the index of the specified ObjectSO
-                SpawnObject(position, configIndex, isEnemy);
+                int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration);
+                SpawnPooledObject(position, configIndex, isEnemy);
             }
         }
     }
@@ -77,21 +83,30 @@ public class WorldGenerator : NetworkBehaviour
         return (minDistance > 0 && Vector3.Distance(Vector3.zero, position) < minDistance) ? Vector3.zero : position;
     }
 
-    private void SpawnObject(Vector3 position, int configIndex, bool isEnemy)
+    private void SpawnPooledObject(Vector3 position, int configIndex, bool isEnemy)
     {
         if (IsServer)
         {
-            GameObject obj = Instantiate(baseObjectPrefab, position, Quaternion.identity);
+            GameObject obj = ObjectPooler.Instance.GetObjectFromPool(configIndex, position, Quaternion.identity);
             NetworkObject netObj = obj.GetComponent<NetworkObject>();
-            if (netObj != null) netObj.Spawn();
+
+            // Only spawn if it's not already spawned
+            if (netObj != null && !netObj.IsSpawned)
+            {
+                netObj.Spawn();
+            }
 
             ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
             var objectLoader = obj.GetComponent<ObjectLoader>();
-            objectLoader?.SetConfigurationFromWorldGenerator(configuration, configIndex);
+            if (objectLoader != null)
+            {
+                objectLoader.SetConfigurationFromWorldGenerator(configuration, configIndex);
+            }
 
             ObjectSpawnedClientRpc(position, configIndex, isEnemy);
         }
     }
+
 
     [ClientRpc]
     private void ObjectSpawnedClientRpc(Vector3 position, int configIndex, bool isEnemy)
@@ -99,29 +114,9 @@ public class WorldGenerator : NetworkBehaviour
         if (!IsServer)
         {
             ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
-            GameObject obj = Instantiate(baseObjectPrefab, position, Quaternion.identity);
+            GameObject obj = ObjectPooler.Instance.GetObjectFromPool(configIndex, position, Quaternion.identity);
             var loader = obj.GetComponent<ObjectLoader>();
             loader?.SetConfigurationFromWorldGenerator(configuration, configIndex);
-        }
-    }
-
-    [ClientRpc]
-    private void SendSectorToClientRpc(Vector2Int sectorCoords, string sectorName, ulong clientId)
-    {
-        // Update the minimap or any other UI with sector data
-        MinimapController.Instance?.AddSectorData(sectorCoords, sectorName);
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    public void GetAllSectorsServerRpc(ServerRpcParams rpcParams = default)
-    {
-        foreach (var sector in sectors)
-        {
-            var sectorCoords = sector.Key;
-            var sectorName = sector.Value.sectorName;
-
-            // Send the sector data to the requesting client
-            SendSectorToClientRpc(sectorCoords, sectorName, rpcParams.Receive.SenderClientId);
         }
     }
 }

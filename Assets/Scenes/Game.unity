@@ -6154,6 +6154,7 @@ GameObject:
   - component: {fileID: 1458642473}
   - component: {fileID: 1458642474}
   - component: {fileID: 1458642470}
+  - component: {fileID: 1458642475}
   m_Layer: 0
   m_Name: WorldGenerator
   m_TagString: Untagged
@@ -6323,9 +6324,10 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   sectorSize: 10
   baseObjectPrefab: {fileID: 628412359505069944, guid: f40ecf204176849b2a3d0067c43049f4, type: 3}
-  asteroidsPerSector: 3
+  asteroidsPerSector: 10
   enemiesPerSector: 1
   enemySpawnDistance: 1
+  poolSizePerType: 20
   asteroidConfiguration: {fileID: 11400000, guid: 094f3a343d9ca48e4a1f705248c20caa, type: 2}
   enemyConfiguration: {fileID: 11400000, guid: 7e48ec0fa0375497b8753193fb2b1182, type: 2}
 --- !u!114 &1458642474
@@ -6343,6 +6345,18 @@ MonoBehaviour:
   sectorSize: 10
   gridColor: {r: 0, g: 1, b: 0, a: 1}
   lineWidth: 0.1
+--- !u!114 &1458642475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1458642469}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e29c5b05209581eaad161535efd49f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1473140041
 GameObject:
   m_ObjectHideFlags: 0
