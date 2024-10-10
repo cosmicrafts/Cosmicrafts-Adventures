@@ -72,17 +72,43 @@ public class WorldGenerator : NetworkBehaviour
         newSector.sectorName = $"Sector ({coordinates.x}, {coordinates.y})";
         sectors.Add(coordinates, newSector);
 
-        GenerateObjectsInSector(coordinates, asteroidsPerSector, false, asteroidConfiguration);
-        GenerateObjectsInSector(coordinates, enemiesPerSector, true, enemyConfiguration);
+        // Pre-calculate Perlin noise grid for this sector
+        float[,] noiseGrid = PrecalculatePerlinNoiseGrid(coordinates);
+
+        GenerateObjectsInSector(coordinates, asteroidsPerSector, false, asteroidConfiguration, noiseGrid);
+        GenerateObjectsInSector(coordinates, enemiesPerSector, true, enemyConfiguration, noiseGrid);
     }
 
-    private void GenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration)
+    // Precalculate a grid of Perlin noise values for the sector
+    private float[,] PrecalculatePerlinNoiseGrid(Vector2Int sectorCoords)
+    {
+        int gridResolution = Mathf.Max(asteroidsPerSector, enemiesPerSector); // Adjust grid resolution based on object count
+        float[,] noiseGrid = new float[gridResolution, 2]; // Each object will have an x and y noise value
+
+        for (int i = 0; i < gridResolution; i++)
+        {
+            // Random offsets for the noise
+            float xOffset = UnityEngine.Random.Range(-sectorSize / 2, sectorSize / 2);
+            float yOffset = UnityEngine.Random.Range(-sectorSize / 2, sectorSize / 2);
+
+            // Generate Perlin noise values
+            float xNoise = Mathf.PerlinNoise((sectorCoords.x + xOffset + randomSeed) / noiseScale, (sectorCoords.y + yOffset + randomSeed) / noiseScale);
+            float yNoise = Mathf.PerlinNoise((sectorCoords.y + yOffset + randomSeed) / noiseScale, (sectorCoords.x + xOffset + randomSeed) / noiseScale);
+
+            noiseGrid[i, 0] = xNoise;
+            noiseGrid[i, 1] = yNoise;
+        }
+
+        return noiseGrid;
+    }
+
+    private void GenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration, float[,] noiseGrid)
     {
         int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration);
 
         for (int i = 0; i < objectCount; i++)
         {
-            Vector3 position = GetPositionUsingPerlinNoise(sectorCoords, isEnemy ? enemySpawnDistance : 0, randomSeed);
+            Vector3 position = GetPositionFromNoiseGrid(sectorCoords, isEnemy ? enemySpawnDistance : 0, noiseGrid, i);
             if (position != Vector3.zero)
             {
                 SpawnObject(position, configIndex);
@@ -90,15 +116,11 @@ public class WorldGenerator : NetworkBehaviour
         }
     }
 
-    // New method to generate a position using Perlin noise for chunk-like placement with a seed
-    private Vector3 GetPositionUsingPerlinNoise(Vector2Int sectorCoords, float minDistance = 0, int seed = 0)
+    // Generate object position from the pre-calculated Perlin noise grid
+    private Vector3 GetPositionFromNoiseGrid(Vector2Int sectorCoords, float minDistance, float[,] noiseGrid, int index)
     {
-        float xOffset = UnityEngine.Random.Range(-sectorSize / 2, sectorSize / 2);
-        float yOffset = UnityEngine.Random.Range(-sectorSize / 2, sectorSize / 2);
-
-        // Modify the seed for Perlin noise
-        float xNoise = Mathf.PerlinNoise((sectorCoords.x + xOffset + seed) / noiseScale, (sectorCoords.y + yOffset + seed) / noiseScale);
-        float yNoise = Mathf.PerlinNoise((sectorCoords.y + yOffset + seed) / noiseScale, (sectorCoords.x + xOffset + seed) / noiseScale);
+        float xNoise = noiseGrid[index, 0];
+        float yNoise = noiseGrid[index, 1];
 
         Vector3 position = new Vector3(
             sectorCoords.x * sectorSize + (xNoise * sectorSize),
@@ -144,19 +166,20 @@ public class WorldGenerator : NetworkBehaviour
 
             foreach (var sector in sectors.Keys)
             {
-                RegenerateObjectsInSector(sector, asteroidsPerSector, false, asteroidConfiguration);
-                RegenerateObjectsInSector(sector, enemiesPerSector, true, enemyConfiguration);
+                float[,] noiseGrid = PrecalculatePerlinNoiseGrid(sector);
+                RegenerateObjectsInSector(sector, asteroidsPerSector, false, asteroidConfiguration, noiseGrid);
+                RegenerateObjectsInSector(sector, enemiesPerSector, true, enemyConfiguration, noiseGrid);
             }
         }
     }
 
-    private void RegenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration)
+    private void RegenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration, float[,] noiseGrid)
     {
         int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration);
 
         for (int i = 0; i < objectCount; i++)
         {
-            Vector3 position = GetPositionUsingPerlinNoise(sectorCoords, isEnemy ? enemySpawnDistance : 0, randomSeed);
+            Vector3 position = GetPositionFromNoiseGrid(sectorCoords, isEnemy ? enemySpawnDistance : 0, noiseGrid, i);
             if (position != Vector3.zero)
             {
                 SpawnObject(position, configIndex);
