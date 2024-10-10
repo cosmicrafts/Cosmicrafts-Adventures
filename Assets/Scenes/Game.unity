@@ -6322,12 +6322,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  sectorSize: 25
+  sectorSize: 20
   objectPrefab: {fileID: 628412359505069944, guid: f40ecf204176849b2a3d0067c43049f4, type: 3}
-  asteroidsPerSector: 10
-  enemiesPerSector: 10
-  enemySpawnDistance: 42
-  poolSizePerType: 20
+  asteroidsPerSector: 5
+  enemiesPerSector: 5
+  enemySpawnDistance: 10
+  noiseScale: 10
   regenerationInterval: 1
   asteroidConfiguration: {fileID: 11400000, guid: 094f3a343d9ca48e4a1f705248c20caa, type: 2}
   enemyConfiguration: {fileID: 11400000, guid: 7e48ec0fa0375497b8753193fb2b1182, type: 2}

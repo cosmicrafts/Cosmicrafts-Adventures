@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Unity.Netcode;
+using System.Collections;
 
 public class WorldGenerator : NetworkBehaviour
 {
@@ -13,29 +14,31 @@ public class WorldGenerator : NetworkBehaviour
     public int asteroidsPerSector = 5;
     public int enemiesPerSector = 2;
     public float enemySpawnDistance = 10;
-    public int poolSizePerType = 20; // Pool size for each object type
+    public float noiseScale = 5f; // Scale of the Perlin noise
+
+    [Header("Regeneration")]
+    public float regenerationInterval = 10f; // Set from Inspector for regeneration time
 
     // Assignable ObjectSO fields for custom configurations
     public ObjectSO asteroidConfiguration;
     public ObjectSO enemyConfiguration;
 
+    private int randomSeed; // Seed for Perlin noise
+
     private void Awake()
     {
         Instance = this;
+        randomSeed = Random.Range(0, 10000); // Initialize random seed once
     }
 
     public override void OnNetworkSpawn()
     {
         if (IsServer)
         {
-            // Pre-pool asteroids and enemies with the single prefab
-            int asteroidIndex = ObjectManager.Instance.GetObjectSOIndex(asteroidConfiguration);
-            int enemyIndex = ObjectManager.Instance.GetObjectSOIndex(enemyConfiguration);
-
-            ObjectPooler.Instance.CreatePool(objectPrefab, poolSizePerType, asteroidIndex);
-            ObjectPooler.Instance.CreatePool(objectPrefab, poolSizePerType, enemyIndex);
-
             GenerateInitialSectors();
+
+            // Start object regeneration coroutine
+            StartCoroutine(RegenerateObjectsCoroutine());
         }
     }
 
@@ -62,42 +65,49 @@ public class WorldGenerator : NetworkBehaviour
         GenerateObjectsInSector(coordinates, enemiesPerSector, true, enemyConfiguration);
     }
 
-    // Simplified to use one prefab for both asteroids and enemies
     private void GenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration)
     {
         int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration);
 
         for (int i = 0; i < objectCount; i++)
         {
-            Vector3 position = GetRandomPositionInSector(sectorCoords, isEnemy ? enemySpawnDistance : 0);
+            Vector3 position = GetPositionUsingPerlinNoise(sectorCoords, isEnemy ? enemySpawnDistance : 0, randomSeed);
             if (position != Vector3.zero)
             {
-                // Request the object from the pool using the single prefab
-                SpawnPooledObject(position, configIndex);
+                SpawnObject(position, configIndex);
             }
         }
     }
 
-    private Vector3 GetRandomPositionInSector(Vector2Int sectorCoords, float minDistance = 0)
+    // New method to generate a position using Perlin noise for chunk-like placement with a seed
+    private Vector3 GetPositionUsingPerlinNoise(Vector2Int sectorCoords, float minDistance = 0, int seed = 0)
     {
         float xOffset = UnityEngine.Random.Range(-sectorSize / 2, sectorSize / 2);
         float yOffset = UnityEngine.Random.Range(-sectorSize / 2, sectorSize / 2);
-        Vector3 position = new Vector3(sectorCoords.x * sectorSize + xOffset, sectorCoords.y * sectorSize + yOffset, 0f);
+
+        // Modify the seed for Perlin noise
+        float xNoise = Mathf.PerlinNoise((sectorCoords.x + xOffset + seed) / noiseScale, (sectorCoords.y + yOffset + seed) / noiseScale);
+        float yNoise = Mathf.PerlinNoise((sectorCoords.y + yOffset + seed) / noiseScale, (sectorCoords.x + xOffset + seed) / noiseScale);
+
+        Vector3 position = new Vector3(
+            sectorCoords.x * sectorSize + (xNoise * sectorSize),
+            sectorCoords.y * sectorSize + (yNoise * sectorSize),
+            0f
+        );
 
         return (minDistance > 0 && Vector3.Distance(Vector3.zero, position) < minDistance) ? Vector3.zero : position;
     }
 
-    private void SpawnPooledObject(Vector3 position, int configIndex)
+    private void SpawnObject(Vector3 position, int configIndex)
     {
         if (IsServer)
         {
-            GameObject obj = ObjectPooler.Instance.GetObjectFromPool(configIndex, position, Quaternion.identity, objectPrefab);
+            GameObject obj = Instantiate(objectPrefab, position, Quaternion.identity);
             NetworkObject netObj = obj.GetComponent<NetworkObject>();
 
-            // Only spawn if it's not already spawned
             if (netObj != null && !netObj.IsSpawned)
             {
-                netObj.Spawn(); // Ensure spawn only happens if not already spawned
+                netObj.Spawn();
             }
 
             ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
@@ -118,10 +128,39 @@ public class WorldGenerator : NetworkBehaviour
         {
             ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
 
-            // Use the single prefab for both asteroids and enemies
-            GameObject obj = ObjectPooler.Instance.GetObjectFromPool(configIndex, position, Quaternion.identity, objectPrefab);
+            GameObject obj = Instantiate(objectPrefab, position, Quaternion.identity);
             var loader = obj.GetComponent<ObjectLoader>();
             loader?.SetConfigurationFromWorldGenerator(configuration, configIndex);
+        }
+    }
+
+    private IEnumerator RegenerateObjectsCoroutine()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(regenerationInterval); // Expose to Inspector
+
+            randomSeed = Random.Range(0, 10000); // Update seed for each regeneration
+
+            foreach (var sector in sectors.Keys)
+            {
+                RegenerateObjectsInSector(sector, asteroidsPerSector, false, asteroidConfiguration);
+                RegenerateObjectsInSector(sector, enemiesPerSector, true, enemyConfiguration);
+            }
+        }
+    }
+
+    private void RegenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration)
+    {
+        int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration);
+
+        for (int i = 0; i < objectCount; i++)
+        {
+            Vector3 position = GetPositionUsingPerlinNoise(sectorCoords, isEnemy ? enemySpawnDistance : 0, randomSeed);
+            if (position != Vector3.zero)
+            {
+                SpawnObject(position, configIndex);
+            }
         }
     }
 }

@@ -45,6 +45,20 @@ public class ObjectPooler : MonoBehaviour
         }
     }
 
+    // Public method to access the pool
+    public Queue<GameObject> GetPool(int objectIndex)
+    {
+        if (poolDictionary.ContainsKey(objectIndex))
+        {
+            return poolDictionary[objectIndex];
+        }
+        else
+        {
+            Debug.LogWarning($"Pool with index {objectIndex} does not exist.");
+            return null;
+        }
+    }
+
     // Dynamically create a pool if it doesn't exist and expand it if needed
     private void EnsurePoolExists(int objectIndex, GameObject prefab, int expandSize = 5)
     {
@@ -56,45 +70,53 @@ public class ObjectPooler : MonoBehaviour
     }
 
     // Retrieve an object from the pool, expand the pool if needed
-    public GameObject GetObjectFromPool(int objectIndex, Vector3 position, Quaternion rotation, GameObject prefab, int expandPoolSize = 5)
+public GameObject GetObjectFromPool(int objectIndex, Vector3 position, Quaternion rotation, GameObject prefab, int expandPoolSize = 5)
+{
+    EnsurePoolExists(objectIndex, prefab, expandPoolSize);
+
+    Queue<GameObject> objectPool = poolDictionary[objectIndex];
+
+    // If pool is empty, instantiate new objects
+    if (objectPool.Count == 0)
     {
-        EnsurePoolExists(objectIndex, prefab, expandPoolSize);
-
-        Queue<GameObject> objectPool = poolDictionary[objectIndex];
-
-        // If pool is empty, instantiate new objects
-        if (objectPool.Count == 0)
+        Debug.Log($"Pool with index {objectIndex} is empty, expanding pool.");
+        for (int i = 0; i < expandPoolSize; i++)
         {
-            Debug.Log($"Pool with index {objectIndex} is empty, expanding pool.");
-            for (int i = 0; i < expandPoolSize; i++)
-            {
-                GameObject newObj = Instantiate(prefab);
-                newObj.SetActive(false);
-                objectPool.Enqueue(newObj);
-            }
+            GameObject newObj = Instantiate(prefab);
+            newObj.SetActive(false);
+            objectPool.Enqueue(newObj);
         }
-
-        GameObject objectToSpawn = objectPool.Dequeue();
-
-        // Reset object properties
-        objectToSpawn.SetActive(true);
-        objectToSpawn.transform.position = position;
-        objectToSpawn.transform.rotation = rotation;
-
-        // Handle networked object spawning
-        NetworkObject networkObject = objectToSpawn.GetComponent<NetworkObject>();
-        if (networkObject != null)
-        {
-            if (!networkObject.IsSpawned)
-            {
-                networkObject.Spawn();  // Spawn the networked object only if it's not already spawned
-            }
-        }
-
-        poolDictionary[objectIndex].Enqueue(objectToSpawn); // Re-enqueue for future reuse
-
-        return objectToSpawn;
     }
+
+    GameObject objectToSpawn = objectPool.Dequeue();
+
+    // Check if the object is null or destroyed
+    if (objectToSpawn == null || objectToSpawn.Equals(null))
+    {
+        Debug.LogWarning("Pooled object is null or destroyed. Expanding pool.");
+        objectToSpawn = Instantiate(prefab);  // Recreate object if necessary
+    }
+
+    // Reset object properties
+    objectToSpawn.SetActive(true);
+    objectToSpawn.transform.position = position;
+    objectToSpawn.transform.rotation = rotation;
+
+    // Handle networked object spawning
+    NetworkObject networkObject = objectToSpawn.GetComponent<NetworkObject>();
+    if (networkObject != null)
+    {
+        if (!networkObject.IsSpawned)
+        {
+            networkObject.Spawn();  // Spawn the networked object only if it's not already spawned
+        }
+    }
+
+    poolDictionary[objectIndex].Enqueue(objectToSpawn); // Re-enqueue for future reuse
+
+    return objectToSpawn;
+}
+
 
     // Deactivate and return object to pool
     public void ReturnToPool(GameObject obj, int objectIndex)
