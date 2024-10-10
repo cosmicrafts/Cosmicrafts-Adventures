@@ -98,29 +98,61 @@ public class WorldGenerator : NetworkBehaviour
         return (minDistance > 0 && Vector3.Distance(Vector3.zero, position) < minDistance) ? Vector3.zero : position;
     }
 
-    private void SpawnObject(Vector3 position, int configIndex)
+private void SpawnObject(Vector3 position, int configIndex)
+{
+    if (IsServer)
     {
-        if (IsServer)
+        // Get object from the pool instead of instantiating new
+        GameObject obj = ObjectPooler.Instance.GetObjectFromPool(configIndex, position, Quaternion.identity, objectPrefab);
+
+        NetworkObject netObj = obj.GetComponent<NetworkObject>();
+        if (netObj != null && !netObj.IsSpawned)
         {
-            GameObject obj = Instantiate(objectPrefab, position, Quaternion.identity);
-            NetworkObject netObj = obj.GetComponent<NetworkObject>();
+            netObj.Spawn();
+        }
 
-            if (netObj != null && !netObj.IsSpawned)
-            {
-                netObj.Spawn();
-            }
+        ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
+        var objectLoader = obj.GetComponent<ObjectLoader>();
+        if (objectLoader != null)
+        {
+            objectLoader.SetConfigurationFromWorldGenerator(configuration, configIndex);
+        }
 
-            ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
-            var objectLoader = obj.GetComponent<ObjectLoader>();
-            if (objectLoader != null)
-            {
-                objectLoader.SetConfigurationFromWorldGenerator(configuration, configIndex);
-            }
+        // Notify clients about the spawned object without instantiating on client
+        InformClientAboutSpawnedObjectClientRpc(position, configIndex);
+    }
+}
 
-            // Notify clients about the spawned object without instantiating on client
-            InformClientAboutSpawnedObjectClientRpc(position, configIndex);
+private IEnumerator RegenerateObjectsCoroutine()
+{
+    while (true)
+    {
+        yield return new WaitForSeconds(regenerationInterval); // Expose to Inspector
+
+        randomSeed = Random.Range(0, 10000); // Update seed for each regeneration
+
+        foreach (var sector in sectors.Keys)
+        {
+            RegenerateObjectsInSector(sector, asteroidsPerSector, false, asteroidConfiguration);
+            RegenerateObjectsInSector(sector, enemiesPerSector, true, enemyConfiguration);
         }
     }
+}
+
+private void RegenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration)
+{
+    int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration);
+
+    for (int i = 0; i < objectCount; i++)
+    {
+        Vector3 position = GetPositionUsingPerlinNoise(sectorCoords, isEnemy ? enemySpawnDistance : 0, randomSeed);
+        if (position != Vector3.zero)
+        {
+            SpawnObject(position, configIndex);
+        }
+    }
+}
+
 
     [ClientRpc]
     private void InformClientAboutSpawnedObjectClientRpc(Vector3 position, int configIndex)
@@ -152,35 +184,5 @@ public class WorldGenerator : NetworkBehaviour
             }
         }
         return null;
-    }
-
-    private IEnumerator RegenerateObjectsCoroutine()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(regenerationInterval); // Expose to Inspector
-
-            randomSeed = Random.Range(0, 10000); // Update seed for each regeneration
-
-            foreach (var sector in sectors.Keys)
-            {
-                RegenerateObjectsInSector(sector, asteroidsPerSector, false, asteroidConfiguration);
-                RegenerateObjectsInSector(sector, enemiesPerSector, true, enemyConfiguration);
-            }
-        }
-    }
-
-    private void RegenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration)
-    {
-        int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration);
-
-        for (int i = 0; i < objectCount; i++)
-        {
-            Vector3 position = GetPositionUsingPerlinNoise(sectorCoords, isEnemy ? enemySpawnDistance : 0, randomSeed);
-            if (position != Vector3.zero)
-            {
-                SpawnObject(position, configIndex);
-            }
-        }
     }
 }

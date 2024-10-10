@@ -6326,7 +6326,7 @@ MonoBehaviour:
   objectPrefab: {fileID: 628412359505069944, guid: f40ecf204176849b2a3d0067c43049f4, type: 3}
   asteroidsPerSector: 5
   enemiesPerSector: 5
-  enemySpawnDistance: 10
+  enemySpawnDistance: 40
   noiseScale: 10
   regenerationInterval: 1
   asteroidConfiguration: {fileID: 11400000, guid: 094f3a343d9ca48e4a1f705248c20caa, type: 2}

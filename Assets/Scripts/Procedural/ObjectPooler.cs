@@ -112,8 +112,7 @@ public GameObject GetObjectFromPool(int objectIndex, Vector3 position, Quaternio
         }
     }
 
-    poolDictionary[objectIndex].Enqueue(objectToSpawn); // Re-enqueue for future reuse
-
+    // No need to re-enqueue since object will be returned to the pool when done
     return objectToSpawn;
 }
 
