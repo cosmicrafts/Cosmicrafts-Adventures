@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 433de92c65ee249e6893dba0da27624e, type: 3}
   m_Name: AsteroidB
   m_EditorClassIdentifier: 
-  driftSpeed: 0.5
-  rotationSpeed: 45
+  minDriftSpeed: 0.25
+  maxDriftSpeed: 5
+  minRotationSpeed: 40
+  maxRotationSpeed: 160

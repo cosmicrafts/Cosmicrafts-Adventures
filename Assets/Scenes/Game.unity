@@ -688,7 +688,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!199 &708330003
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -6125,7 +6125,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 16
+  orthographic size: 36
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -6322,12 +6322,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  sectorSize: 10
+  sectorSize: 25
   objectPrefab: {fileID: 628412359505069944, guid: f40ecf204176849b2a3d0067c43049f4, type: 3}
   asteroidsPerSector: 10
-  enemiesPerSector: 1
-  enemySpawnDistance: 1
+  enemiesPerSector: 10
+  enemySpawnDistance: 42
   poolSizePerType: 20
+  regenerationInterval: 1
   asteroidConfiguration: {fileID: 11400000, guid: 094f3a343d9ca48e4a1f705248c20caa, type: 2}
   enemyConfiguration: {fileID: 11400000, guid: 7e48ec0fa0375497b8753193fb2b1182, type: 2}
 --- !u!114 &1458642474
@@ -6342,7 +6343,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec3730de743dcb9b58d944a497902bfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sectorSize: 10
+  sectorSize: 50
   gridColor: {r: 0, g: 1, b: 0, a: 1}
   lineWidth: 0.1
 --- !u!114 &1458642475
@@ -6473,7 +6474,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf9117a613c2e6284b50c9e34e6aa725, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spaceTileSpriteForeground: {fileID: 2884288314312988557, guid: be84a871dd496d1a6b19c5695632b9e3, type: 3}
+  spaceTileSpriteForeground: {fileID: 21300000, guid: 8b076c010fc28dcf4894902d5caff89a, type: 3}
   spaceTileSpriteBackground: {fileID: 21300000, guid: 8df60219e0fb91b45ac3feca8b72bf9b, type: 3}
   tileWorldSize: 32
   renderDistance: 4
@@ -6483,7 +6484,7 @@ MonoBehaviour:
   additiveMaterialForeground: {fileID: 2100000, guid: c61ac908fe43b384fb405c5311be3195, type: 2}
   foregroundColor: {r: 1, g: 1, b: 1, a: 1}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  foregroundScaleFactor: 1.75
+  foregroundScaleFactor: 1.25
   backgroundScaleFactor: 1
 --- !u!4 &1474598984
 Transform:

@@ -121,7 +121,7 @@ public class Bullet : NetworkBehaviour
         if (impactEffectPrefab != null)
         {
             GameObject impactEffect = Instantiate(impactEffectPrefab, impactPoint, Quaternion.identity);
-            Destroy(impactEffect, 0.1f);
+            Destroy(impactEffect, 0.25f);
         }
         Destroy(gameObject);
     }

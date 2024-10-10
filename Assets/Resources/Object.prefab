@@ -63,7 +63,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2884145813
+  GlobalObjectIdHash: 2754538681
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: -1
@@ -343,6 +343,8 @@ MonoBehaviour:
     m_InternalValue: 100
   healthSlider: {fileID: 1045440782311064407}
   collisionDamage: 4
+  explosionPrefab: {fileID: 4726858116288998076, guid: b6fd84498ab5fee47b7b4f8a4b68dd0e, type: 3}
+  explosionDuration: 1
 --- !u!114 &5363122064442604197
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -743,13 +745,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: Healthbar
       objectReference: {fileID: 0}
-    - target: {fileID: 7205504579877206552, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
-      propertyPath: m_AnchorMax.x
+    - target: {fileID: 5077535734357111452, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7205504579877206552, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.366
+      objectReference: {fileID: 0}
+    - target: {fileID: 7205504579877206552, guid: 6f3a500bf75b4eb48b5c6c41e18784a5, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

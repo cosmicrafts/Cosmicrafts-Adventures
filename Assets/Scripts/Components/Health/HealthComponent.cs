@@ -10,6 +10,9 @@ public class HealthComponent : NetworkBehaviour
     public float collisionDamage = 4f; // Damage taken upon collision
     private float predictedHealth; // For client-side prediction
 
+    public GameObject explosionPrefab; // Reference to explosion prefab
+    public float explosionDuration = 1f; // Explosion duration, tweakable in the Inspector
+
     private ObjectLoader objectLoader; // Reference to ObjectLoader for getting pool index
 
     // Unified ApplyConfiguration method
@@ -89,6 +92,19 @@ public class HealthComponent : NetworkBehaviour
 
     private void HandleDeath()
     {
+        // Trigger explosion if the prefab is set
+        if (explosionPrefab != null)
+        {
+            GameObject explosionInstance = Instantiate(explosionPrefab, transform.position, transform.rotation);
+            
+            // Use the explosionDuration to destroy the explosion instance after the set time
+            Destroy(explosionInstance, explosionDuration); 
+        }
+        else
+        {
+            Debug.LogWarning("Explosion prefab not assigned.");
+        }
+
         // Instead of destroying, return the object to the pool
         if (objectLoader != null)
         {
@@ -98,6 +114,7 @@ public class HealthComponent : NetworkBehaviour
         else
         {
             Debug.LogWarning("ObjectLoader is not found on this object.");
+            Destroy(gameObject); // Fallback to destroying if no pooling is available
         }
 
         // Optionally, disable health slider and any other visuals related to the object before pooling
@@ -105,8 +122,6 @@ public class HealthComponent : NetworkBehaviour
         {
             healthSlider.gameObject.SetActive(false);
         }
-
-        // Perform any other cleanup needed before returning to the pool (e.g., resetting position)
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -133,7 +148,6 @@ public class HealthComponent : NetworkBehaviour
             ApplyDamage(collisionDamage);
         }
     }
-
 
     private void UpdateHealthUI(float healthValue)
     {

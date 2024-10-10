@@ -23,8 +23,9 @@ MonoBehaviour:
   moveSmoothTime: 0.1
   hasRotation: 1
   rotationSpeed: 120
+  usePointerRotation: 1
   hasShooting: 1
-  bulletSpeed: 20
+  bulletSpeed: 8
   shootingCooldown: 0.1
   bulletDamage: 1
   bulletLifespan: 1
@@ -38,3 +39,4 @@ MonoBehaviour:
   hasBlinkAbility: 1
   blinkDistance: 10
   blinkCooldown: 2
+  behavior: {fileID: 0}
