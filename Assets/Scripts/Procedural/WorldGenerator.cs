@@ -9,7 +9,7 @@ public class WorldGenerator : NetworkBehaviour
     private Dictionary<Vector2Int, Sector> sectors = new Dictionary<Vector2Int, Sector>();
 
     [Header("Settings")]
-    public GameObject baseObjectPrefab;
+    public GameObject objectPrefab; // Single prefab for all objects
     public int asteroidsPerSector = 5;
     public int enemiesPerSector = 2;
     public float enemySpawnDistance = 10;
@@ -28,11 +28,12 @@ public class WorldGenerator : NetworkBehaviour
     {
         if (IsServer)
         {
-            // Pre-pool asteroids and enemies
+            // Pre-pool asteroids and enemies with the single prefab
             int asteroidIndex = ObjectManager.Instance.GetObjectSOIndex(asteroidConfiguration);
             int enemyIndex = ObjectManager.Instance.GetObjectSOIndex(enemyConfiguration);
-            ObjectPooler.Instance.CreatePool(baseObjectPrefab, poolSizePerType, asteroidIndex);
-            ObjectPooler.Instance.CreatePool(baseObjectPrefab, poolSizePerType, enemyIndex);
+
+            ObjectPooler.Instance.CreatePool(objectPrefab, poolSizePerType, asteroidIndex);
+            ObjectPooler.Instance.CreatePool(objectPrefab, poolSizePerType, enemyIndex);
 
             GenerateInitialSectors();
         }
@@ -61,15 +62,18 @@ public class WorldGenerator : NetworkBehaviour
         GenerateObjectsInSector(coordinates, enemiesPerSector, true, enemyConfiguration);
     }
 
+    // Simplified to use one prefab for both asteroids and enemies
     private void GenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration)
     {
+        int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration);
+
         for (int i = 0; i < objectCount; i++)
         {
             Vector3 position = GetRandomPositionInSector(sectorCoords, isEnemy ? enemySpawnDistance : 0);
             if (position != Vector3.zero)
             {
-                int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration);
-                SpawnPooledObject(position, configIndex, isEnemy);
+                // Request the object from the pool using the single prefab
+                SpawnPooledObject(position, configIndex);
             }
         }
     }
@@ -83,17 +87,17 @@ public class WorldGenerator : NetworkBehaviour
         return (minDistance > 0 && Vector3.Distance(Vector3.zero, position) < minDistance) ? Vector3.zero : position;
     }
 
-    private void SpawnPooledObject(Vector3 position, int configIndex, bool isEnemy)
+    private void SpawnPooledObject(Vector3 position, int configIndex)
     {
         if (IsServer)
         {
-            GameObject obj = ObjectPooler.Instance.GetObjectFromPool(configIndex, position, Quaternion.identity);
+            GameObject obj = ObjectPooler.Instance.GetObjectFromPool(configIndex, position, Quaternion.identity, objectPrefab);
             NetworkObject netObj = obj.GetComponent<NetworkObject>();
 
             // Only spawn if it's not already spawned
             if (netObj != null && !netObj.IsSpawned)
             {
-                netObj.Spawn();
+                netObj.Spawn(); // Ensure spawn only happens if not already spawned
             }
 
             ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
@@ -103,18 +107,19 @@ public class WorldGenerator : NetworkBehaviour
                 objectLoader.SetConfigurationFromWorldGenerator(configuration, configIndex);
             }
 
-            ObjectSpawnedClientRpc(position, configIndex, isEnemy);
+            ObjectSpawnedClientRpc(position, configIndex);
         }
     }
 
-
     [ClientRpc]
-    private void ObjectSpawnedClientRpc(Vector3 position, int configIndex, bool isEnemy)
+    private void ObjectSpawnedClientRpc(Vector3 position, int configIndex)
     {
         if (!IsServer)
         {
             ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
-            GameObject obj = ObjectPooler.Instance.GetObjectFromPool(configIndex, position, Quaternion.identity);
+
+            // Use the single prefab for both asteroids and enemies
+            GameObject obj = ObjectPooler.Instance.GetObjectFromPool(configIndex, position, Quaternion.identity, objectPrefab);
             var loader = obj.GetComponent<ObjectLoader>();
             loader?.SetConfigurationFromWorldGenerator(configuration, configIndex);
         }

@@ -6323,7 +6323,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   sectorSize: 10
-  baseObjectPrefab: {fileID: 628412359505069944, guid: f40ecf204176849b2a3d0067c43049f4, type: 3}
+  objectPrefab: {fileID: 628412359505069944, guid: f40ecf204176849b2a3d0067c43049f4, type: 3}
   asteroidsPerSector: 10
   enemiesPerSector: 1
   enemySpawnDistance: 1
