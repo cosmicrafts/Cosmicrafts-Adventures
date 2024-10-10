@@ -11,6 +11,7 @@ TagManager:
   - Enemy
   - Friend
   - Neutral
+  - prefab
   layers:
   - Default
   - TransparentFX

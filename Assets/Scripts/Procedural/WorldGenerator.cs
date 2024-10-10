@@ -35,6 +35,17 @@ public class WorldGenerator : NetworkBehaviour
     {
         if (IsServer)
         {
+            // Pre-create pools for asteroids and enemies
+            int asteroidIndex = ObjectManager.Instance.GetObjectSOIndex(asteroidConfiguration);
+            int enemyIndex = ObjectManager.Instance.GetObjectSOIndex(enemyConfiguration);
+
+            // Create a pool for asteroids
+            ObjectPooler.Instance.CreatePool(objectPrefab, asteroidsPerSector, asteroidIndex);
+
+            // Create a pool for enemies
+            ObjectPooler.Instance.CreatePool(objectPrefab, enemiesPerSector, enemyIndex);
+
+            // Now proceed with sector generation and object spawning
             GenerateInitialSectors();
 
             // Start object regeneration coroutine
@@ -98,61 +109,60 @@ public class WorldGenerator : NetworkBehaviour
         return (minDistance > 0 && Vector3.Distance(Vector3.zero, position) < minDistance) ? Vector3.zero : position;
     }
 
-private void SpawnObject(Vector3 position, int configIndex)
-{
-    if (IsServer)
+    private void SpawnObject(Vector3 position, int configIndex)
     {
-        // Get object from the pool instead of instantiating new
-        GameObject obj = ObjectPooler.Instance.GetObjectFromPool(configIndex, position, Quaternion.identity, objectPrefab);
-
-        NetworkObject netObj = obj.GetComponent<NetworkObject>();
-        if (netObj != null && !netObj.IsSpawned)
+        if (IsServer)
         {
-            netObj.Spawn();
-        }
+            // Get object from the pool instead of instantiating new
+            GameObject obj = ObjectPooler.Instance.GetObjectFromPool(configIndex, position, Quaternion.identity, objectPrefab);
 
-        ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
-        var objectLoader = obj.GetComponent<ObjectLoader>();
-        if (objectLoader != null)
-        {
-            objectLoader.SetConfigurationFromWorldGenerator(configuration, configIndex);
-        }
+            NetworkObject netObj = obj.GetComponent<NetworkObject>();
+            if (netObj != null && !netObj.IsSpawned)
+            {
+                netObj.Spawn();
+            }
 
-        // Notify clients about the spawned object without instantiating on client
-        InformClientAboutSpawnedObjectClientRpc(position, configIndex);
-    }
-}
+            ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
+            var objectLoader = obj.GetComponent<ObjectLoader>();
+            if (objectLoader != null)
+            {
+                objectLoader.SetConfigurationFromWorldGenerator(configuration, configIndex);
+            }
 
-private IEnumerator RegenerateObjectsCoroutine()
-{
-    while (true)
-    {
-        yield return new WaitForSeconds(regenerationInterval); // Expose to Inspector
-
-        randomSeed = Random.Range(0, 10000); // Update seed for each regeneration
-
-        foreach (var sector in sectors.Keys)
-        {
-            RegenerateObjectsInSector(sector, asteroidsPerSector, false, asteroidConfiguration);
-            RegenerateObjectsInSector(sector, enemiesPerSector, true, enemyConfiguration);
+            // Notify clients about the spawned object without instantiating on client
+            InformClientAboutSpawnedObjectClientRpc(position, configIndex);
         }
     }
-}
 
-private void RegenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration)
-{
-    int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration);
-
-    for (int i = 0; i < objectCount; i++)
+    private IEnumerator RegenerateObjectsCoroutine()
     {
-        Vector3 position = GetPositionUsingPerlinNoise(sectorCoords, isEnemy ? enemySpawnDistance : 0, randomSeed);
-        if (position != Vector3.zero)
+        while (true)
         {
-            SpawnObject(position, configIndex);
+            yield return new WaitForSeconds(regenerationInterval); // Expose to Inspector
+
+            randomSeed = Random.Range(0, 10000); // Update seed for each regeneration
+
+            foreach (var sector in sectors.Keys)
+            {
+                RegenerateObjectsInSector(sector, asteroidsPerSector, false, asteroidConfiguration);
+                RegenerateObjectsInSector(sector, enemiesPerSector, true, enemyConfiguration);
+            }
         }
     }
-}
 
+    private void RegenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration)
+    {
+        int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration);
+
+        for (int i = 0; i < objectCount; i++)
+        {
+            Vector3 position = GetPositionUsingPerlinNoise(sectorCoords, isEnemy ? enemySpawnDistance : 0, randomSeed);
+            if (position != Vector3.zero)
+            {
+                SpawnObject(position, configIndex);
+            }
+        }
+    }
 
     [ClientRpc]
     private void InformClientAboutSpawnedObjectClientRpc(Vector3 position, int configIndex)
