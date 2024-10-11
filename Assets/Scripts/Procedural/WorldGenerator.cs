@@ -95,7 +95,7 @@ public class WorldGenerator : NetworkBehaviour
         GameObject prefab = isEnemy ? enemyPrefab : asteroidPrefab;
         if (prefab == null)
         {
-            Debug.LogError("[WorldGenerator] Prefab is null! Ensure the prefab references are set correctly.");
+          //  Debug.LogError("[WorldGenerator] Prefab is null! Ensure the prefab references are set correctly.");
             return;
         }
 
@@ -123,72 +123,86 @@ public class WorldGenerator : NetworkBehaviour
         return (minDistance > 0 && Vector3.Distance(Vector3.zero, position) < minDistance) ? Vector3.zero : position;
     }
 
-    private void SpawnObject(Vector3 position, GameObject prefab, ObjectSO configuration)
+private void SpawnObject(Vector3 position, GameObject prefab, ObjectSO configuration)
+{
+    if (!IsServer) return; // Ensure only server executes this code
+
+    // Get object from the NetworkObjectPool
+    NetworkObject netObj = NetworkObjectPool.Singleton.GetNetworkObject(prefab, position, Quaternion.identity);
+
+    if (netObj != null)
     {
-        if (!IsServer) return; // Ensure only server executes this code
+        // Debug.Log($"[WorldGenerator] Retrieved {prefab.name} from the pool and spawning it.");
 
-        // Get object from the NetworkObjectPool
-        NetworkObject netObj = NetworkObjectPool.Singleton.GetNetworkObject(prefab, position, Quaternion.identity);
-
-        if (netObj != null)
+        // Only spawn the object if it is not already spawned
+        if (!netObj.IsSpawned)
         {
-            Debug.Log($"[WorldGenerator] Retrieved {prefab.name} from the pool and spawning it.");
-
-            // Only spawn the object if it is not already spawned
-            if (!netObj.IsSpawned)
-            {
-                netObj.Spawn(true); // Ensure the object is spawned by the server and synchronized to clients
-                Debug.Log($"[WorldGenerator] {prefab.name} has been spawned on the network.");
-            }
-
-            // Handle object configuration and loader
-            var objectLoader = netObj.GetComponent<ObjectLoader>();
-            if (objectLoader != null)
-            {
-                // Apply the configuration using ObjectLoader, which sets up the ObjectSO configuration
-                objectLoader.SetConfigurationFromWorldGenerator(configuration, ObjectManager.Instance.GetObjectSOIndex(configuration));
-
-                // Set the original prefab for proper pooling behavior when returning objects
-                objectLoader.SetOriginalPrefab(prefab); // This ensures the object can be returned to the correct pool
-            }
+            netObj.Spawn(true); // Ensure the object is spawned by the server and synchronized to clients
+            Debug.Log($"[WorldGenerator] {prefab.name} has been spawned on the network.");
         }
-        else
+
+        // Handle object configuration and loader
+        var objectLoader = netObj.GetComponent<ObjectLoader>();
+        if (objectLoader != null)
         {
-            Debug.LogError($"[WorldGenerator] Failed to get {prefab.name} from the pool.");
+            // Apply the configuration using ObjectLoader, which sets up the ObjectSO configuration
+            objectLoader.SetConfigurationFromWorldGenerator(configuration, ObjectManager.Instance.GetObjectSOIndex(configuration));
+
+            // Set the original prefab for proper pooling behavior when returning objects
+            objectLoader.SetOriginalPrefab(prefab); // This ensures the object can be returned to the correct pool
+        }
+
+        // Inform clients about the spawned object
+        InformClientAboutSpawnedObjectClientRpc(position, ObjectManager.Instance.GetObjectSOIndex(configuration));
+    }
+    else
+    {
+        Debug.LogError($"[WorldGenerator] Failed to get {prefab.name} from the pool.");
+    }
+}
+
+[ClientRpc]
+private void InformClientAboutSpawnedObjectClientRpc(Vector3 position, int configIndex)
+{
+    if (IsServer) return; // This logic is for clients only
+
+    // Clients should only activate objects, not spawn them
+    ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
+    
+    // Find an inactive object in the pool that matches the prefab tag or specific logic
+    GameObject obj = FindInactiveObject(); // Use the prefab tag or custom tag logic if needed
+
+    if (obj != null)
+    {
+        // Set the object's position and activate it
+        obj.transform.position = position;
+        obj.SetActive(true);
+
+        // Apply configuration to the object using the ObjectLoader
+        var loader = obj.GetComponent<ObjectLoader>();
+        loader?.SetConfigurationFromWorldGenerator(configuration, configIndex);
+    }
+    else
+    {
+        Debug.LogError($"[WorldGenerator] Failed to find an inactive object to activate on the client.");
+    }
+}
+
+
+private GameObject FindInactiveObject()
+{
+    // This method searches for an inactive object of the given prefab in the scene or pool
+    GameObject[] objects = GameObject.FindGameObjectsWithTag("YourTag"); // Replace with the actual tag
+    foreach (GameObject obj in objects)
+    {
+        if (!obj.activeInHierarchy)
+        {
+            return obj; // Return the first inactive object found
         }
     }
+    return null;
+}
 
-
-    [ClientRpc]
-    private void InformClientAboutSpawnedObjectClientRpc(Vector3 position, int configIndex)
-    {
-        if (IsServer) return;
-
-        // Clients only activate objects, no need to spawn locally
-        ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
-        GameObject obj = FindInactiveObject(); // Use the prefab tag or custom tag logic if needed
-
-        if (obj != null)
-        {
-            obj.SetActive(true);
-            var loader = obj.GetComponent<ObjectLoader>();
-            loader?.SetConfigurationFromWorldGenerator(configuration, configIndex);
-        }
-    }
-
-    private GameObject FindInactiveObject()
-    {
-        // Logic for finding inactive object in the scene
-        GameObject[] objects = GameObject.FindGameObjectsWithTag("YourTag"); // Replace with the actual tag
-        foreach (GameObject obj in objects)
-        {
-            if (!obj.activeInHierarchy)
-            {
-                return obj;
-            }
-        }
-        return null;
-    }
 
     private IEnumerator RegenerateObjectsCoroutine()
     {
