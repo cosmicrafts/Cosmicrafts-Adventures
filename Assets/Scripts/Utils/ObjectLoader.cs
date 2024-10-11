@@ -24,6 +24,11 @@ public class ObjectLoader : NetworkBehaviour
         return poolIndex;
     }
 
+    public int GetConfigIndex()
+    {
+        return selectedConfigIndex.Value;
+    }
+
     private GameObject originalPrefab; // Store the original prefab reference
 
     // New method to set the original prefab reference

@@ -132,8 +132,6 @@ private void SpawnObject(Vector3 position, GameObject prefab, ObjectSO configura
 
     if (netObj != null)
     {
-        // Debug.Log($"[WorldGenerator] Retrieved {prefab.name} from the pool and spawning it.");
-
         // Only spawn the object if it is not already spawned
         if (!netObj.IsSpawned)
         {
@@ -152,8 +150,8 @@ private void SpawnObject(Vector3 position, GameObject prefab, ObjectSO configura
             objectLoader.SetOriginalPrefab(prefab); // This ensures the object can be returned to the correct pool
         }
 
-        // Inform clients about the spawned object
-        InformClientAboutSpawnedObjectClientRpc(position, ObjectManager.Instance.GetObjectSOIndex(configuration));
+        // Inform clients about the spawned object and set isActive to true since it's being spawned
+        InformClientAboutSpawnedObjectClientRpc(position, ObjectManager.Instance.GetObjectSOIndex(configuration), true);
     }
     else
     {
@@ -161,38 +159,49 @@ private void SpawnObject(Vector3 position, GameObject prefab, ObjectSO configura
     }
 }
 
+    private Dictionary<ulong, bool> objectStates = new Dictionary<ulong, bool>(); // Track active/inactive state of each object
+
+
 [ClientRpc]
-private void InformClientAboutSpawnedObjectClientRpc(Vector3 position, int configIndex)
+public void InformClientAboutSpawnedObjectClientRpc(Vector3 position, int configIndex, bool isActive)
 {
     if (IsServer) return; // This logic is for clients only
 
-    // Clients should only activate objects, not spawn them
     ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
-    
-    // Find an inactive object in the pool that matches the prefab tag or specific logic
-    GameObject obj = FindInactiveObject(); // Use the prefab tag or custom tag logic if needed
+
+    // Find the object using the pooling mechanism or in the scene
+    GameObject obj = FindInactiveObject();
 
     if (obj != null)
     {
-        // Set the object's position and activate it
-        obj.transform.position = position;
-        obj.SetActive(true);
+        if (isActive)
+        {
+            // Activate the object, set its position and apply configuration
+            obj.transform.position = position;
+            obj.SetActive(true);
 
-        // Apply configuration to the object using the ObjectLoader
-        var loader = obj.GetComponent<ObjectLoader>();
-        loader?.SetConfigurationFromWorldGenerator(configuration, configIndex);
+            var loader = obj.GetComponent<ObjectLoader>();
+            loader?.SetConfigurationFromWorldGenerator(configuration, configIndex);
+        }
+        else
+        {
+            // Deactivate the object if it's being destroyed
+            obj.SetActive(false);
+            obj.tag = "Inactive";  // Ensure it's properly tagged as inactive
+        }
     }
     else
     {
-        Debug.LogError($"[WorldGenerator] Failed to find an inactive object to activate on the client.");
+        Debug.LogError($"[WorldGenerator] Failed to find an object for activation/deactivation.");
     }
 }
+
 
 
 private GameObject FindInactiveObject()
 {
     // This method searches for an inactive object of the given prefab in the scene or pool
-    GameObject[] objects = GameObject.FindGameObjectsWithTag("YourTag"); // Replace with the actual tag
+    GameObject[] objects = GameObject.FindGameObjectsWithTag("Inactive");
     foreach (GameObject obj in objects)
     {
         if (!obj.activeInHierarchy)
@@ -204,26 +213,55 @@ private GameObject FindInactiveObject()
 }
 
 
-    private IEnumerator RegenerateObjectsCoroutine()
+private void ReactivateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration)
+{
+    GameObject prefab = isEnemy ? enemyPrefab : asteroidPrefab;
+    if (prefab == null) return;
+
+    for (int i = 0; i < objectCount; i++)
     {
-        while (true)
+        // Fetch and reactivate objects directly from the pool
+        NetworkObject netObj = NetworkObjectPool.Singleton.GetNetworkObject(prefab, GetRandomPositionInSector(sectorCoords), Quaternion.identity);
+        if (netObj != null && !netObj.IsSpawned)
         {
-            yield return new WaitForSeconds(regenerationInterval);
-
-            randomSeed = Random.Range(0, 10000);
-
-            foreach (var sector in sectors.Keys)
+            netObj.Spawn(true);
+            var objectLoader = netObj.GetComponent<ObjectLoader>();
+            if (objectLoader != null)
             {
-                float[,] noiseGrid = PrecalculatePerlinNoiseGrid(sector);
-
-                JobHandle handle = RegenerateSectorInBatches(sector, asteroidsPerSector, false, asteroidConfiguration, noiseGrid);
-                handle.Complete();
-
-                handle = RegenerateSectorInBatches(sector, enemiesPerSector, true, enemyConfiguration, noiseGrid);
-                handle.Complete();
+                objectLoader.SetConfigurationFromWorldGenerator(configuration, ObjectManager.Instance.GetObjectSOIndex(configuration));
             }
         }
     }
+}
+
+private IEnumerator RegenerateObjectsCoroutine()
+{
+    while (true)
+    {
+        yield return new WaitForSeconds(regenerationInterval);
+
+        // Reactivate objects in each sector by reactivating from the pool
+        foreach (var sector in sectors.Keys)
+        {
+            if (gameObject.activeInHierarchy) // Ensure the WorldGenerator is active
+            {
+                ReactivateObjectsInSector(sector, asteroidsPerSector, false, asteroidConfiguration);
+                ReactivateObjectsInSector(sector, enemiesPerSector, true, enemyConfiguration);
+            }
+        }
+    }
+}
+
+
+
+private Vector3 GetRandomPositionInSector(Vector2Int sectorCoords)
+{
+    // Logic to calculate position within the sector
+    float xNoise = UnityEngine.Random.Range(-sectorSize / 2, sectorSize / 2);
+    float yNoise = UnityEngine.Random.Range(-sectorSize / 2, sectorSize / 2);
+    return new Vector3(sectorCoords.x * sectorSize + xNoise, sectorCoords.y * sectorSize + yNoise, 0f);
+}
+
 
     private JobHandle RegenerateSectorInBatches(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration, float[,] noiseGrid)
     {
@@ -252,29 +290,39 @@ private GameObject FindInactiveObject()
         return handle;
     }
 
-    private IEnumerator SpawnObjectsAfterJob(Vector2Int sectorCoords, int objectCount, ObjectSO configuration, NativeArray<Vector3> positions, JobHandle handle)
+private IEnumerator SpawnObjectsAfterJob(Vector2Int sectorCoords, int objectCount, ObjectSO configuration, NativeArray<Vector3> positions, JobHandle handle)
+{
+    yield return new WaitUntil(() => handle.IsCompleted);
+    handle.Complete();
+
+    GameObject prefab = (configuration == enemyConfiguration) ? enemyPrefab : asteroidPrefab;
+
+    for (int i = 0; i < objectCount; i++)
     {
-        yield return new WaitUntil(() => handle.IsCompleted);
-        handle.Complete();
-
-        GameObject prefab = (configuration == enemyConfiguration) ? enemyPrefab : asteroidPrefab;
-
-        for (int i = 0; i < objectCount; i++)
+        if (i % objectsPerFrame == 0)
         {
-            if (i % objectsPerFrame == 0)
-            {
-                yield return null;
-            }
-
-            Vector3 position = positions[i];
-            if (position != Vector3.zero)
-            {
-                SpawnObject(position, prefab, configuration);
-            }
+            yield return null;
         }
 
-        positions.Dispose();
+        Vector3 position = positions[i];
+        if (position != Vector3.zero)
+        {
+            // Get an object from the pool and activate it
+            NetworkObject netObj = NetworkObjectPool.Singleton.GetNetworkObject(prefab, position, Quaternion.identity);
+            if (netObj != null && !netObj.IsSpawned)
+            {
+                netObj.Spawn(true);
+                var objectLoader = netObj.GetComponent<ObjectLoader>();
+                if (objectLoader != null)
+                {
+                    objectLoader.SetConfigurationFromWorldGenerator(configuration, ObjectManager.Instance.GetObjectSOIndex(configuration));
+                }
+            }
+        }
     }
+
+    positions.Dispose();
+}
 
     [BurstCompile]
     private struct RegenerateObjectsJob : IJob

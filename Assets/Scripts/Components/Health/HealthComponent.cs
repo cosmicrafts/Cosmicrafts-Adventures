@@ -12,7 +12,7 @@ public class HealthComponent : NetworkBehaviour
     private float predictedHealth; // For client-side prediction
     public GameObject explosionPrefab; // Reference to explosion prefab
     public float explosionDuration = 1f;
-
+    private bool isDead = false;  // Flag to prevent multiple death handling
     private ObjectLoader objectLoader; // Reference to ObjectLoader for pooling purposes
 
     public void ApplyConfiguration(ObjectSO config)
@@ -62,6 +62,7 @@ public class HealthComponent : NetworkBehaviour
 
     private void ApplyDamage(float amount)
     {
+        if (currentHealth.Value == 0) return;
         if (this == null || !this.gameObject.activeInHierarchy) return;
 
         float newHealth = currentHealth.Value - amount;
@@ -75,6 +76,15 @@ public class HealthComponent : NetworkBehaviour
 
     private void HandleDeath()
     {
+        if (isDead)
+        {
+            Debug.LogWarning("HandleDeath called more than once for " + gameObject.name);
+            return;
+        }
+
+        isDead = true;
+
+        // Instantiate explosion effect if available
         if (explosionPrefab != null)
         {
             GameObject explosionInstance = Instantiate(explosionPrefab, transform.position, transform.rotation);
@@ -86,25 +96,27 @@ public class HealthComponent : NetworkBehaviour
             NetworkObject netObject = GetComponent<NetworkObject>();
             if (netObject != null && netObject.IsSpawned)
             {
-                // Despawn for all clients before returning to the pool
-                netObject.Despawn();
+                // Return the network object to the pool
+                NetworkObjectPool.Singleton.ReturnNetworkObject(netObject, objectLoader.GetOriginalPrefab());
+
+                // Despawn the object on the network
+                DeactivateClientRpc();
             }
-
-            NetworkObjectPool.Singleton.ReturnNetworkObject(netObject, objectLoader.GetOriginalPrefab());
-        }
-        else
-        {
-            Destroy(gameObject); // Fallback
-        }
-
-        if (healthSlider != null)
-        {
-            healthSlider.gameObject.SetActive(false);
         }
     }
 
+    [ClientRpc]
+    private void DeactivateClientRpc()
+    {
+        gameObject.SetActive(false);
+    }
+
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if (currentHealth.Value == 0) return;
+        if (isDead) return;
+    
         if (collision.gameObject.CompareTag("Bullet"))
         {
             Bullet bullet = collision.gameObject.GetComponent<Bullet>();
@@ -118,6 +130,11 @@ public class HealthComponent : NetworkBehaviour
         else if (IsServer)
         {
             ApplyDamage(collisionDamage);
+        }
+
+                if (currentHealth.Value <= 0)
+        {
+            HandleDeath();
         }
     }
 

@@ -12,6 +12,7 @@ TagManager:
   - Friend
   - Neutral
   - prefab
+  - Inactive
   layers:
   - Default
   - TransparentFX
