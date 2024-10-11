@@ -132,8 +132,14 @@ public NetworkObject GetNetworkObject(GameObject prefab, Vector3 position, Quate
 
         void ActionOnGet(NetworkObject networkObject)
         {
-           // Debug.Log($"[NetworkObjectPool] Activating {networkObject.name} from the pool.");
             networkObject.gameObject.SetActive(true);
+
+            // Reset health on activation
+            var healthComponent = networkObject.GetComponent<HealthComponent>();
+            if (healthComponent != null)
+            {
+                healthComponent.currentHealth.Value = healthComponent.maxHealth;
+            }
         }
 
         void ActionOnRelease(NetworkObject networkObject)
