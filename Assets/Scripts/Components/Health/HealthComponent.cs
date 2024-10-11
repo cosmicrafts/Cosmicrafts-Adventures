@@ -59,7 +59,6 @@ public class HealthComponent : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void TakeDamageServerRpc(float amount)
     {
-        // Check if the network object is initialized
         if (IsSpawned)
         {
             ApplyDamage(amount);
@@ -74,16 +73,13 @@ public class HealthComponent : NetworkBehaviour
     {
         float newHealth = currentHealth.Value - amount;
 
-        // Prevent health from going below zero
         if (newHealth < 0)
         {
             newHealth = 0;
         }
 
-        // Update the NetworkVariable
         currentHealth.Value = newHealth;
 
-        // Handle death if health is zero
         if (currentHealth.Value <= 0)
         {
             HandleDeath();
@@ -96,28 +92,19 @@ public class HealthComponent : NetworkBehaviour
         if (explosionPrefab != null)
         {
             GameObject explosionInstance = Instantiate(explosionPrefab, transform.position, transform.rotation);
-            
-            // Use the explosionDuration to destroy the explosion instance after the set time
             Destroy(explosionInstance, explosionDuration); 
         }
-        else
-        {
-            Debug.LogWarning("Explosion prefab not assigned.");
-        }
 
-        // Instead of destroying, return the object to the pool
+        // Return the object to the pool using the original prefab
         if (objectLoader != null)
         {
-            int poolIndex = objectLoader.GetPoolIndex(); // Get pool index from the ObjectLoader
-            ObjectPooler.Instance.ReturnToPool(gameObject, poolIndex); // Return object to pool
+            NetworkObjectPool.Singleton.ReturnNetworkObject(GetComponent<NetworkObject>(), objectLoader.GetOriginalPrefab()); // Use the original prefab here
         }
         else
         {
-            Debug.LogWarning("ObjectLoader is not found on this object.");
             Destroy(gameObject); // Fallback to destroying if no pooling is available
         }
 
-        // Optionally, disable health slider and any other visuals related to the object before pooling
         if (healthSlider != null)
         {
             healthSlider.gameObject.SetActive(false);
@@ -131,20 +118,17 @@ public class HealthComponent : NetworkBehaviour
             Bullet bullet = collision.gameObject.GetComponent<Bullet>();
             if (bullet != null)
             {
-                // Client prediction
                 predictedHealth -= bullet.bulletDamage;
                 if (predictedHealth < 0)
                     predictedHealth = 0;
 
                 UpdateHealthUI(predictedHealth);
 
-                // Request server to apply damage (remove IsOwner check here)
-                TakeDamageServerRpc(bullet.bulletDamage);  // Always request server to apply damage
+                TakeDamageServerRpc(bullet.bulletDamage);
             }
         }
         else if (IsServer)
         {
-            // Handle other types of collisions server-side
             ApplyDamage(collisionDamage);
         }
     }
@@ -161,7 +145,6 @@ public class HealthComponent : NetworkBehaviour
     {
         if (IsClient)
         {
-            // Smooth correction towards server-authoritative health
             predictedHealth = Mathf.Lerp(predictedHealth, currentHealth.Value, Time.deltaTime * 10f);
             UpdateHealthUI(predictedHealth);
         }

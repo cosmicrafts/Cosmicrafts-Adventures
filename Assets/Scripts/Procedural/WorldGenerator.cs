@@ -13,7 +13,8 @@ public class WorldGenerator : NetworkBehaviour
     private Dictionary<Vector2Int, Sector> sectors = new Dictionary<Vector2Int, Sector>();
 
     [Header("Settings")]
-    public GameObject objectPrefab;
+    public GameObject asteroidPrefab;
+    public GameObject enemyPrefab;
     public int asteroidsPerSector = 5;
     public int enemiesPerSector = 2;
     public float enemySpawnDistance = 10;
@@ -39,12 +40,7 @@ public class WorldGenerator : NetworkBehaviour
     {
         if (IsServer)
         {
-            int asteroidIndex = ObjectManager.Instance.GetObjectSOIndex(asteroidConfiguration);
-            int enemyIndex = ObjectManager.Instance.GetObjectSOIndex(enemyConfiguration);
-
-            ObjectPooler.Instance.CreatePool(objectPrefab, asteroidsPerSector, asteroidIndex);
-            ObjectPooler.Instance.CreatePool(objectPrefab, enemiesPerSector, enemyIndex);
-
+            // Server-only object generation
             GenerateInitialSectors();
             StartCoroutine(RegenerateObjectsCoroutine());
         }
@@ -96,13 +92,19 @@ public class WorldGenerator : NetworkBehaviour
 
     private void GenerateObjectsInSector(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration, float[,] noiseGrid)
     {
-        int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration);
+        GameObject prefab = isEnemy ? enemyPrefab : asteroidPrefab;
+        if (prefab == null)
+        {
+            Debug.LogError("[WorldGenerator] Prefab is null! Ensure the prefab references are set correctly.");
+            return;
+        }
+
         for (int i = 0; i < objectCount; i++)
         {
             Vector3 position = GetPositionFromNoiseGrid(sectorCoords, isEnemy ? enemySpawnDistance : 0, noiseGrid, i);
             if (position != Vector3.zero)
             {
-                SpawnObject(position, configIndex);
+                SpawnObject(position, prefab, configuration);
             }
         }
     }
@@ -121,42 +123,51 @@ public class WorldGenerator : NetworkBehaviour
         return (minDistance > 0 && Vector3.Distance(Vector3.zero, position) < minDistance) ? Vector3.zero : position;
     }
 
-    private void SpawnObject(Vector3 position, int configIndex)
+    private void SpawnObject(Vector3 position, GameObject prefab, ObjectSO configuration)
     {
-        if (IsServer)
+        if (!IsServer) return;
+
+        // Get object from NetworkObjectPool
+        NetworkObject netObj = NetworkObjectPool.Singleton.GetNetworkObject(prefab, position, Quaternion.identity);
+        
+        if (netObj != null && !netObj.IsSpawned)
         {
-            GameObject obj = FindInactiveObject(objectPrefab);
-            if (obj == null)
-            {
-                // No inactive object found, expand pool and create new one
-                obj = ObjectPooler.Instance.GetObjectFromPool(configIndex, position, Quaternion.identity, objectPrefab);
-            }
-            else
-            {
-                // Reuse the inactive object
-                obj.transform.position = position;
-                obj.SetActive(true);
-            }
+            netObj.Spawn(true); // Server spawns the object and synchronizes to clients
+            Debug.Log($"[WorldGenerator] {prefab.name} has been spawned on the network.");
+        }
 
-            NetworkObject netObj = obj.GetComponent<NetworkObject>();
-            if (netObj != null && !netObj.IsSpawned)
-            {
-                netObj.Spawn();
-            }
+        // Configure the object on server
+        var objectLoader = netObj.GetComponent<ObjectLoader>();
+        if (objectLoader != null)
+        {
+            objectLoader.SetConfigurationFromWorldGenerator(configuration, ObjectManager.Instance.GetObjectSOIndex(configuration));
+        }
 
-            ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
-            var objectLoader = obj.GetComponent<ObjectLoader>();
-            if (objectLoader != null)
-            {
-                objectLoader.SetConfigurationFromWorldGenerator(configuration, configIndex);
-            }
+        // Inform clients about the spawned object
+        InformClientAboutSpawnedObjectClientRpc(position, ObjectManager.Instance.GetObjectSOIndex(configuration));
+    }
+
+    [ClientRpc]
+    private void InformClientAboutSpawnedObjectClientRpc(Vector3 position, int configIndex)
+    {
+        if (IsServer) return;
+
+        // Clients only activate objects, no need to spawn locally
+        ObjectSO configuration = ObjectManager.Instance.GetObjectSOByIndex(configIndex);
+        GameObject obj = FindInactiveObject(); // Use the prefab tag or custom tag logic if needed
+
+        if (obj != null)
+        {
+            obj.SetActive(true);
+            var loader = obj.GetComponent<ObjectLoader>();
+            loader?.SetConfigurationFromWorldGenerator(configuration, configIndex);
         }
     }
 
-    // Method to search for inactive objects in the pool by their tag (as per the old implementation)
-    private GameObject FindInactiveObject(GameObject prefab)
+    private GameObject FindInactiveObject()
     {
-        GameObject[] objects = GameObject.FindGameObjectsWithTag(prefab.tag);
+        // Logic for finding inactive object in the scene
+        GameObject[] objects = GameObject.FindGameObjectsWithTag("YourTag"); // Replace with the actual tag
         foreach (GameObject obj in objects)
         {
             if (!obj.activeInHierarchy)
@@ -185,106 +196,91 @@ public class WorldGenerator : NetworkBehaviour
                 handle = RegenerateSectorInBatches(sector, enemiesPerSector, true, enemyConfiguration, noiseGrid);
                 handle.Complete();
             }
-
-            yield return null;
-        }
-    }
-private JobHandle RegenerateSectorInBatches(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration, float[,] noiseGrid)
-{
-    // Create NativeArrays for noiseGrid and positions
-    NativeArray<float> noiseGridNative = new NativeArray<float>(objectCount * 2, Allocator.TempJob);
-    NativeArray<Vector3> positionsNative = new NativeArray<Vector3>(objectCount, Allocator.TempJob);
-
-    // Fill NativeArray with noise grid data
-    for (int i = 0; i < objectCount; i++)
-    {
-        noiseGridNative[i * 2] = noiseGrid[i, 0];
-        noiseGridNative[i * 2 + 1] = noiseGrid[i, 1];
-    }
-
-    // Set up the job
-    RegenerateObjectsJob job = new RegenerateObjectsJob
-    {
-        sectorCoords = sectorCoords,
-        objectCount = objectCount,
-        isEnemy = isEnemy,
-        noiseGrid = noiseGridNative,
-        positions = positionsNative,
-        sectorSize = sectorSize
-    };
-
-    // Schedule the job and get the JobHandle
-    JobHandle handle = job.Schedule();
-
-    // Start the coroutine to process the objects after the job is completed
-    StartCoroutine(SpawnObjectsAfterJob(sectorCoords, objectCount, configuration, positionsNative, handle));
-
-    return handle;
-}
-
-private IEnumerator SpawnObjectsAfterJob(Vector2Int sectorCoords, int objectCount, ObjectSO configuration, NativeArray<Vector3> positions, JobHandle handle)
-{
-    yield return new WaitUntil(() => handle.IsCompleted); // Wait until the job is done
-
-    handle.Complete(); // Ensure the job has fully completed
-
-    int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration);
-
-    // Spawn the objects in batches over multiple frames
-    for (int i = 0; i < objectCount; i++)
-    {
-        if (i % objectsPerFrame == 0)
-        {
-            yield return null; // Yield to the next frame every 'objectsPerFrame'
-        }
-
-        Vector3 position = positions[i];
-        if (position != Vector3.zero)
-        {
-            SpawnObject(position, configIndex);
         }
     }
 
-    // Dispose the NativeArray after processing
-    positions.Dispose();
-}
-
-[BurstCompile]
-private struct RegenerateObjectsJob : IJob
-{
-    public Vector2Int sectorCoords;
-    public int objectCount;
-    public bool isEnemy;
-    public int sectorSize;
-
-    // Automatically dispose of noiseGrid after the job is complete
-    [DeallocateOnJobCompletion] public NativeArray<float> noiseGrid;
-
-    // Manually dispose of positions after job completion in coroutine
-    public NativeArray<Vector3> positions;
-
-    public void Execute()
+    private JobHandle RegenerateSectorInBatches(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration, float[,] noiseGrid)
     {
+        NativeArray<float> noiseGridNative = new NativeArray<float>(objectCount * 2, Allocator.TempJob);
+        NativeArray<Vector3> positionsNative = new NativeArray<Vector3>(objectCount, Allocator.TempJob);
+
         for (int i = 0; i < objectCount; i++)
         {
-            positions[i] = GetPositionFromNoiseGrid(sectorCoords, isEnemy ? 10f : 0f, noiseGrid, i);
+            noiseGridNative[i * 2] = noiseGrid[i, 0];
+            noiseGridNative[i * 2 + 1] = noiseGrid[i, 1];
+        }
+
+        RegenerateObjectsJob job = new RegenerateObjectsJob
+        {
+            sectorCoords = sectorCoords,
+            objectCount = objectCount,
+            isEnemy = isEnemy,
+            noiseGrid = noiseGridNative,
+            positions = positionsNative,
+            sectorSize = sectorSize
+        };
+
+        JobHandle handle = job.Schedule();
+        StartCoroutine(SpawnObjectsAfterJob(sectorCoords, objectCount, configuration, positionsNative, handle));
+
+        return handle;
+    }
+
+    private IEnumerator SpawnObjectsAfterJob(Vector2Int sectorCoords, int objectCount, ObjectSO configuration, NativeArray<Vector3> positions, JobHandle handle)
+    {
+        yield return new WaitUntil(() => handle.IsCompleted);
+        handle.Complete();
+
+        GameObject prefab = (configuration == enemyConfiguration) ? enemyPrefab : asteroidPrefab;
+
+        for (int i = 0; i < objectCount; i++)
+        {
+            if (i % objectsPerFrame == 0)
+            {
+                yield return null;
+            }
+
+            Vector3 position = positions[i];
+            if (position != Vector3.zero)
+            {
+                SpawnObject(position, prefab, configuration);
+            }
+        }
+
+        positions.Dispose();
+    }
+
+    [BurstCompile]
+    private struct RegenerateObjectsJob : IJob
+    {
+        public Vector2Int sectorCoords;
+        public int objectCount;
+        public bool isEnemy;
+        public int sectorSize;
+
+        [DeallocateOnJobCompletion] public NativeArray<float> noiseGrid;
+        public NativeArray<Vector3> positions;
+
+        public void Execute()
+        {
+            for (int i = 0; i < objectCount; i++)
+            {
+                positions[i] = GetPositionFromNoiseGrid(sectorCoords, isEnemy ? 10f : 0f, noiseGrid, i);
+            }
+        }
+
+        private Vector3 GetPositionFromNoiseGrid(Vector2Int sectorCoords, float minDistance, NativeArray<float> noiseGrid, int index)
+        {
+            float xNoise = noiseGrid[index * 2];
+            float yNoise = noiseGrid[index * 2 + 1];
+
+            Vector3 position = new Vector3(
+                sectorCoords.x * sectorSize + (xNoise * sectorSize),
+                sectorCoords.y * sectorSize + (yNoise * sectorSize),
+                0f
+            );
+
+            return (minDistance > 0 && Vector3.Distance(Vector3.zero, position) < minDistance) ? Vector3.zero : position;
         }
     }
-
-    private Vector3 GetPositionFromNoiseGrid(Vector2Int sectorCoords, float minDistance, NativeArray<float> noiseGrid, int index)
-    {
-        float xNoise = noiseGrid[index * 2];
-        float yNoise = noiseGrid[index * 2 + 1];
-
-        Vector3 position = new Vector3(
-            sectorCoords.x * sectorSize + (xNoise * sectorSize),
-            sectorCoords.y * sectorSize + (yNoise * sectorSize),
-            0f
-        );
-
-        return (minDistance > 0 && Vector3.Distance(Vector3.zero, position) < minDistance) ? Vector3.zero : position;
-    }
-}
-
-
 }

@@ -10,8 +10,32 @@ public class ObjectLoader : NetworkBehaviour
 
     public ObjectSO objectConfiguration;
 
-    // New field to store the pool index
     private int poolIndex;
+
+    // Method to set the pool index when this object is spawned from the pool
+    public void SetPoolIndex(int index)
+    {
+        poolIndex = index;
+    }
+
+    // Method to get the pool index when returning the object to the pool
+    public int GetPoolIndex()
+    {
+        return poolIndex;
+    }
+
+    private GameObject originalPrefab; // Store the original prefab reference
+
+    // New method to set the original prefab reference
+    public void SetOriginalPrefab(GameObject prefab)
+    {
+        originalPrefab = prefab;
+    }
+
+    public GameObject GetOriginalPrefab()
+    {
+        return originalPrefab;
+    }
 
     public void SetConfigurationFromWorldGenerator(ObjectSO configuration, int configIndex)
     {
@@ -104,17 +128,5 @@ public class ObjectLoader : NetworkBehaviour
             objectConfiguration = config;
             ConfigurationApplier.ApplyConfiguration(gameObject, objectConfiguration);
         }
-    }
-
-    // Method to set the pool index when this object is spawned from the pool
-    public void SetPoolIndex(int index)
-    {
-        poolIndex = index;
-    }
-
-    // Method to get the pool index when returning the object to the pool
-    public int GetPoolIndex()
-    {
-        return poolIndex;
     }
 }
