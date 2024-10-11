@@ -189,94 +189,102 @@ public class WorldGenerator : NetworkBehaviour
             yield return null;
         }
     }
+private JobHandle RegenerateSectorInBatches(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration, float[,] noiseGrid)
+{
+    // Create NativeArrays for noiseGrid and positions
+    NativeArray<float> noiseGridNative = new NativeArray<float>(objectCount * 2, Allocator.TempJob);
+    NativeArray<Vector3> positionsNative = new NativeArray<Vector3>(objectCount, Allocator.TempJob);
 
-    private JobHandle RegenerateSectorInBatches(Vector2Int sectorCoords, int objectCount, bool isEnemy, ObjectSO configuration, float[,] noiseGrid)
+    // Fill NativeArray with noise grid data
+    for (int i = 0; i < objectCount; i++)
     {
-        NativeArray<float> noiseGridNative = new NativeArray<float>(objectCount * 2, Allocator.TempJob);
-        NativeArray<Vector3> positionsNative = new NativeArray<Vector3>(objectCount, Allocator.TempJob);
+        noiseGridNative[i * 2] = noiseGrid[i, 0];
+        noiseGridNative[i * 2 + 1] = noiseGrid[i, 1];
+    }
 
-        // Convert the 2D array to NativeArray for Jobs
+    // Set up the job
+    RegenerateObjectsJob job = new RegenerateObjectsJob
+    {
+        sectorCoords = sectorCoords,
+        objectCount = objectCount,
+        isEnemy = isEnemy,
+        noiseGrid = noiseGridNative,
+        positions = positionsNative,
+        sectorSize = sectorSize
+    };
+
+    // Schedule the job and get the JobHandle
+    JobHandle handle = job.Schedule();
+
+    // Start the coroutine to process the objects after the job is completed
+    StartCoroutine(SpawnObjectsAfterJob(sectorCoords, objectCount, configuration, positionsNative, handle));
+
+    return handle;
+}
+
+private IEnumerator SpawnObjectsAfterJob(Vector2Int sectorCoords, int objectCount, ObjectSO configuration, NativeArray<Vector3> positions, JobHandle handle)
+{
+    yield return new WaitUntil(() => handle.IsCompleted); // Wait until the job is done
+
+    handle.Complete(); // Ensure the job has fully completed
+
+    int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration);
+
+    // Spawn the objects in batches over multiple frames
+    for (int i = 0; i < objectCount; i++)
+    {
+        if (i % objectsPerFrame == 0)
+        {
+            yield return null; // Yield to the next frame every 'objectsPerFrame'
+        }
+
+        Vector3 position = positions[i];
+        if (position != Vector3.zero)
+        {
+            SpawnObject(position, configIndex);
+        }
+    }
+
+    // Dispose the NativeArray after processing
+    positions.Dispose();
+}
+
+[BurstCompile]
+private struct RegenerateObjectsJob : IJob
+{
+    public Vector2Int sectorCoords;
+    public int objectCount;
+    public bool isEnemy;
+    public int sectorSize;
+
+    // Automatically dispose of noiseGrid after the job is complete
+    [DeallocateOnJobCompletion] public NativeArray<float> noiseGrid;
+
+    // Manually dispose of positions after job completion in coroutine
+    public NativeArray<Vector3> positions;
+
+    public void Execute()
+    {
         for (int i = 0; i < objectCount; i++)
         {
-            noiseGridNative[i * 2] = noiseGrid[i, 0];
-            noiseGridNative[i * 2 + 1] = noiseGrid[i, 1];
+            positions[i] = GetPositionFromNoiseGrid(sectorCoords, isEnemy ? 10f : 0f, noiseGrid, i);
         }
-
-        RegenerateObjectsJob job = new RegenerateObjectsJob
-        {
-            sectorCoords = sectorCoords,
-            objectCount = objectCount,
-            isEnemy = isEnemy,
-            noiseGrid = noiseGridNative,
-            positions = positionsNative,
-            sectorSize = sectorSize
-        };
-
-        JobHandle handle = job.Schedule();
-
-        StartCoroutine(SpawnObjectsAfterJob(sectorCoords, objectCount, configuration, positionsNative, handle));
-
-        return handle;
     }
 
-    private IEnumerator SpawnObjectsAfterJob(Vector2Int sectorCoords, int objectCount, ObjectSO configuration, NativeArray<Vector3> positions, JobHandle handle)
+    private Vector3 GetPositionFromNoiseGrid(Vector2Int sectorCoords, float minDistance, NativeArray<float> noiseGrid, int index)
     {
-        yield return new WaitUntil(() => handle.IsCompleted); // Wait until the job is done
+        float xNoise = noiseGrid[index * 2];
+        float yNoise = noiseGrid[index * 2 + 1];
 
-        handle.Complete(); // Ensure the job has fully completed
+        Vector3 position = new Vector3(
+            sectorCoords.x * sectorSize + (xNoise * sectorSize),
+            sectorCoords.y * sectorSize + (yNoise * sectorSize),
+            0f
+        );
 
-        int configIndex = ObjectManager.Instance.GetObjectSOIndex(configuration);
-
-        // Spawn the objects in batches over multiple frames
-        for (int i = 0; i < objectCount; i++)
-        {
-            if (i % objectsPerFrame == 0)
-            {
-                yield return null; // Yield to the next frame every 'objectsPerFrame'
-            }
-
-            Vector3 position = positions[i];
-            if (position != Vector3.zero)
-            {
-                SpawnObject(position, configIndex);
-            }
-        }
-
-        positions.Dispose(); // Clean up NativeArray after spawning
+        return (minDistance > 0 && Vector3.Distance(Vector3.zero, position) < minDistance) ? Vector3.zero : position;
     }
+}
 
-    [BurstCompile]
-    private struct RegenerateObjectsJob : IJob
-    {
-        public Vector2Int sectorCoords;
-        public int objectCount;
-        public bool isEnemy;
-        [NativeDisableParallelForRestriction]
-        public NativeArray<float> noiseGrid;
-        [NativeDisableParallelForRestriction]
-        public NativeArray<Vector3> positions;
-        public int sectorSize;
 
-        public void Execute()
-        {
-            for (int i = 0; i < objectCount; i++)
-            {
-                positions[i] = GetPositionFromNoiseGrid(sectorCoords, isEnemy ? 10f : 0f, noiseGrid, i);
-            }
-        }
-
-        private Vector3 GetPositionFromNoiseGrid(Vector2Int sectorCoords, float minDistance, NativeArray<float> noiseGrid, int index)
-        {
-            float xNoise = noiseGrid[index * 2];
-            float yNoise = noiseGrid[index * 2 + 1];
-
-            Vector3 position = new Vector3(
-                sectorCoords.x * sectorSize + (xNoise * sectorSize),
-                sectorCoords.y * sectorSize + (yNoise * sectorSize),
-                0f
-            );
-
-            return (minDistance > 0 && Vector3.Distance(Vector3.zero, position) < minDistance) ? Vector3.zero : position;
-        }
-    }
 }

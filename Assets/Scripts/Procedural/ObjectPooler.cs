@@ -54,7 +54,7 @@ public class ObjectPooler : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"Pool with index {objectIndex} does not exist.");
+           // Debug.LogWarning($"Pool with index {objectIndex} does not exist.");
             return null;
         }
     }
@@ -64,7 +64,7 @@ public class ObjectPooler : MonoBehaviour
     {
         if (!poolDictionary.ContainsKey(objectIndex))
         {
-            Debug.Log($"Pool with index {objectIndex} doesn't exist. Creating new pool.");
+            // Debug.Log($"Pool with index {objectIndex} doesn't exist. Creating new pool.");
             CreatePool(prefab, expandSize, objectIndex);
         }
     }
@@ -79,7 +79,7 @@ public GameObject GetObjectFromPool(int objectIndex, Vector3 position, Quaternio
     // If pool is empty, instantiate new objects
     if (objectPool.Count == 0)
     {
-        Debug.Log($"Pool with index {objectIndex} is empty, expanding pool.");
+        // Debug.Log($"Pool with index {objectIndex} is empty, expanding pool.");
         for (int i = 0; i < expandPoolSize; i++)
         {
             GameObject newObj = Instantiate(prefab);
