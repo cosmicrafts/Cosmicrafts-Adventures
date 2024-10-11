@@ -138,7 +138,7 @@ public NetworkObject GetNetworkObject(GameObject prefab, Vector3 position, Quate
 
         void ActionOnRelease(NetworkObject networkObject)
         {
-            Debug.Log($"[NetworkObjectPool] Deactivating {networkObject.name} and returning it to the pool.");
+           // Debug.Log($"[NetworkObjectPool] Deactivating {networkObject.name} and returning it to the pool.");
             networkObject.gameObject.SetActive(false);
         }
 

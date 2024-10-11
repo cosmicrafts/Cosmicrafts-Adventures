@@ -125,27 +125,39 @@ public class WorldGenerator : NetworkBehaviour
 
     private void SpawnObject(Vector3 position, GameObject prefab, ObjectSO configuration)
     {
-        if (!IsServer) return;
+        if (!IsServer) return; // Ensure only server executes this code
 
-        // Get object from NetworkObjectPool
+        // Get object from the NetworkObjectPool
         NetworkObject netObj = NetworkObjectPool.Singleton.GetNetworkObject(prefab, position, Quaternion.identity);
-        
-        if (netObj != null && !netObj.IsSpawned)
-        {
-            netObj.Spawn(true); // Server spawns the object and synchronizes to clients
-            Debug.Log($"[WorldGenerator] {prefab.name} has been spawned on the network.");
-        }
 
-        // Configure the object on server
-        var objectLoader = netObj.GetComponent<ObjectLoader>();
-        if (objectLoader != null)
+        if (netObj != null)
         {
-            objectLoader.SetConfigurationFromWorldGenerator(configuration, ObjectManager.Instance.GetObjectSOIndex(configuration));
-        }
+            Debug.Log($"[WorldGenerator] Retrieved {prefab.name} from the pool and spawning it.");
 
-        // Inform clients about the spawned object
-        InformClientAboutSpawnedObjectClientRpc(position, ObjectManager.Instance.GetObjectSOIndex(configuration));
+            // Only spawn the object if it is not already spawned
+            if (!netObj.IsSpawned)
+            {
+                netObj.Spawn(true); // Ensure the object is spawned by the server and synchronized to clients
+                Debug.Log($"[WorldGenerator] {prefab.name} has been spawned on the network.");
+            }
+
+            // Handle object configuration and loader
+            var objectLoader = netObj.GetComponent<ObjectLoader>();
+            if (objectLoader != null)
+            {
+                // Apply the configuration using ObjectLoader, which sets up the ObjectSO configuration
+                objectLoader.SetConfigurationFromWorldGenerator(configuration, ObjectManager.Instance.GetObjectSOIndex(configuration));
+
+                // Set the original prefab for proper pooling behavior when returning objects
+                objectLoader.SetOriginalPrefab(prefab); // This ensures the object can be returned to the correct pool
+            }
+        }
+        else
+        {
+            Debug.LogError($"[WorldGenerator] Failed to get {prefab.name} from the pool.");
+        }
     }
+
 
     [ClientRpc]
     private void InformClientAboutSpawnedObjectClientRpc(Vector3 position, int configIndex)
