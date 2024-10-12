@@ -6332,7 +6332,6 @@ MonoBehaviour:
   regenerationInterval: 30
   objectsPerFrame: 1
   configurations:
-  - {fileID: 11400000, guid: 45614961dffe51ab9a2fdeaaabdf7d95, type: 2}
   - {fileID: 11400000, guid: 7fe5b224f9551b259bd499e083d80611, type: 2}
   - {fileID: 11400000, guid: 3c1bbc98e3f3efee3b17988444a4e4a6, type: 2}
   - {fileID: 11400000, guid: cd14dcfd3f1ac9339a43bff17eb9a577, type: 2}

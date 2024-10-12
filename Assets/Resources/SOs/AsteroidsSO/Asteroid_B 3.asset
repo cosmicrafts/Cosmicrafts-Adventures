@@ -12,7 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 433de92c65ee249e6893dba0da27624e, type: 3}
   m_Name: Asteroid_B 3
   m_EditorClassIdentifier: 
-  minDriftSpeed: 0.75
-  maxDriftSpeed: 1.5
-  minRotationSpeed: 70
-  maxRotationSpeed: 130
+  movementType: 1
+  minDriftSpeed: 1
+  maxDriftSpeed: 5
+  minCircularSpeed: 0.1
+  maxCircularSpeed: 0.25
+  orbitRadius: 8
+  minSpiralSpeed: 0.5
+  maxSpiralSpeed: 2
+  spiralGrowthRate: 0.1
+  minZigZagSpeed: 1
+  maxZigZagSpeed: 2
+  zigZagFrequency: 1
+  minRotationSpeed: 10
+  maxRotationSpeed: 100
+  randomStartDelay: 0.25

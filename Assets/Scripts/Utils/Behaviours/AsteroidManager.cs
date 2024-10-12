@@ -1,127 +1,115 @@
 using System.Collections.Generic;
-using Unity.Burst;
-using Unity.Collections;
-using Unity.Jobs;
 using UnityEngine;
 
 public class AsteroidManager : MonoBehaviour
 {
     public static AsteroidManager Instance;
     private List<AsteroidData> asteroids = new List<AsteroidData>();
-    private NativeArray<Vector3> positions;
-    private NativeArray<Vector2> directions;
-    private NativeArray<float> speeds;
-    private bool jobsInitialized = false;
 
     private void Awake()
     {
         Instance = this;
     }
-
-    private void OnDestroy()
+    public enum MovementType
     {
-        // Dispose native arrays when the object is destroyed
-        if (jobsInitialized)
-        {
-            positions.Dispose();
-            directions.Dispose();
-            speeds.Dispose();
-        }
+        Linear,
+        Circular,
+        Spiral,
+        RandomJitter,
+        ZigZag
     }
 
-    // Add an asteroid to the list to be batched
     public void RegisterAsteroid(GameObject asteroid, Vector2 direction, float driftSpeed)
     {
-        asteroids.Add(new AsteroidData(asteroid, direction, driftSpeed));
-        InitializeNativeArrays();
+        asteroids.Add(new AsteroidData(asteroid, direction, driftSpeed, MovementType.Linear));
     }
 
-    // Remove asteroid when no longer active
-    public void UnregisterAsteroid(GameObject asteroid)
+    public void RegisterAsteroidForCircularMovement(GameObject asteroid, Vector2 center, float speed, float radius)
     {
-        asteroids.RemoveAll(a => a.asteroid == asteroid);
-        InitializeNativeArrays();
+        asteroids.Add(new AsteroidData(asteroid, Vector2.zero, speed, MovementType.Circular, center, radius));
     }
 
-    // Reinitialize native arrays if the asteroid list changes
-    private void InitializeNativeArrays()
+    public void RegisterAsteroidForSpiralMovement(GameObject asteroid, Vector2 initialDirection, float speed, float growthRate)
     {
-        // Dispose old arrays if they exist
-        if (jobsInitialized)
-        {
-            positions.Dispose();
-            directions.Dispose();
-            speeds.Dispose();
-        }
+        asteroids.Add(new AsteroidData(asteroid, initialDirection, speed, MovementType.Spiral, Vector2.zero, growthRate));
+    }
 
-        // Create new native arrays with current asteroid data size
-        int count = asteroids.Count;
-        positions = new NativeArray<Vector3>(count, Allocator.Persistent);
-        directions = new NativeArray<Vector2>(count, Allocator.Persistent);
-        speeds = new NativeArray<float>(count, Allocator.Persistent);
+    public void RegisterAsteroidForRandomJitter(GameObject asteroid, Vector2 direction, float speed)
+    {
+        asteroids.Add(new AsteroidData(asteroid, direction, speed, MovementType.RandomJitter));
+    }
 
-        jobsInitialized = true;
+    public void RegisterAsteroidForZigZag(GameObject asteroid, Vector2 initialDirection, float speed, float frequency)
+    {
+        asteroids.Add(new AsteroidData(asteroid, initialDirection, speed, MovementType.ZigZag, Vector2.zero, frequency));
     }
 
     private void Update()
     {
-        if (asteroids.Count == 0 || !jobsInitialized) return;
-
-        // Populate the native arrays with current asteroid data
-        for (int i = 0; i < asteroids.Count; i++)
+        float deltaTime = Time.deltaTime;
+        foreach (var asteroid in asteroids)
         {
-            positions[i] = asteroids[i].asteroid.transform.position;
-            directions[i] = asteroids[i].direction;
-            speeds[i] = asteroids[i].driftSpeed;
-        }
+            switch (asteroid.movementType)
+            {
+                case MovementType.Linear:
+                    asteroid.asteroid.transform.Translate(asteroid.direction * asteroid.driftSpeed * deltaTime);
+                    break;
 
-        // Schedule the job to run
-        AsteroidMovementJob movementJob = new AsteroidMovementJob
-        {
-            positions = positions,
-            directions = directions,
-            speeds = speeds,
-            deltaTime = Time.deltaTime
-        };
+                case MovementType.Circular:
+                    asteroid.angle += asteroid.driftSpeed * deltaTime; // Circular movement
+                    asteroid.asteroid.transform.position = asteroid.center + new Vector2(Mathf.Cos(asteroid.angle), Mathf.Sin(asteroid.angle)) * asteroid.radius;
+                    break;
 
-        // Schedule the job for execution
-        JobHandle jobHandle = movementJob.Schedule(asteroids.Count, 64);
-        jobHandle.Complete(); // Ensure the job completes before accessing the results
+                case MovementType.Spiral:
+                    asteroid.angle += asteroid.driftSpeed * deltaTime; // Spiral movement
+                    asteroid.radius += asteroid.growthRate * deltaTime; // Spiral outwards
+                    asteroid.asteroid.transform.position += new Vector3(Mathf.Cos(asteroid.angle), Mathf.Sin(asteroid.angle), 0) * asteroid.radius * deltaTime;
+                    break;
 
-        // Apply the updated positions back to the asteroids
-        for (int i = 0; i < asteroids.Count; i++)
-        {
-            asteroids[i].asteroid.transform.position = positions[i];
+                case MovementType.RandomJitter:
+                    asteroid.direction = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
+                    asteroid.asteroid.transform.Translate(asteroid.direction * asteroid.driftSpeed * deltaTime);
+                    break;
+
+                case MovementType.ZigZag:
+                    asteroid.angle += asteroid.driftSpeed * asteroid.frequency * deltaTime;
+                    float zigZagX = Mathf.Sin(asteroid.angle);
+                    asteroid.asteroid.transform.Translate(new Vector3(zigZagX, asteroid.driftSpeed * deltaTime, 0));
+                    break;
+            }
         }
     }
 
-    // Data structure to hold asteroid details
     private class AsteroidData
     {
         public GameObject asteroid;
         public Vector2 direction;
         public float driftSpeed;
+        public MovementType movementType;
+        public float angle;
+        public Vector2 center;
+        public float radius;
+        public float growthRate;
+        public float frequency;
 
-        public AsteroidData(GameObject asteroid, Vector2 direction, float driftSpeed)
+        // Linear or Jitter
+        public AsteroidData(GameObject asteroid, Vector2 direction, float driftSpeed, MovementType type)
         {
             this.asteroid = asteroid;
             this.direction = direction;
             this.driftSpeed = driftSpeed;
+            this.movementType = type;
         }
-    }
 
-    [BurstCompile]
-    private struct AsteroidMovementJob : IJobParallelFor
-    {
-        public NativeArray<Vector3> positions;
-        [ReadOnly] public NativeArray<Vector2> directions;
-        [ReadOnly] public NativeArray<float> speeds;
-        public float deltaTime;
-
-        public void Execute(int index)
+        // Circular, Spiral, or ZigZag
+        public AsteroidData(GameObject asteroid, Vector2 direction, float driftSpeed, MovementType type, Vector2 center, float param)
         {
-            // Move the position based on direction, speed, and deltaTime
-            positions[index] += (Vector3)(directions[index] * speeds[index] * deltaTime);
+            this.asteroid = asteroid;
+            this.direction = direction;
+            this.driftSpeed = driftSpeed;
+            this.movementType = type;
+            this.center = center;
+            this.radius = param; // Can be radius for circular, growth rate for spiral, or frequency for zigzag
         }
     }
 }

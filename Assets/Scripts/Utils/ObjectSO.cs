@@ -7,19 +7,20 @@ public class ObjectSO : ScriptableObject
     public Sprite objectSprite;
 
     // Transform settings
-    public Vector3 scale = Vector3.one;
+    [Header("Scale Settings")]
+    public float minScale = 0.5f; // Minimum scale for randomization
+    public float maxScale = 1.5f; // Maximum scale for randomization
+    [HideInInspector] public Vector3 scale = Vector3.one; // Final scale applied
 
     // Collider settings
     public float colliderRadius = 1f;
     public bool isTrigger = false;
-    
+
     // Rigidbody2D settings
     public RigidbodyType2D bodyType = RigidbodyType2D.Dynamic;
     public PhysicsMaterial2D physicsMaterial;
     public bool isKinematic = false;
     public float mass = 1f;
-
-
 
     // MovementComponent settings
     public bool hasMovement = true;
@@ -59,4 +60,14 @@ public class ObjectSO : ScriptableObject
 
     // New field for behavior selection in the Inspector
     public BehaviorSO behavior;
+
+    // Randomize and apply uniform scale
+    public void RandomizeScale()
+    {
+        // Generate a random scale value between min and max
+        float randomScale = Random.Range(minScale, maxScale);
+
+        // Apply the same value to X, Y, and Z for uniform scaling
+        scale = new Vector3(randomScale, randomScale, randomScale);
+    }
 }
