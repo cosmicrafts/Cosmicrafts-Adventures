@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      deathstar 1_0: 4078242276586067487
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

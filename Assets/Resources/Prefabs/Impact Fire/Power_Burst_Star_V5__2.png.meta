@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Power_Burst_Star_V5__2_0: 5661018757768824189
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

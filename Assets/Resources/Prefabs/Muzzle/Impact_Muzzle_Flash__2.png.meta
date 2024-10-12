@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Impact_Muzzle_Flash__2_0: 5914826135048317378
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

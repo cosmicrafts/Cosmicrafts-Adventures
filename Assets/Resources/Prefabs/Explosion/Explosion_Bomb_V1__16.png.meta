@@ -822,7 +822,35 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Explosion_Bomb_V1__16_0: 128716813907114984
+      Explosion_Bomb_V1__16_1: 1538328311565439974
+      Explosion_Bomb_V1__16_10: 2104597449846359558
+      Explosion_Bomb_V1__16_11: 8794076339136838381
+      Explosion_Bomb_V1__16_12: 2731713348264928092
+      Explosion_Bomb_V1__16_13: -7259893122874444222
+      Explosion_Bomb_V1__16_14: -2500695792052992691
+      Explosion_Bomb_V1__16_15: -886493436058329836
+      Explosion_Bomb_V1__16_16: -252523451720993219
+      Explosion_Bomb_V1__16_17: 1096377543190537346
+      Explosion_Bomb_V1__16_18: 5211476603370552439
+      Explosion_Bomb_V1__16_19: -5875730886919162421
+      Explosion_Bomb_V1__16_2: -708135963996692414
+      Explosion_Bomb_V1__16_20: -6340628424727057612
+      Explosion_Bomb_V1__16_21: -1782179718714379051
+      Explosion_Bomb_V1__16_22: -4293264480081634189
+      Explosion_Bomb_V1__16_23: -2828707167501329054
+      Explosion_Bomb_V1__16_24: 2497469061400981615
+      Explosion_Bomb_V1__16_25: 8974079029533942927
+      Explosion_Bomb_V1__16_26: 9214220197384653185
+      Explosion_Bomb_V1__16_27: 750434699395285900
+      Explosion_Bomb_V1__16_3: 5137932397473255682
+      Explosion_Bomb_V1__16_4: 852621052033090636
+      Explosion_Bomb_V1__16_5: -3940716034433527121
+      Explosion_Bomb_V1__16_6: -6501798470493887461
+      Explosion_Bomb_V1__16_7: 4860051194907421061
+      Explosion_Bomb_V1__16_8: -8374140209757081885
+      Explosion_Bomb_V1__16_9: -851833361303201257
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -222,7 +222,11 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Impact_Muzzle_Flash__8_0: 4769931176713523086
+      Impact_Muzzle_Flash__8_1: -1418960096896725546
+      Impact_Muzzle_Flash__8_2: -3722767311366850602
+      Impact_Muzzle_Flash__8_3: 7316751181954203906
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
