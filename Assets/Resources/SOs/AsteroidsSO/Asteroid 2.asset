@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c4ee91495e7d416bb5a7476be1825ea, type: 3}
   m_Name: Asteroid 2
   m_EditorClassIdentifier: 
-  objectSprite: {fileID: 21300000, guid: a2cee9d052e59de49b7be65115aa2e46, type: 3}
+  objectSprite: {fileID: 21300000, guid: 50f6fb27bf553f8bda71b267f3087e56, type: 3}
+  minScale: 0.5
+  maxScale: 1.5
   scale: {x: 0.35, y: 0.35, z: 1}
   colliderRadius: 2
   isTrigger: 0

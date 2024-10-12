@@ -915,7 +915,7 @@ RectTransform:
   m_GameObject: {fileID: 536929888}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_LocalScale: {x: 1.25, y: 1.25, z: 1.25}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 1473140042}
@@ -1001,7 +1001,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -3708377168491533583, guid: 6ef6d92357c8bb98699c6f6087d33358, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6ef6d92357c8bb98699c6f6087d33358, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -1058,7 +1058,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!199 &708330003
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -7148,6 +7148,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: cd14dcfd3f1ac9339a43bff17eb9a577, type: 2}
   - {fileID: 11400000, guid: f8d8c23fccd586ece9113816dbd07d2f, type: 2}
   - {fileID: 11400000, guid: 0cda141501e3bf742a3b480c639a3e12, type: 2}
+  - {fileID: 11400000, guid: 3bf4f7d7d1692a87b8d0891ca027ef12, type: 2}
   - {fileID: 11400000, guid: ea34f3b2cd2412368932d97e46f9a98b, type: 2}
   - {fileID: 11400000, guid: 7e48ec0fa0375497b8753193fb2b1182, type: 2}
   - {fileID: 11400000, guid: 45614961dffe51ab9a2fdeaaabdf7d95, type: 2}
@@ -7208,6 +7209,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: cd14dcfd3f1ac9339a43bff17eb9a577, type: 2}
   - {fileID: 11400000, guid: f8d8c23fccd586ece9113816dbd07d2f, type: 2}
   - {fileID: 11400000, guid: 0cda141501e3bf742a3b480c639a3e12, type: 2}
+  - {fileID: 11400000, guid: 3bf4f7d7d1692a87b8d0891ca027ef12, type: 2}
 --- !u!114 &1458642477
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7346,7 +7348,7 @@ MonoBehaviour:
   additiveMaterialForeground: {fileID: 2100000, guid: c61ac908fe43b384fb405c5311be3195, type: 2}
   foregroundColor: {r: 1, g: 1, b: 1, a: 1}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  foregroundScaleFactor: 1.25
+  foregroundScaleFactor: 2.7
   backgroundScaleFactor: 1
 --- !u!4 &1474598984
 Transform:

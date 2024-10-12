@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c4ee91495e7d416bb5a7476be1825ea, type: 3}
   m_Name: 1
   m_EditorClassIdentifier: 
-  objectSprite: {fileID: -3708377168491533583, guid: 6ef6d92357c8bb98699c6f6087d33358, type: 3}
+  objectSprite: {fileID: 21300000, guid: 6ef6d92357c8bb98699c6f6087d33358, type: 3}
+  minScale: 0.5
+  maxScale: 1.5
   scale: {x: 0.25, y: 0.25, z: 1}
   colliderRadius: 3
   isTrigger: 0
@@ -24,7 +26,7 @@ MonoBehaviour:
   moveSpeed: 25
   moveSmoothTime: 0.1
   hasRotation: 1
-  rotationSpeed: 120
+  rotationSpeed: 10
   usePointerRotation: 1
   hasShooting: 1
   bulletSpeed: 20
