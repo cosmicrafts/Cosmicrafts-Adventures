@@ -121,7 +121,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8338280399416968410}
   - component: {fileID: 6274300619826020187}
-  - component: {fileID: 6728759563536879886}
   m_Layer: 30
   m_Name: Slider
   m_TagString: Untagged
@@ -202,28 +201,6 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
---- !u!95 &6728759563536879886
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2766816208795412317}
-  m_Enabled: 0
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 7c8057ec3ecb6a0009dbfa0d8c19d3cd, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &4240643594769728058
 GameObject:
   m_ObjectHideFlags: 0
@@ -311,6 +288,7 @@ GameObject:
   - component: {fileID: 9122700511045111383}
   - component: {fileID: 4731550738214483384}
   - component: {fileID: 4560915024470215829}
+  - component: {fileID: 4433768598754329417}
   m_Layer: 30
   m_Name: Healthbar
   m_TagString: Healthbar
@@ -396,6 +374,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 902afaf3a28f110eea1767072d6c80f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!111 &4433768598754329417
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5077535734357111452}
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Animation: {fileID: 7400000, guid: c4dfc11922b8d475e9b9ac5505a220bc, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: c4dfc11922b8d475e9b9ac5505a220bc, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 0
+  m_AnimatePhysics: 0
+  m_UpdateMode: 0
+  m_CullingType: 0
 --- !u!1 &7765503370053134932
 GameObject:
   m_ObjectHideFlags: 0

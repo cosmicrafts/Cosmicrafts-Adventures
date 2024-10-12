@@ -3,6 +3,9 @@ using Unity.Netcode;
 
 public class TeamComponent : NetworkBehaviour
 {
+    // Reference to the SpriteRenderer to change color based on team
+    [SerializeField] private SpriteRenderer spriteRenderer;
+
     // Network variable to synchronize the team tag across clients
     public NetworkVariable<TeamTag> PlayerTeam = new NetworkVariable<TeamTag>(
         TeamTag.Neutral, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -16,8 +19,9 @@ public class TeamComponent : NetworkBehaviour
 
     private void Start()
     {
-        // Set the initial layer based on the team (for local instantiation)
+        // Set the initial layer and color based on the team (for local instantiation)
         SetLayerBasedOnTeam(PlayerTeam.Value);
+        UpdateColorBasedOnTeam(PlayerTeam.Value);
     }
 
     public override void OnNetworkSpawn()
@@ -36,13 +40,14 @@ public class TeamComponent : NetworkBehaviour
         SetTeam(config.teamTag);
     }
 
-    // Change the team and update the corresponding layer
+    // Change the team and update the corresponding layer and color
     public void SetTeam(TeamTag team)
     {
         if (IsServer)
         {
             PlayerTeam.Value = team;
-            SetLayerBasedOnTeam(team); // Update the object's layer based on its team
+            SetLayerBasedOnTeam(team);  // Update the object's layer based on its team
+            UpdateColorBasedOnTeam(team);  // Update the sprite color based on the team
         }
     }
 
@@ -59,6 +64,29 @@ public class TeamComponent : NetworkBehaviour
                 break;
             case TeamTag.Neutral:
                 gameObject.layer = LayerMask.NameToLayer("Neutral");
+                break;
+        }
+    }
+
+    // Set the color of the SpriteRenderer based on the team
+    private void UpdateColorBasedOnTeam(TeamTag team)
+    {
+        if (spriteRenderer == null)
+        {
+            Debug.LogWarning("SpriteRenderer is not assigned!");
+            return;
+        }
+
+        switch (team)
+        {
+            case TeamTag.Friend:
+                spriteRenderer.color = Color.green;
+                break;
+            case TeamTag.Enemy:
+                spriteRenderer.color = Color.red;
+                break;
+            case TeamTag.Neutral:
+                spriteRenderer.color = Color.white;
                 break;
         }
     }

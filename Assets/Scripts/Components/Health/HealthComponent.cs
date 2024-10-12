@@ -8,6 +8,8 @@ public class HealthComponent : NetworkBehaviour
     public NetworkVariable<float> currentHealth = new NetworkVariable<float>(100f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public Slider healthSlider;
     public float collisionDamage = 4f;
+    public Animation animationComponent; // Reference to the Animation component
+    public string damageAnimationName = "Damage"; // Name of the damage animation clip
 
     private float predictedHealth;
     public GameObject explosionPrefab;
@@ -59,6 +61,27 @@ public class HealthComponent : NetworkBehaviour
     {
         predictedHealth = newHealth;
         UpdateHealthUI(predictedHealth);
+
+        // Play the damage animation every time health changes
+        if (newHealth < oldHealth && !isDead) // Only play if health decreases
+        {
+            PlayDamageAnimation();
+        }
+
+        // If health drops to 0, trigger the death sequence
+        if (newHealth <= 0 && !isDead)
+        {
+            HandleDeath();
+        }
+    }
+
+    // Play the damage animation
+    private void PlayDamageAnimation()
+    {
+        if (animationComponent != null && animationComponent.GetClip(damageAnimationName) != null)
+        {
+            animationComponent.Play(damageAnimationName); // Play the Damage animation
+        }
     }
 
     [ServerRpc(RequireOwnership = false)]
