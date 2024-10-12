@@ -9,15 +9,25 @@ public class HealthComponent : NetworkBehaviour
     public Slider healthSlider;
     public float collisionDamage = 4f;
 
-    private float predictedHealth; // For client-side prediction
-    public GameObject explosionPrefab; // Reference to explosion prefab
+    private float predictedHealth;
+    public GameObject explosionPrefab;
     public float explosionDuration = 1f;
-    private bool isDead = false;  // Flag to prevent multiple death handling
-    private ObjectLoader objectLoader; // Reference to ObjectLoader for pooling purposes
+    private bool isDead = false;
+    private ObjectLoader objectLoader;
 
     public void ApplyConfiguration(ObjectSO config)
     {
         maxHealth = config.maxHealth;
+    }
+
+    // OnEnable to reset object when reused from pool
+    private void OnEnable()
+    {
+        isDead = false; // Reset isDead flag when object is re-enabled
+        if (IsServer)
+        {
+            currentHealth.Value = maxHealth; // Reset health on server
+        }
     }
 
     private void Start()
@@ -54,7 +64,7 @@ public class HealthComponent : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void TakeDamageServerRpc(float amount)
     {
-        if (IsSpawned)
+        if (IsSpawned && !isDead)
         {
             ApplyDamage(amount);
         }
@@ -62,11 +72,9 @@ public class HealthComponent : NetworkBehaviour
 
     private void ApplyDamage(float amount)
     {
-        if (currentHealth.Value == 0) return;
-        if (this == null || !this.gameObject.activeInHierarchy) return;
+        if (isDead || currentHealth.Value <= 0) return;  // Simplified conditions
 
-        float newHealth = currentHealth.Value - amount;
-        currentHealth.Value = Mathf.Max(newHealth, 0);
+        currentHealth.Value = Mathf.Max(currentHealth.Value - amount, 0);
 
         if (currentHealth.Value <= 0)
         {
@@ -76,15 +84,10 @@ public class HealthComponent : NetworkBehaviour
 
     private void HandleDeath()
     {
-        if (isDead)
-        {
-            Debug.LogWarning("HandleDeath called more than once for " + gameObject.name);
-            return;
-        }
+        if (isDead) return; // Simplified multiple death check
 
         isDead = true;
 
-        // Instantiate explosion effect if available
         if (explosionPrefab != null)
         {
             GameObject explosionInstance = Instantiate(explosionPrefab, transform.position, transform.rotation);
@@ -96,10 +99,7 @@ public class HealthComponent : NetworkBehaviour
             NetworkObject netObject = GetComponent<NetworkObject>();
             if (netObject != null && netObject.IsSpawned)
             {
-                // Return the network object to the pool
                 NetworkObjectPool.Singleton.ReturnNetworkObject(netObject, objectLoader.GetOriginalPrefab());
-
-                // Despawn the object on the network
                 DeactivateClientRpc();
             }
         }
@@ -111,12 +111,10 @@ public class HealthComponent : NetworkBehaviour
         gameObject.SetActive(false);
     }
 
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (currentHealth.Value == 0) return;
-        if (isDead) return;
-    
+        if (isDead) return; // Only check if already dead
+
         if (collision.gameObject.CompareTag("Bullet"))
         {
             Bullet bullet = collision.gameObject.GetComponent<Bullet>();
@@ -131,17 +129,10 @@ public class HealthComponent : NetworkBehaviour
         {
             ApplyDamage(collisionDamage);
         }
-
-                if (currentHealth.Value <= 0)
-        {
-            HandleDeath();
-        }
     }
 
     private void UpdateHealthUI(float healthValue)
     {
-        if (this == null || !this.gameObject.activeInHierarchy) return;
-
         if (healthSlider != null)
         {
             healthSlider.value = healthValue;

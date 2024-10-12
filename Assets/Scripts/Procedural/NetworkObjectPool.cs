@@ -86,22 +86,22 @@ public class NetworkObjectPool : NetworkBehaviour
     /// <param name="position">The position to spawn the object at.</param>
     /// <param name="rotation">The rotation to spawn the object with.</param>
     /// <returns></returns>
-public NetworkObject GetNetworkObject(GameObject prefab, Vector3 position, Quaternion rotation)
-{
-    if (!m_PooledObjects.ContainsKey(prefab))
+    public NetworkObject GetNetworkObject(GameObject prefab, Vector3 position, Quaternion rotation)
     {
-       // Debug.LogError($"[NetworkObjectPool] Prefab '{prefab.name}' is not registered in the pool. Ensure it is included in PooledPrefabsList.");
-        return null;
+        if (!m_PooledObjects.ContainsKey(prefab))
+        {
+        // Debug.LogError($"[NetworkObjectPool] Prefab '{prefab.name}' is not registered in the pool. Ensure it is included in PooledPrefabsList.");
+            return null;
+        }
+
+        var networkObject = m_PooledObjects[prefab].Get();
+
+        var noTransform = networkObject.transform;
+        noTransform.position = position;
+        noTransform.rotation = rotation;
+
+        return networkObject;
     }
-
-    var networkObject = m_PooledObjects[prefab].Get();
-
-    var noTransform = networkObject.transform;
-    noTransform.position = position;
-    noTransform.rotation = rotation;
-
-    return networkObject;
-}
 
 
     /// <summary>
@@ -109,8 +109,15 @@ public NetworkObject GetNetworkObject(GameObject prefab, Vector3 position, Quate
     /// </summary>
     public void ReturnNetworkObject(NetworkObject networkObject, GameObject prefab)
     {
-        m_PooledObjects[prefab].Release(networkObject);
+        if (prefab == null)
+        {
+            //Debug.LogError("[NetworkObjectPool] The prefab provided is null.");
+            return;
+        }
+
+        m_PooledObjects[prefab].Release(networkObject);  // This line fails if prefab is null
     }
+
 
     /// <summary>
     /// Builds up the cache for a prefab.
@@ -142,7 +149,7 @@ public NetworkObject GetNetworkObject(GameObject prefab, Vector3 position, Quate
             }
         }
 
-        void ActionOnRelease(NetworkObject networkObject)
+        void ActionOnReturn(NetworkObject networkObject)
         {
            // Debug.Log($"[NetworkObjectPool] Deactivating {networkObject.name} and returning it to the pool.");
             networkObject.gameObject.SetActive(false);
@@ -155,7 +162,7 @@ public NetworkObject GetNetworkObject(GameObject prefab, Vector3 position, Quate
         }
 
         m_Prefabs.Add(prefab);
-        m_PooledObjects[prefab] = new ObjectPool<NetworkObject>(CreateFunc, ActionOnGet, ActionOnRelease, ActionOnDestroy, defaultCapacity: prewarmCount);
+        m_PooledObjects[prefab] = new ObjectPool<NetworkObject>(CreateFunc, ActionOnGet, ActionOnReturn, ActionOnDestroy, defaultCapacity: prewarmCount);
 
         // Prewarm the pool
         var prewarmNetworkObjects = new List<NetworkObject>();

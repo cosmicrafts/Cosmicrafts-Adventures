@@ -6329,7 +6329,7 @@ MonoBehaviour:
   enemiesPerSector: 5
   enemySpawnDistance: 25
   noiseScale: 100
-  regenerationInterval: 100
+  regenerationInterval: 30
   objectsPerFrame: 1
   asteroidConfiguration: {fileID: 11400000, guid: 094f3a343d9ca48e4a1f705248c20caa, type: 2}
   enemyConfiguration: {fileID: 11400000, guid: 7e48ec0fa0375497b8753193fb2b1182, type: 2}
