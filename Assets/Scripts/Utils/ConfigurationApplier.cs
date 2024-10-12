@@ -17,6 +17,13 @@ public static class ConfigurationApplier
             spriteRenderer.sprite = objectConfiguration.objectSprite;
         }
 
+        // Apply Transform scale
+        var transform = gameObject.transform;
+        if (transform != null)
+        {
+            transform.localScale = objectConfiguration.scale;  // Apply scale from ObjectSO
+        }
+
         // Apply CircleCollider2D configuration
         var collider = gameObject.GetComponent<CircleCollider2D>();
         if (collider != null)
@@ -31,6 +38,7 @@ public static class ConfigurationApplier
         {
             rigidbody2D.bodyType = objectConfiguration.isKinematic ? RigidbodyType2D.Kinematic : RigidbodyType2D.Dynamic;
             rigidbody2D.sharedMaterial = objectConfiguration.physicsMaterial;
+            rigidbody2D.mass = objectConfiguration.mass;
         }
 
         // Apply MovementComponent configuration

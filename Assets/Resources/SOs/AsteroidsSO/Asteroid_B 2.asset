@@ -9,8 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d0c0a2ea07d94e289dd5a213c4ca580, type: 3}
-  m_Name: EnemyB
+  m_Script: {fileID: 11500000, guid: 433de92c65ee249e6893dba0da27624e, type: 3}
+  m_Name: Asteroid_B 2
   m_EditorClassIdentifier: 
-  enemySpeed: 25
-  detectionRange: 10
+  minDriftSpeed: 0.5
+  maxDriftSpeed: 1.25
+  minRotationSpeed: 60
+  maxRotationSpeed: 120

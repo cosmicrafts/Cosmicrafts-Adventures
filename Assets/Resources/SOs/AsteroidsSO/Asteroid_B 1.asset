@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 433de92c65ee249e6893dba0da27624e, type: 3}
-  m_Name: AsteroidB
+  m_Name: Asteroid_B 1
   m_EditorClassIdentifier: 
   minDriftSpeed: 0.25
-  maxDriftSpeed: 5
-  minRotationSpeed: 40
-  maxRotationSpeed: 160
+  maxDriftSpeed: 1
+  minRotationSpeed: 30
+  maxRotationSpeed: 90

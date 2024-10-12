@@ -10,30 +10,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0c4ee91495e7d416bb5a7476be1825ea, type: 3}
-  m_Name: Enemy
+  m_Name: Asteroid 4
   m_EditorClassIdentifier: 
-  objectSprite: {fileID: 3324485648619394109, guid: 6f3f3d37ace516c33bd1e4ff0a2d5e67, type: 3}
-  scale: {x: 0.25, y: 0.25, z: 1}
-  colliderRadius: 3
+  objectSprite: {fileID: 4983820697865722447, guid: e659f6ac0831ee13ebe803cb473bca32, type: 3}
+  scale: {x: 0.6, y: 0.6, z: 1}
+  colliderRadius: 4
   isTrigger: 0
   bodyType: 0
   physicsMaterial: {fileID: 6200000, guid: a0c43d290e2d3f492bf3458f97f022c5, type: 2}
   isKinematic: 0
   mass: 1
   hasMovement: 0
-  moveSpeed: 5
-  moveSmoothTime: 0.1
-  hasRotation: 0
-  rotationSpeed: 120
+  moveSpeed: 0
+  moveSmoothTime: 3
+  hasRotation: 1
+  rotationSpeed: 0
   usePointerRotation: 0
   hasShooting: 0
-  bulletSpeed: 6
-  shootingCooldown: 0.25
-  bulletDamage: 1
-  bulletLifespan: 1
+  bulletSpeed: 0
+  shootingCooldown: 0
+  bulletDamage: 0
+  bulletLifespan: 0
   maxHealth: 99
   hasInput: 0
-  teamTag: 2
+  teamTag: 1
   hasDashAbility: 0
   dashSpeed: 0
   dashDuration: 0
@@ -41,4 +41,4 @@ MonoBehaviour:
   hasBlinkAbility: 0
   blinkDistance: 0
   blinkCooldown: 0
-  behavior: {fileID: 11400000, guid: 740e34e26501742a19ec43ffa8ae2db0, type: 2}
+  behavior: {fileID: 11400000, guid: 91f5f00675dd67500baa293d8e1baf48, type: 2}

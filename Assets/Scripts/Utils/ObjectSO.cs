@@ -6,6 +6,9 @@ public class ObjectSO : ScriptableObject
 {
     public Sprite objectSprite;
 
+    // Transform settings
+    public Vector3 scale = Vector3.one;
+
     // Collider settings
     public float colliderRadius = 1f;
     public bool isTrigger = false;
@@ -14,13 +17,9 @@ public class ObjectSO : ScriptableObject
     public RigidbodyType2D bodyType = RigidbodyType2D.Dynamic;
     public PhysicsMaterial2D physicsMaterial;
     public bool isKinematic = false;
+    public float mass = 1f;
 
-    // NetworkTransform ownership authority settings
-    public enum AuthorityType
-    {
-        Server,
-        Owner
-    }
+
 
     // MovementComponent settings
     public bool hasMovement = true;

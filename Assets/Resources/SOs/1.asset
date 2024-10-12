@@ -13,16 +13,19 @@ MonoBehaviour:
   m_Name: 1
   m_EditorClassIdentifier: 
   objectSprite: {fileID: -3708377168491533583, guid: 6ef6d92357c8bb98699c6f6087d33358, type: 3}
+  scale: {x: 0.25, y: 0.25, z: 1}
   colliderRadius: 3
   isTrigger: 0
   bodyType: 0
   physicsMaterial: {fileID: 6200000, guid: a0c43d290e2d3f492bf3458f97f022c5, type: 2}
   isKinematic: 0
+  mass: 1
   hasMovement: 1
-  moveSpeed: 10
+  moveSpeed: 25
   moveSmoothTime: 0.1
   hasRotation: 1
   rotationSpeed: 120
+  usePointerRotation: 1
   hasShooting: 1
   bulletSpeed: 20
   shootingCooldown: 0.1
@@ -38,3 +41,4 @@ MonoBehaviour:
   hasBlinkAbility: 1
   blinkDistance: 10
   blinkCooldown: 2
+  behavior: {fileID: 0}
