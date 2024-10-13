@@ -3,9 +3,13 @@ using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport;
 using Unity.Networking.Transport.TLS; // Add this line
+using TMPro; // Add this line for TextMeshPro support
 
 public class NetworkStartUI : MonoBehaviour
 {
+    public TMP_Text fpsText; // Change Text to TMP_Text
+    public TMP_Text pingText; // Change Text to TMP_Text
+
     private float deltaTime = 0.0f;
     private UnityTransport transport;
 
@@ -32,6 +36,35 @@ public class NetworkStartUI : MonoBehaviour
     {
         // Update deltaTime for FPS calculation
         deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
+
+        // Display FPS
+        int fps = Mathf.CeilToInt(1.0f / deltaTime);
+        fpsText.text = $"{fps}"; // Using TMP_Text
+
+        // Display network latency (ping)
+        if (transport != null && NetworkManager.Singleton.IsClient)
+        {
+            var rtt = transport.GetCurrentRtt(NetworkManager.Singleton.LocalClientId);
+            pingText.text = $"Ping: {rtt} ms"; // Using TMP_Text
+        }
+    }
+
+    public void StartHost()
+    {
+        SetupSecureServer();
+        NetworkManager.Singleton.StartHost();
+    }
+
+    public void StartClient()
+    {
+        SetupSecureClient();
+        NetworkManager.Singleton.StartClient();
+    }
+
+    public void StartServer()
+    {
+        SetupSecureServer();
+        NetworkManager.Singleton.StartServer();
     }
 
     private void SetupSecureServer()
@@ -84,12 +117,12 @@ public class NetworkStartUI : MonoBehaviour
             if (transport != null)
             {
                 // Set the client to connect to the server IP address
-                transport.SetConnectionData("192.168.100.5", 7777);
+                transport.SetConnectionData("127.0.0.1", 7777);
 
                 // Set client secure parameters for encrypted communication
                 transport.SetClientSecrets(SecureParameters.ServerCommonName, SecureParameters.MyGameClientCA);
 
-               // Debug.Log("Client connection data set to 127.0.0.1:7777 with encryption.");
+                // Debug.Log("Client connection data set to 127.0.0.1:7777 with encryption.");
             }
             else
             {
@@ -99,47 +132,6 @@ public class NetworkStartUI : MonoBehaviour
         else
         {
             Debug.LogWarning("NetworkManager not found in the scene.");
-        }
-    }
-
-    void OnGUI()
-    {
-        // Display buttons for starting as Host or Client if not running in headless mode
-        if (!Application.isBatchMode)
-        {
-            GUILayout.BeginArea(new Rect(10, 10, 300, 300));
-
-            if (!NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsServer)
-            {
-                if (GUILayout.Button("Start Host"))
-                {
-                    SetupSecureServer();
-                    NetworkManager.Singleton.StartHost();
-                }
-                if (GUILayout.Button("Start Client"))
-                {
-                    SetupSecureClient(); // Set the client's secure connection data
-                    NetworkManager.Singleton.StartClient();
-                }
-                if (GUILayout.Button("Start Server"))
-                {
-                    SetupSecureServer();
-                    NetworkManager.Singleton.StartServer();
-                }
-            }
-
-            GUILayout.EndArea();
-        }
-
-        // Display FPS
-        int fps = Mathf.CeilToInt(1.0f / deltaTime);
-        GUI.Label(new Rect(10, 320, 150, 30), $"FPS: {fps}");
-
-        // Display network latency (ping)
-        if (transport != null && NetworkManager.Singleton.IsClient)
-        {
-            var rtt = transport.GetCurrentRtt(NetworkManager.Singleton.LocalClientId);
-            GUI.Label(new Rect(10, 350, 200, 30), $"Ping: {rtt} ms");
         }
     }
 }

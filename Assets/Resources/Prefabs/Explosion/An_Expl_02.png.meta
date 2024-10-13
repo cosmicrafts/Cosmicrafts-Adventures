@@ -1,0 +1,1151 @@
+fileFormatVersion: 2
+guid: 0a4898a251cd84a4d8225e15d94bd05a
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 329800936938109008
+    second: An_Expl_02_0
+  - first:
+      213: 1764118772940413232
+    second: An_Expl_02_1
+  - first:
+      213: 3693111060169525318
+    second: An_Expl_02_2
+  - first:
+      213: -5646407125611993972
+    second: An_Expl_02_3
+  - first:
+      213: -6308350312854265131
+    second: An_Expl_02_4
+  - first:
+      213: 5175294819572724361
+    second: An_Expl_02_5
+  - first:
+      213: -3407638899907643826
+    second: An_Expl_02_6
+  - first:
+      213: -8257981616941133851
+    second: An_Expl_02_7
+  - first:
+      213: -7309948098369661870
+    second: An_Expl_02_8
+  - first:
+      213: -6164279234336665052
+    second: An_Expl_02_9
+  - first:
+      213: -7183637934997184997
+    second: An_Expl_02_10
+  - first:
+      213: -7226229502254648095
+    second: An_Expl_02_11
+  - first:
+      213: -987038664062173614
+    second: An_Expl_02_12
+  - first:
+      213: -8175982640672635454
+    second: An_Expl_02_13
+  - first:
+      213: -7616378127033007400
+    second: An_Expl_02_14
+  - first:
+      213: 4560442208534111201
+    second: An_Expl_02_15
+  - first:
+      213: -6353537111043109745
+    second: An_Expl_02_16
+  - first:
+      213: -2810013376982970982
+    second: An_Expl_02_17
+  - first:
+      213: 7547850419098674948
+    second: An_Expl_02_18
+  - first:
+      213: 2144364379530336563
+    second: An_Expl_02_19
+  - first:
+      213: 7155377423308101924
+    second: An_Expl_02_20
+  - first:
+      213: -3478848043355432056
+    second: An_Expl_02_21
+  - first:
+      213: -4181265572939681635
+    second: An_Expl_02_22
+  - first:
+      213: 3377979346315075466
+    second: An_Expl_02_23
+  - first:
+      213: 6288979558570875314
+    second: An_Expl_02_24
+  - first:
+      213: -7983571589720529264
+    second: An_Expl_02_25
+  - first:
+      213: 5935799016407409316
+    second: An_Expl_02_26
+  - first:
+      213: 4984134426665882237
+    second: An_Expl_02_27
+  - first:
+      213: 623547775696658067
+    second: An_Expl_02_28
+  - first:
+      213: -8845179119336297653
+    second: An_Expl_02_29
+  - first:
+      213: -4353233832608271823
+    second: An_Expl_02_30
+  - first:
+      213: 6180587829193470892
+    second: An_Expl_02_31
+  - first:
+      213: 5420951636182778071
+    second: An_Expl_02_32
+  - first:
+      213: -5744900567449235751
+    second: An_Expl_02_33
+  - first:
+      213: 6717390684491670274
+    second: An_Expl_02_34
+  - first:
+      213: -8303477195201676244
+    second: An_Expl_02_35
+  - first:
+      213: -5960060899844842608
+    second: An_Expl_02_36
+  - first:
+      213: -7939705366124734060
+    second: An_Expl_02_37
+  - first:
+      213: 4128211783126144042
+    second: An_Expl_02_38
+  - first:
+      213: 828559966846117742
+    second: An_Expl_02_39
+  - first:
+      213: -7075315533804853543
+    second: An_Expl_02_40
+  - first:
+      213: -6508235115932517337
+    second: An_Expl_02_41
+  - first:
+      213: -7823142875091457446
+    second: An_Expl_02_42
+  - first:
+      213: 8108903037267563486
+    second: An_Expl_02_43
+  - first:
+      213: -1377258902133528368
+    second: An_Expl_02_44
+  - first:
+      213: 1330386921371586794
+    second: An_Expl_02_45
+  - first:
+      213: 4006101641268442893
+    second: An_Expl_02_46
+  - first:
+      213: -3304696397733358820
+    second: An_Expl_02_47
+  - first:
+      213: -4585594854436812132
+    second: An_Expl_02_48
+  - first:
+      213: 2048098992499789173
+    second: An_Expl_02_49
+  - first:
+      213: -6116716518330151065
+    second: An_Expl_02_50
+  - first:
+      213: 7405125700273599344
+    second: An_Expl_02_51
+  - first:
+      213: 881724350087374067
+    second: An_Expl_02_52
+  - first:
+      213: -4787778089787017792
+    second: An_Expl_02_53
+  - first:
+      213: 6266443314108523856
+    second: An_Expl_02_54
+  - first:
+      213: -5357210135052778582
+    second: An_Expl_02_55
+  - first:
+      213: 3186617212731389497
+    second: An_Expl_02_56
+  - first:
+      213: 7474349250315845638
+    second: An_Expl_02_57
+  - first:
+      213: -9048312747981207796
+    second: An_Expl_02_58
+  - first:
+      213: -3713455562748309740
+    second: An_Expl_02_59
+  - first:
+      213: -7197572872176067943
+    second: An_Expl_02_60
+  - first:
+      213: 8984056781176975217
+    second: An_Expl_02_61
+  - first:
+      213: -1790268137425281121
+    second: An_Expl_02_62
+  - first:
+      213: -7799928735159833652
+    second: An_Expl_02_63
+  - first:
+      213: 2274308117226497751
+    second: An_Expl_02_64
+  - first:
+      213: -9031779100255873934
+    second: An_Expl_02_65
+  - first:
+      213: -6905326143967620943
+    second: An_Expl_02_66
+  - first:
+      213: 3499352316466993832
+    second: An_Expl_02_67
+  - first:
+      213: 5153615401128715742
+    second: An_Expl_02_68
+  - first:
+      213: 85246440893353215
+    second: An_Expl_02_69
+  - first:
+      213: -6202221857888750180
+    second: An_Expl_02_70
+  - first:
+      213: -5565484768616327106
+    second: An_Expl_02_71
+  - first:
+      213: 5186551847283460557
+    second: An_Expl_02_72
+  - first:
+      213: 2465219568812327630
+    second: An_Expl_02_73
+  - first:
+      213: 3902503815657680619
+    second: An_Expl_02_74
+  - first:
+      213: -399257394231181533
+    second: An_Expl_02_75
+  - first:
+      213: 5640981853608691623
+    second: An_Expl_02_76
+  - first:
+      213: 2799666172573987395
+    second: An_Expl_02_77
+  - first:
+      213: 2443387450422096456
+    second: An_Expl_02_78
+  - first:
+      213: -1421336075080787739
+    second: An_Expl_02_79
+  - first:
+      213: -3808923670481151781
+    second: An_Expl_02_80
+  - first:
+      213: 1222414078009509514
+    second: An_Expl_02_81
+  - first:
+      213: 4702723251541685037
+    second: An_Expl_02_82
+  - first:
+      213: -8503544683585857384
+    second: An_Expl_02_83
+  - first:
+      213: -5874449645406266057
+    second: An_Expl_02_84
+  - first:
+      213: 202676704202814534
+    second: An_Expl_02_85
+  - first:
+      213: 4676220596210582360
+    second: An_Expl_02_86
+  - first:
+      213: -1724267733236980910
+    second: An_Expl_02_87
+  - first:
+      213: 2339979939593278473
+    second: An_Expl_02_88
+  - first:
+      213: 3102502313697924237
+    second: An_Expl_02_89
+  - first:
+      213: -5091200427490744717
+    second: An_Expl_02_90
+  - first:
+      213: 1028314601420610521
+    second: An_Expl_02_91
+  - first:
+      213: 4099442631482218513
+    second: An_Expl_02_92
+  - first:
+      213: -4940727960855653735
+    second: An_Expl_02_93
+  - first:
+      213: -2486052476349095562
+    second: An_Expl_02_94
+  - first:
+      213: -2968568779145400860
+    second: An_Expl_02_95
+  - first:
+      213: -2182080734690297139
+    second: An_Expl_02_96
+  - first:
+      213: -923908848146018034
+    second: An_Expl_02_97
+  - first:
+      213: 3457766549934562853
+    second: An_Expl_02_98
+  - first:
+      213: 4476572312861811362
+    second: An_Expl_02_99
+  - first:
+      213: -2750660382386969320
+    second: An_Expl_02_100
+  - first:
+      213: 220264387125449957
+    second: An_Expl_02_101
+  - first:
+      213: 118413723745514763
+    second: An_Expl_02_102
+  - first:
+      213: -6712218563757423644
+    second: An_Expl_02_103
+  - first:
+      213: 3560623767198516601
+    second: An_Expl_02_104
+  - first:
+      213: 2983740449373094192
+    second: An_Expl_02_105
+  - first:
+      213: 880829171392499364
+    second: An_Expl_02_106
+  - first:
+      213: -4699174542131650026
+    second: An_Expl_02_107
+  - first:
+      213: 2486875558576819025
+    second: An_Expl_02_108
+  - first:
+      213: 1518666748834815805
+    second: An_Expl_02_109
+  - first:
+      213: -8085340295542719788
+    second: An_Expl_02_110
+  - first:
+      213: -7861463160125614097
+    second: An_Expl_02_111
+  - first:
+      213: 6511735121455642
+    second: An_Expl_02_112
+  - first:
+      213: 2291816449280163668
+    second: An_Expl_02_113
+  - first:
+      213: 2059301292408706495
+    second: An_Expl_02_114
+  - first:
+      213: -8705445536488105967
+    second: An_Expl_02_115
+  - first:
+      213: 9177399921121459977
+    second: An_Expl_02_116
+  - first:
+      213: 5564525702999004877
+    second: An_Expl_02_117
+  - first:
+      213: -8114955791936366087
+    second: An_Expl_02_118
+  - first:
+      213: -6708403008099798735
+    second: An_Expl_02_119
+  - first:
+      213: 2326491784590568820
+    second: An_Expl_02_120
+  - first:
+      213: 5126246810077759043
+    second: An_Expl_02_121
+  - first:
+      213: 6185140500954872443
+    second: An_Expl_02_122
+  - first:
+      213: -368457071774393465
+    second: An_Expl_02_123
+  - first:
+      213: 8732424738665874561
+    second: An_Expl_02_124
+  - first:
+      213: -3001939853964916956
+    second: An_Expl_02_125
+  - first:
+      213: 1521011362379852072
+    second: An_Expl_02_126
+  - first:
+      213: 1068913277274862152
+    second: An_Expl_02_127
+  - first:
+      213: 4599922846329055205
+    second: An_Expl_02_128
+  - first:
+      213: -3900378937667199055
+    second: An_Expl_02_129
+  - first:
+      213: 879692822826813598
+    second: An_Expl_02_130
+  - first:
+      213: 875814101129309774
+    second: An_Expl_02_131
+  - first:
+      213: -5391489184067307605
+    second: An_Expl_02_132
+  - first:
+      213: -5407404918779209354
+    second: An_Expl_02_133
+  - first:
+      213: -1263904077410081059
+    second: An_Expl_02_134
+  - first:
+      213: 3647974553107190778
+    second: An_Expl_02_135
+  - first:
+      213: 5577080424361572297
+    second: An_Expl_02_136
+  - first:
+      213: 1633655948892764254
+    second: An_Expl_02_137
+  - first:
+      213: 557935809225135589
+    second: An_Expl_02_138
+  - first:
+      213: 3457230732859072872
+    second: An_Expl_02_139
+  - first:
+      213: -7223203709820153220
+    second: An_Expl_02_140
+  - first:
+      213: -2323026462910847734
+    second: An_Expl_02_141
+  - first:
+      213: -8940796311684111939
+    second: An_Expl_02_142
+  - first:
+      213: 3672476260809056946
+    second: An_Expl_02_143
+  - first:
+      213: -6148008304874417822
+    second: An_Expl_02_144
+  - first:
+      213: 5218192046462742225
+    second: An_Expl_02_145
+  - first:
+      213: -6193869896981313433
+    second: An_Expl_02_146
+  - first:
+      213: 4556857779947887726
+    second: An_Expl_02_147
+  - first:
+      213: 6712570670034760132
+    second: An_Expl_02_148
+  - first:
+      213: 9134730643772078118
+    second: An_Expl_02_149
+  - first:
+      213: -3041320374819894045
+    second: An_Expl_02_150
+  - first:
+      213: -5464991970589068626
+    second: An_Expl_02_151
+  - first:
+      213: 5155538832894665685
+    second: An_Expl_02_152
+  - first:
+      213: -1602333500056382487
+    second: An_Expl_02_153
+  - first:
+      213: 1618102223658368961
+    second: An_Expl_02_154
+  - first:
+      213: 8790773888206168353
+    second: An_Expl_02_155
+  - first:
+      213: -9204501641610268002
+    second: An_Expl_02_156
+  - first:
+      213: -5634004016288584006
+    second: An_Expl_02_157
+  - first:
+      213: 3585198080745992724
+    second: An_Expl_02_158
+  - first:
+      213: 1963819859101024531
+    second: An_Expl_02_159
+  - first:
+      213: -2563821004550679870
+    second: An_Expl_02_160
+  - first:
+      213: 1924421470914348647
+    second: An_Expl_02_161
+  - first:
+      213: -4255189765380546282
+    second: An_Expl_02_162
+  - first:
+      213: 184648160411655526
+    second: An_Expl_02_163
+  - first:
+      213: -4951674241720080110
+    second: An_Expl_02_164
+  - first:
+      213: -9086058360952307474
+    second: An_Expl_02_165
+  - first:
+      213: -8706528067004281714
+    second: An_Expl_02_166
+  - first:
+      213: 6315666569197531674
+    second: An_Expl_02_167
+  - first:
+      213: 2972037606020325366
+    second: An_Expl_02_168
+  - first:
+      213: -6772388771237891086
+    second: An_Expl_02_169
+  - first:
+      213: 8955088202712832553
+    second: An_Expl_02_170
+  - first:
+      213: -2685724255157317368
+    second: An_Expl_02_171
+  - first:
+      213: -6627479640193493691
+    second: An_Expl_02_172
+  - first:
+      213: -6993977607286157841
+    second: An_Expl_02_173
+  - first:
+      213: -4733170354851058788
+    second: An_Expl_02_174
+  - first:
+      213: 6807241444526652684
+    second: An_Expl_02_175
+  - first:
+      213: 1305052332145748821
+    second: An_Expl_02_176
+  - first:
+      213: -7143708929097588025
+    second: An_Expl_02_177
+  - first:
+      213: -5601253624517052970
+    second: An_Expl_02_178
+  - first:
+      213: -7221631097394956079
+    second: An_Expl_02_179
+  - first:
+      213: -1305665204022103207
+    second: An_Expl_02_180
+  - first:
+      213: 6583193008378325147
+    second: An_Expl_02_181
+  - first:
+      213: -4533626729615279107
+    second: An_Expl_02_182
+  - first:
+      213: 8257784522062315336
+    second: An_Expl_02_183
+  - first:
+      213: 3436072949376298027
+    second: An_Expl_02_184
+  - first:
+      213: 1407922003818412956
+    second: An_Expl_02_185
+  - first:
+      213: -4988870893159649974
+    second: An_Expl_02_186
+  - first:
+      213: -8288535535164737603
+    second: An_Expl_02_187
+  - first:
+      213: 2512968843419523899
+    second: An_Expl_02_188
+  - first:
+      213: -6555680171358597650
+    second: An_Expl_02_189
+  - first:
+      213: -3927099179566495950
+    second: An_Expl_02_190
+  - first:
+      213: 1235047497810112402
+    second: An_Expl_02_191
+  - first:
+      213: -38265310655792522
+    second: An_Expl_02_192
+  - first:
+      213: 1181234825508481390
+    second: An_Expl_02_193
+  - first:
+      213: -2671071107690442113
+    second: An_Expl_02_194
+  - first:
+      213: 1590714557199425685
+    second: An_Expl_02_195
+  - first:
+      213: 2149837731771306386
+    second: An_Expl_02_196
+  - first:
+      213: -6829813638424942086
+    second: An_Expl_02_197
+  - first:
+      213: 7591562858207072014
+    second: An_Expl_02_198
+  - first:
+      213: 2091726140663173390
+    second: An_Expl_02_199
+  - first:
+      213: -4187593192418214908
+    second: An_Expl_02_200
+  - first:
+      213: 8327985265440897375
+    second: An_Expl_02_201
+  - first:
+      213: -5959968655582060945
+    second: An_Expl_02_202
+  - first:
+      213: -3013388421678483802
+    second: An_Expl_02_203
+  - first:
+      213: 4961649595161710834
+    second: An_Expl_02_204
+  - first:
+      213: -6207532646327477080
+    second: An_Expl_02_205
+  - first:
+      213: -846007062678563693
+    second: An_Expl_02_206
+  - first:
+      213: 3386005228905820618
+    second: An_Expl_02_207
+  - first:
+      213: -6463469463775526975
+    second: An_Expl_02_208
+  - first:
+      213: -4338464617610690311
+    second: An_Expl_02_209
+  - first:
+      213: -4393997519541143914
+    second: An_Expl_02_210
+  - first:
+      213: 9139877029514181832
+    second: An_Expl_02_211
+  - first:
+      213: 4932766336458060975
+    second: An_Expl_02_212
+  - first:
+      213: -4478961806414593228
+    second: An_Expl_02_213
+  - first:
+      213: 2274114938042649126
+    second: An_Expl_02_214
+  - first:
+      213: 6456795906628144687
+    second: An_Expl_02_215
+  - first:
+      213: -4864715016408773777
+    second: An_Expl_02_216
+  - first:
+      213: 3425693697837086545
+    second: An_Expl_02_217
+  - first:
+      213: 4517593561254030646
+    second: An_Expl_02_218
+  - first:
+      213: -5219964012160092949
+    second: An_Expl_02_219
+  - first:
+      213: -7878488073682257282
+    second: An_Expl_02_220
+  - first:
+      213: -8772079963276058663
+    second: An_Expl_02_221
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: An_Expl_02_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1536
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e6be8d94ec9e9594ba8af1108e4a6c68
+      internalID: 1936438239
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: An_Expl_02_1
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 1536
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2d8317aa98fff8a498154a1c69552904
+      internalID: -1779402272
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: An_Expl_02_2
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 1536
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6b3154f28bbc9ab43aa848a2757f9e7d
+      internalID: -527765666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: An_Expl_02_3
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 1536
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0cec5300821422740afdf1fae2889959
+      internalID: 963502950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: An_Expl_02_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1024
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0f2da7301cc886446b9657b21d73277d
+      internalID: 221870302
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: An_Expl_02_5
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 1024
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e8a57c2d3cf4bae49a7c3beefba85553
+      internalID: -303685177
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: An_Expl_02_6
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 1024
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 09ff92a8b7feee341a1a4109bc0f65ad
+      internalID: -757516419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: An_Expl_02_7
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 1024
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ef16f04b52756974c8f1592d91253549
+      internalID: -1387580810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: An_Expl_02_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 512
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: acc39922f85420548bd09e63009086bb
+      internalID: -737287011
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: An_Expl_02_9
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 512
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: acbfde86f53588743ab30f8283f1dfb3
+      internalID: 110752938
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: An_Expl_02_10
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 512
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 23df49e4677130743ab794e29d0e33c2
+      internalID: 259204346
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: An_Expl_02_11
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 512
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9abd4fc09cda3294fbc7fe09edf45307
+      internalID: -899252439
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: An_Expl_02_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a4b638a6070322d4caf74853c2249a65
+      internalID: 2038969666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: An_Expl_02_13
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 0
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5f134f34460f9a94383c5d598a93ab70
+      internalID: 1357072322
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: An_Expl_02_14
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 0
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 16f4f4cdf063dfe48a15d62990fe15fa
+      internalID: 384680227
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: An_Expl_02_15
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 0
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 628524b0c926510448de1c6041490360
+      internalID: -1342220830
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 67fbe49f8636ac446a7a8222dc9b7de4
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      An_Expl_02_0: 1936438239
+      An_Expl_02_1: -1779402272
+      An_Expl_02_10: 259204346
+      An_Expl_02_11: -899252439
+      An_Expl_02_12: 2038969666
+      An_Expl_02_13: 1357072322
+      An_Expl_02_14: 384680227
+      An_Expl_02_15: -1342220830
+      An_Expl_02_2: -527765666
+      An_Expl_02_3: 963502950
+      An_Expl_02_4: 221870302
+      An_Expl_02_5: -303685177
+      An_Expl_02_6: -757516419
+      An_Expl_02_7: -1387580810
+      An_Expl_02_8: -737287011
+      An_Expl_02_9: 110752938
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
