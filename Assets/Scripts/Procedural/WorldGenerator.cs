@@ -218,11 +218,34 @@ public class WorldGenerator : NetworkBehaviour
             }
         }
     }
-//
     private Vector3 GetRandomPositionInSector(Vector2Int sectorCoords)
     {
         float xNoise = UnityEngine.Random.Range(-sectorSize / 2, sectorSize / 2);
         float yNoise = UnityEngine.Random.Range(-sectorSize / 2, sectorSize / 2);
         return new Vector3(sectorCoords.x * sectorSize + xNoise, sectorCoords.y * sectorSize + yNoise, 0f);
     }
+
+    // Method called by the client to request regeneration
+    public void RequestRegeneration()
+    {
+        if (IsClient)
+        {
+            RequestRegenerationServerRpc();
+        }
+    }
+
+    // Server RPC to regenerate objects when a client requests it
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestRegenerationServerRpc()
+    {
+        // Regenerate objects (or call your existing regeneration logic)
+        foreach (var sector in sectors.Keys)
+        {
+            if (gameObject.activeInHierarchy)
+            {
+                ReactivateObjectsInSector(sector, objectsPerSector);
+            }
+        }
+    }
+
 }

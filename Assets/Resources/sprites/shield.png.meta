@@ -201,6 +201,19 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -1009,7 +1022,43 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      shield_0: 2389193319765324094
+      shield_1: 5085415284296604745
+      shield_10: -7692592507366012451
+      shield_11: 2536548511085074632
+      shield_12: -6880720000848392178
+      shield_13: -6411710812370774675
+      shield_14: -8391566782126530650
+      shield_15: 3419264202578727928
+      shield_16: -751347868484882285
+      shield_17: -3208461720741387023
+      shield_18: 4410620268090068078
+      shield_19: 5966984831636730540
+      shield_2: 1691966074973790518
+      shield_20: -6521942997921326431
+      shield_21: 536740593913241913
+      shield_22: 3257572751964099493
+      shield_23: -3402171037789071540
+      shield_24: -8061918755334583206
+      shield_25: 7390090002504109256
+      shield_26: -2159469882456361167
+      shield_27: 566430241908690095
+      shield_28: -3308930563178950038
+      shield_29: 7417248709105435631
+      shield_3: -4135836072091612975
+      shield_30: 7054584531090899564
+      shield_31: -1923565897381245631
+      shield_32: 8105920918686733900
+      shield_33: -8061903864544630143
+      shield_34: 2447566252387881007
+      shield_35: 7609063781391644218
+      shield_4: -7604838462600041511
+      shield_5: -2326387718176073400
+      shield_6: -7640969164507117352
+      shield_7: 7640822524586941387
+      shield_8: -6453787051673858669
+      shield_9: -3019361257924403925
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
