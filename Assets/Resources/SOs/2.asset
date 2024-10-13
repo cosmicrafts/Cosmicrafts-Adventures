@@ -37,8 +37,8 @@ MonoBehaviour:
   hasInput: 1
   teamTag: 0
   hasDashAbility: 1
-  dashSpeed: 15
-  dashDuration: 0.2
+  dashSpeed: 40
+  dashDuration: 0.25
   dashCooldown: 1
   hasBlinkAbility: 1
   blinkDistance: 10

@@ -6,7 +6,7 @@ public class MinimapZoom : MonoBehaviour
     private float currentZoomLevel = 36f;           // Default starting size
     private const float minZoomLevel = 24f;         // Minimum zoom level
     private const float maxZoomLevel = 64f;         // Maximum zoom level
-    private const float zoomStep = 2f;              // Amount to increase/decrease per click
+    private const float zoomStep = 4f;              // Amount to increase/decrease per click
 
     private void Start()
     {
