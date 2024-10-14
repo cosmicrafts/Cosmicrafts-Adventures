@@ -23,7 +23,7 @@ MonoBehaviour:
   isKinematic: 0
   mass: 1
   hasMovement: 1
-  moveSpeed: 25
+  moveSpeed: 24
   moveSmoothTime: 0.1
   hasRotation: 1
   rotationSpeed: 10
