@@ -18354,6 +18354,8 @@ MonoBehaviour:
   objectsPerFrame: 1
   configurations:
   - {fileID: 11400000, guid: 45614961dffe51ab9a2fdeaaabdf7d95, type: 2}
+  - {fileID: 11400000, guid: ea34f3b2cd2412368932d97e46f9a98b, type: 2}
+  - {fileID: 11400000, guid: cfa2c8031deb7bd90acce233afc7ac39, type: 2}
 --- !u!114 &1458642474
 MonoBehaviour:
   m_ObjectHideFlags: 0

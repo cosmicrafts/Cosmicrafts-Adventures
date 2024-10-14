@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: EnemyBehavior
   m_EditorClassIdentifier: 
   movementType: 1
-  moveSpeed: 4
+  moveSpeed: 18
   attackRange: 32
   shootingCooldown: 0.1
   aggroRange: 40

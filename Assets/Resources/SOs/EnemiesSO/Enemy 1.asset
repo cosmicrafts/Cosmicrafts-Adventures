@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Enemy 1
   m_EditorClassIdentifier: 
   objectSprite: {fileID: -4260756745080484681, guid: a9062266415ada69b96bb6ef62220a19, type: 3}
+  minScale: 0.5
+  maxScale: 0.75
   scale: {x: 0.5, y: 0.5, z: 1}
   colliderRadius: 3
   isTrigger: 0
@@ -41,4 +43,4 @@ MonoBehaviour:
   hasBlinkAbility: 0
   blinkDistance: 0
   blinkCooldown: 0
-  behavior: {fileID: 11400000, guid: 740e34e26501742a19ec43ffa8ae2db0, type: 2}
+  behavior: {fileID: 11400000, guid: 2a3cae8c2729f244691e2c94dfd7fb8e, type: 2}

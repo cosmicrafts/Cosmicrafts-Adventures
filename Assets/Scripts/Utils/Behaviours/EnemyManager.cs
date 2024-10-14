@@ -28,8 +28,8 @@ public class EnemyManager : MonoBehaviour
         foreach (var enemyData in enemies)
         {
             HandleMovement(enemyData, deltaTime);
-            HandleShooting(enemyData, deltaTime);
             HandleRotation(enemyData, deltaTime);
+            HandleShooting(enemyData, deltaTime);  // Call shooting continuously
         }
     }
 
@@ -53,17 +53,18 @@ public class EnemyManager : MonoBehaviour
 
 private void HandleShooting(EnemyData enemyData, float deltaTime)
 {
+    // Find the closest target within the attack range
     GameObject target = FindClosestTarget(enemyData.enemy, enemyData.behavior.attackRange);
 
-    if (target != null)
+    if (target != null)  // Ensure there is a valid target in range
     {
-        // Decrease cooldown timer
+        // Decrease the cooldown timer each frame
         if (enemyData.shootingCooldownTimer > 0f)
         {
-            enemyData.shootingCooldownTimer -= deltaTime;
+            enemyData.shootingCooldownTimer -= deltaTime;  // Count down
         }
 
-        // Continue shooting as long as the cooldown timer is 0 and target is within range
+        // Shoot when cooldown reaches 0
         if (enemyData.shootingCooldownTimer <= 0f)
         {
             // Get the ShootingComponent from the enemy
@@ -71,10 +72,42 @@ private void HandleShooting(EnemyData enemyData, float deltaTime)
 
             if (shootingComponent != null)
             {
+                // Trigger the shooting and reset the cooldown
                 shootingComponent.RequestShoot();  // Enemy shoots via ShootingComponent
-                enemyData.shootingCooldownTimer = enemyData.behavior.shootingCooldown;  // Reset cooldown after shooting
+                enemyData.shootingCooldownTimer = enemyData.behavior.shootingCooldown;  // Reset cooldown
             }
         }
+    }
+    else
+    {
+        // Optionally handle case where target is lost (optional)
+        enemyData.shootingCooldownTimer = 0f;  // Reset cooldown to shoot again immediately if target reappears
+    }
+}
+
+
+private void Chase(EnemyData enemyData, float deltaTime)
+{
+    GameObject target = FindClosestTarget(enemyData.enemy, enemyData.behavior.aggroRange);
+    if (target != null)
+    {
+        float distanceToTarget = Vector2.Distance(enemyData.enemy.transform.position, target.transform.position);
+
+        // Only move toward the target if it's outside the attack range
+        if (distanceToTarget > enemyData.behavior.attackRange)
+        {
+            Vector2 direction = (target.transform.position - enemyData.enemy.transform.position).normalized;
+            enemyData.enemy.transform.Translate(direction * enemyData.behavior.moveSpeed * deltaTime);
+            enemyData.lastMovementDirection = direction;  // Store direction for rotation
+        }
+
+        // Handle shooting even if chasing
+        HandleShooting(enemyData, deltaTime);  // Ensure continuous shooting logic
+    }
+    else
+    {
+        // If no target, stop shooting and cooldown resets (optional)
+        enemyData.shootingCooldownTimer = 0f;
     }
 }
 
@@ -131,27 +164,6 @@ private void HandleShooting(EnemyData enemyData, float deltaTime)
         }
     }
 
-    // Modified chase movement (move toward closest target but stop at attack range)
-    private void Chase(EnemyData enemyData, float deltaTime)
-    {
-        GameObject target = FindClosestTarget(enemyData.enemy, enemyData.behavior.aggroRange);
-        if (target != null)
-        {
-            float distanceToTarget = Vector2.Distance(enemyData.enemy.transform.position, target.transform.position);
-
-            // Only move toward the target if it's outside the attack range
-            if (distanceToTarget > enemyData.behavior.attackRange)
-            {
-                Vector2 direction = (target.transform.position - enemyData.enemy.transform.position).normalized;
-                enemyData.enemy.transform.Translate(direction * enemyData.behavior.moveSpeed * deltaTime);
-                enemyData.lastMovementDirection = direction;
-            }
-
-            // Continue shooting even while chasing
-            HandleShooting(enemyData, deltaTime);
-        }
-    }
-
 
     // Find the closest target in range
     private GameObject FindClosestTarget(GameObject enemy, float range)
@@ -189,4 +201,3 @@ private void HandleShooting(EnemyData enemyData, float deltaTime)
         }
     }
 }
-//
