@@ -24,24 +24,24 @@ public class Bullet : NetworkBehaviour
         gameObject.tag = "Bullet";
     }
 
-    public void Initialize(ulong shooterId, TeamComponent.TeamTag teamTag)
-    {
-        shooterClientId = shooterId;
-        shooterTeamTag = teamTag;
+public void Initialize(ulong shooterId, TeamComponent.TeamTag teamTag)
+{
+    shooterClientId = shooterId;
+    shooterTeamTag = teamTag;
 
-        // Ignore collision between bullet and friendly team players
-        foreach (var player in FindObjectsByType<TeamComponent>(FindObjectsSortMode.None))
+    // Ignore collision between bullet and entities on the same team (whether Friend or Enemy)
+    foreach (var entity in FindObjectsByType<TeamComponent>(FindObjectsSortMode.None))
+    {
+        if (entity.GetTeam() == shooterTeamTag) // If the entity has the same team tag as the shooter
         {
-            if (player.GetTeam() == shooterTeamTag && shooterTeamTag == TeamComponent.TeamTag.Friend)
+            Collider2D entityCollider = entity.GetComponent<Collider2D>();
+            if (entityCollider != null && bulletCollider != null)
             {
-                Collider2D playerCollider = player.GetComponent<Collider2D>();
-                if (playerCollider != null && bulletCollider != null)
-                {
-                    Physics2D.IgnoreCollision(bulletCollider, playerCollider);
-                }
+                Physics2D.IgnoreCollision(bulletCollider, entityCollider); // Ignore collisions with same team entities
             }
         }
     }
+}
 
     public void SetLocalOnly()
     {
