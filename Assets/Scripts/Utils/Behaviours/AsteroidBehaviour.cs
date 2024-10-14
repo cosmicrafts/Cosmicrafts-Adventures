@@ -47,12 +47,13 @@ public class AsteroidBehaviorSO : BehaviorSO
         float delay = Random.Range(0f, randomStartDelay);
         asteroid.GetComponent<MonoBehaviour>().StartCoroutine(StartMovementAfterDelay(asteroid, delay));
 
-        // Apply random rotation between min and max values
+        // Apply random rotation between min and max values and randomize direction
         Rigidbody2D rb = asteroid.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
             float randomRotationSpeed = Random.Range(minRotationSpeed, maxRotationSpeed);
-            rb.angularVelocity = randomRotationSpeed; // Set angular velocity for rotation
+            int randomDirection = Random.value > 0.5f ? 1 : -1; // Randomize clockwise or counterclockwise
+            rb.angularVelocity = randomRotationSpeed * randomDirection; // Set angular velocity for rotation
         }
     }
 

@@ -160,7 +160,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      ohsalmeron_spaceship_top-down_view_top_camerastarcraft_2_terran_969018c1-fe00-4fc3-80e5-8f9c4f9db5ab_0: -3371567575705901310
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

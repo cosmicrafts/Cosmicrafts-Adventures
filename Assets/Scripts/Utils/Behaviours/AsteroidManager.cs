@@ -19,20 +19,24 @@ public class AsteroidManager : MonoBehaviour
         ZigZag
     }
 
-    public void RegisterAsteroid(GameObject asteroid, Vector2 direction, float driftSpeed)
-    {
-        asteroids.Add(new AsteroidData(asteroid, direction, driftSpeed, MovementType.Linear));
-    }
+public void RegisterAsteroidForCircularMovement(GameObject asteroid, Vector2 center, float speed, float radius)
+{
+    int randomDirection = Random.value > 0.5f ? 1 : -1; // Randomize direction
+    asteroids.Add(new AsteroidData(asteroid, Vector2.zero, speed * randomDirection, MovementType.Circular, center, radius));
+}
 
-    public void RegisterAsteroidForCircularMovement(GameObject asteroid, Vector2 center, float speed, float radius)
-    {
-        asteroids.Add(new AsteroidData(asteroid, Vector2.zero, speed, MovementType.Circular, center, radius));
-    }
+public void RegisterAsteroidForSpiralMovement(GameObject asteroid, Vector2 initialDirection, float speed, float growthRate)
+{
+    int randomDirection = Random.value > 0.5f ? 1 : -1; // Randomize direction
+    asteroids.Add(new AsteroidData(asteroid, initialDirection, speed * randomDirection, MovementType.Spiral, Vector2.zero, growthRate));
+}
 
-    public void RegisterAsteroidForSpiralMovement(GameObject asteroid, Vector2 initialDirection, float speed, float growthRate)
-    {
-        asteroids.Add(new AsteroidData(asteroid, initialDirection, speed, MovementType.Spiral, Vector2.zero, growthRate));
-    }
+public void RegisterAsteroid(GameObject asteroid, Vector2 direction, float driftSpeed)
+{
+    int randomDirection = Random.value > 0.5f ? 1 : -1; // Randomize direction
+    asteroids.Add(new AsteroidData(asteroid, direction * randomDirection, driftSpeed, MovementType.Linear));
+}
+
 
     public void RegisterAsteroidForRandomJitter(GameObject asteroid, Vector2 direction, float speed)
     {

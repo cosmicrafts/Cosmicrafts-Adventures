@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d0c0a2ea07d94e289dd5a213c4ca580, type: 3}
   m_Name: EnemyBehavior 1
   m_EditorClassIdentifier: 
-  movementType: 0
-  moveSpeed: 18
-  attackRange: 22
+  movementType: 2
+  moveSpeed: 10
+  attackRange: 16
   shootingCooldown: 0.25
-  aggroRange: 35
+  aggroRange: 4
