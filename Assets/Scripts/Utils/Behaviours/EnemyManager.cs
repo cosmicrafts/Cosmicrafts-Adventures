@@ -1,12 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
-
 public class EnemyManager : MonoBehaviour
 {
     public static EnemyManager Instance;
-    public GameObject bulletPrefab;
 
     private List<EnemyData> enemies = new List<EnemyData>();
 
@@ -32,80 +29,128 @@ public class EnemyManager : MonoBehaviour
         {
             HandleMovement(enemyData, deltaTime);
             HandleShooting(enemyData, deltaTime);
+            HandleRotation(enemyData, deltaTime);
         }
     }
 
-private void HandleMovement(EnemyData enemyData, float deltaTime)
-{
-    switch (enemyData.behavior.movementType)
+    private void HandleMovement(EnemyData enemyData, float deltaTime)
     {
-        case EnemyBehaviorSO.MovementType.Patrol:
-            Patrol(enemyData.enemy, enemyData.behavior.moveSpeed, deltaTime);
-            break;
+        switch (enemyData.behavior.movementType)
+        {
+            case EnemyBehaviorSO.MovementType.Patrol:
+                Patrol(enemyData.enemy, enemyData.behavior.moveSpeed, deltaTime);
+                break;
 
-        case EnemyBehaviorSO.MovementType.Chase:
-            Chase(enemyData, deltaTime);
-            break;
+            case EnemyBehaviorSO.MovementType.Chase:
+                Chase(enemyData, deltaTime);
+                break;
 
-        case EnemyBehaviorSO.MovementType.Stationary:
-            // No movement if stationary
-            break;
+            case EnemyBehaviorSO.MovementType.Stationary:
+                // No movement if stationary
+                break;
+        }
     }
-}
 
 private void HandleShooting(EnemyData enemyData, float deltaTime)
 {
     GameObject target = FindClosestTarget(enemyData.enemy, enemyData.behavior.attackRange);
-    
-    if (target != null && enemyData.shootingCooldownTimer <= 0f)
-    {
-        // Get the ShootingComponent from the enemy
-        var shootingComponent = enemyData.enemy.GetComponent<ShootingComponent>();
 
-        if (shootingComponent != null)
+    if (target != null)
+    {
+        // Decrease cooldown timer
+        if (enemyData.shootingCooldownTimer > 0f)
         {
-            shootingComponent.RequestShoot();  // Enemy shoots via ShootingComponent
+            enemyData.shootingCooldownTimer -= deltaTime;
         }
 
-        enemyData.shootingCooldownTimer = enemyData.behavior.shootingCooldown;
-    }
-    else
-    {
-        enemyData.shootingCooldownTimer -= deltaTime;
+        // Continue shooting as long as the cooldown timer is 0 and target is within range
+        if (enemyData.shootingCooldownTimer <= 0f)
+        {
+            // Get the ShootingComponent from the enemy
+            var shootingComponent = enemyData.enemy.GetComponent<ShootingComponent>();
+
+            if (shootingComponent != null)
+            {
+                shootingComponent.RequestShoot();  // Enemy shoots via ShootingComponent
+                enemyData.shootingCooldownTimer = enemyData.behavior.shootingCooldown;  // Reset cooldown after shooting
+            }
+        }
     }
 }
 
 
+
+    // Rotates the enemy towards its movement or shooting direction
+    private void HandleRotation(EnemyData enemyData, float deltaTime)
+    {
+        // For patrol or chase, rotate towards movement direction
+        if (enemyData.behavior.movementType != EnemyBehaviorSO.MovementType.Stationary)
+        {
+            Vector2 movementDirection = enemyData.lastMovementDirection;
+            RotateTowardsDirection(enemyData.enemy, movementDirection, deltaTime);
+        }
+
+        // If shooting, rotate towards the target
+        GameObject target = FindClosestTarget(enemyData.enemy, enemyData.behavior.attackRange);
+        if (target != null)
+        {
+            Vector2 targetDirection = (target.transform.position - enemyData.enemy.transform.position).normalized;
+            RotateTowardsDirection(enemyData.enemy, targetDirection, deltaTime);
+        }
+    }
+
+    // Smooth rotation logic
+    private void RotateTowardsDirection(GameObject enemy, Vector2 direction, float deltaTime)
+    {
+        if (direction == Vector2.zero) return; // Don't rotate if no direction
+
+        float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
+        Quaternion targetRotation = Quaternion.Euler(0f, 0f, targetAngle);
+
+        // Smooth rotation
+        enemy.transform.rotation = Quaternion.Lerp(
+            enemy.transform.rotation, targetRotation, deltaTime * 5f // You can adjust the rotation speed
+        );
+    }
 
     // Example patrol movement (move back and forth)
     private void Patrol(GameObject enemy, float speed, float deltaTime)
     {
         // Patrol logic (simplified)
-        enemy.transform.Translate(Vector2.left * speed * deltaTime);
+        Vector2 patrolDirection = Vector2.left; // Example patrol direction
+        enemy.transform.Translate(patrolDirection * speed * deltaTime);
+
+        // Set the last movement direction directly on the enemyData
+        foreach (var enemyData in enemies)
+        {
+            if (enemyData.enemy == enemy)
+            {
+                enemyData.lastMovementDirection = patrolDirection; // Store the last movement direction
+                break;
+            }
+        }
     }
 
-    // Example chase movement (move toward closest target)
+    // Modified chase movement (move toward closest target but stop at attack range)
     private void Chase(EnemyData enemyData, float deltaTime)
     {
         GameObject target = FindClosestTarget(enemyData.enemy, enemyData.behavior.aggroRange);
         if (target != null)
         {
-            Vector2 direction = (target.transform.position - enemyData.enemy.transform.position).normalized;
-            enemyData.enemy.transform.Translate(direction * enemyData.behavior.moveSpeed * deltaTime);
+            float distanceToTarget = Vector2.Distance(enemyData.enemy.transform.position, target.transform.position);
+
+            // Only move toward the target if it's outside the attack range
+            if (distanceToTarget > enemyData.behavior.attackRange)
+            {
+                Vector2 direction = (target.transform.position - enemyData.enemy.transform.position).normalized;
+                enemyData.enemy.transform.Translate(direction * enemyData.behavior.moveSpeed * deltaTime);
+                enemyData.lastMovementDirection = direction;
+            }
+
+            // Continue shooting even while chasing
+            HandleShooting(enemyData, deltaTime);
         }
     }
-
-
-    // Shooting logic
-private void ShootAtTarget(GameObject enemy, GameObject target)
-{
-    // Handle shooting with the ShootingComponent
-    var shootingComponent = enemy.GetComponent<ShootingComponent>();
-    if (shootingComponent != null)
-    {
-        shootingComponent.RequestShoot();  // Use the existing shooting logic
-    }
-}
 
 
     // Find the closest target in range
@@ -133,12 +178,15 @@ private void ShootAtTarget(GameObject enemy, GameObject target)
         public GameObject enemy;
         public EnemyBehaviorSO behavior;
         public float shootingCooldownTimer;
+        public Vector2 lastMovementDirection;  // Store the last movement direction for rotation
 
         public EnemyData(GameObject enemy, EnemyBehaviorSO behavior)
         {
             this.enemy = enemy;
             this.behavior = behavior;
             this.shootingCooldownTimer = 0f;
+            this.lastMovementDirection = Vector2.zero;  // Initial direction
         }
     }
 }
+//

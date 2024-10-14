@@ -16,31 +16,31 @@ MonoBehaviour:
   minScale: 1
   maxScale: 1.5
   scale: {x: 1, y: 1, z: 1}
-  colliderRadius: 3
+  colliderRadius: 3.5
   isTrigger: 0
   bodyType: 0
   physicsMaterial: {fileID: 6200000, guid: a0c43d290e2d3f492bf3458f97f022c5, type: 2}
   isKinematic: 0
-  mass: 3
+  mass: 4
   hasMovement: 0
-  moveSpeed: 5
-  moveSmoothTime: 0.1
+  moveSpeed: 0
+  moveSmoothTime: 0
   hasRotation: 0
-  rotationSpeed: 120
+  rotationSpeed: 0
   usePointerRotation: 0
   hasShooting: 0
   bulletSpeed: 40
   shootingCooldown: 0.1
   bulletDamage: 1
   bulletLifespan: 1
-  maxHealth: 100
+  maxHealth: 250
   hasInput: 1
   teamTag: 2
   hasDashAbility: 0
-  dashSpeed: 15
-  dashDuration: 0.2
-  dashCooldown: 1
+  dashSpeed: 0
+  dashDuration: 0
+  dashCooldown: 0
   hasBlinkAbility: 0
-  blinkDistance: 10
-  blinkCooldown: 2
+  blinkDistance: 0
+  blinkCooldown: 0
   behavior: {fileID: 11400000, guid: 2a3cae8c2729f244691e2c94dfd7fb8e, type: 2}

@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6d0c0a2ea07d94e289dd5a213c4ca580, type: 3}
-  m_Name: EnemyBehavior
+  m_Name: EnemyBehavior 1
   m_EditorClassIdentifier: 
-  movementType: 1
-  moveSpeed: 6
-  attackRange: 18
-  shootingCooldown: 0.1
-  aggroRange: 40
+  movementType: 0
+  moveSpeed: 18
+  attackRange: 22
+  shootingCooldown: 0.25
+  aggroRange: 35

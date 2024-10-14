@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Enemy 2
   m_EditorClassIdentifier: 
   objectSprite: {fileID: 21300000, guid: a9a0662d6790b4a4285709b54a0de0e8, type: 3}
+  minScale: 0.5
+  maxScale: 1.5
   scale: {x: 0.35, y: 0.35, z: 1}
   colliderRadius: 3
   isTrigger: 0
@@ -31,7 +33,7 @@ MonoBehaviour:
   shootingCooldown: 0.25
   bulletDamage: 1
   bulletLifespan: 1
-  maxHealth: 99
+  maxHealth: 150
   hasInput: 0
   teamTag: 2
   hasDashAbility: 0
@@ -41,4 +43,4 @@ MonoBehaviour:
   hasBlinkAbility: 0
   blinkDistance: 0
   blinkCooldown: 0
-  behavior: {fileID: 11400000, guid: 740e34e26501742a19ec43ffa8ae2db0, type: 2}
+  behavior: {fileID: 11400000, guid: ac12ac6fd21920c45b82e5d7827bb620, type: 2}
