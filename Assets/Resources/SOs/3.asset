@@ -23,23 +23,23 @@ MonoBehaviour:
   isKinematic: 0
   mass: 1
   hasMovement: 1
-  moveSpeed: 10
+  moveSpeed: 8
   moveSmoothTime: 0.1
   hasRotation: 1
-  rotationSpeed: 10
+  rotationSpeed: 160
   usePointerRotation: 1
   hasShooting: 1
   bulletSpeed: 20
-  shootingCooldown: 0.1
-  bulletDamage: 1
+  shootingCooldown: 0.75
+  bulletDamage: 32
   bulletLifespan: 1
   maxHealth: 100
   hasInput: 1
   teamTag: 0
   hasDashAbility: 1
-  dashSpeed: 15
-  dashDuration: 0.2
-  dashCooldown: 1
+  dashSpeed: 60
+  dashDuration: 0.35
+  dashCooldown: 0.75
   hasBlinkAbility: 1
   blinkDistance: 10
   blinkCooldown: 2

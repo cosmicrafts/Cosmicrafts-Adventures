@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c4ee91495e7d416bb5a7476be1825ea, type: 3}
   m_Name: 4
   m_EditorClassIdentifier: 
-  objectSprite: {fileID: -5636096004135832054, guid: 828f40be70d8a0145ac998debb754be4, type: 3}
+  objectSprite: {fileID: -2704229953061288984, guid: 760980c57b7658908a7ad89bc959945a, type: 3}
   minScale: 0.5
   maxScale: 1.5
   scale: {x: 0.25, y: 0.25, z: 1}
@@ -26,20 +26,20 @@ MonoBehaviour:
   moveSpeed: 10
   moveSmoothTime: 0.1
   hasRotation: 1
-  rotationSpeed: 10
+  rotationSpeed: 160
   usePointerRotation: 1
   hasShooting: 1
-  bulletSpeed: 20
-  shootingCooldown: 0.1
-  bulletDamage: 1
+  bulletSpeed: 24
+  shootingCooldown: 0.15
+  bulletDamage: 10
   bulletLifespan: 1
   maxHealth: 100
   hasInput: 1
   teamTag: 0
   hasDashAbility: 1
-  dashSpeed: 15
-  dashDuration: 0.2
-  dashCooldown: 1
+  dashSpeed: 20
+  dashDuration: 0.25
+  dashCooldown: 0.5
   hasBlinkAbility: 1
   blinkDistance: 10
   blinkCooldown: 2

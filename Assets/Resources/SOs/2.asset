@@ -26,21 +26,21 @@ MonoBehaviour:
   moveSpeed: 12
   moveSmoothTime: 0.1
   hasRotation: 1
-  rotationSpeed: 10
+  rotationSpeed: 160
   usePointerRotation: 1
   hasShooting: 1
-  bulletSpeed: 8
-  shootingCooldown: 0.1
-  bulletDamage: 1
+  bulletSpeed: 10
+  shootingCooldown: 0.25
+  bulletDamage: 18
   bulletLifespan: 1
   maxHealth: 100
   hasInput: 1
   teamTag: 0
   hasDashAbility: 1
-  dashSpeed: 40
+  dashSpeed: 35
   dashDuration: 0.25
-  dashCooldown: 1
+  dashCooldown: 0.25
   hasBlinkAbility: 1
   blinkDistance: 10
-  blinkCooldown: 2
+  blinkCooldown: 1
   behavior: {fileID: 0}

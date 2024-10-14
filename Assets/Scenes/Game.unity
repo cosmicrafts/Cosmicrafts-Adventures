@@ -18177,6 +18177,7 @@ GameObject:
   - component: {fileID: 1458642474}
   - component: {fileID: 1458642470}
   - component: {fileID: 1458642477}
+  - component: {fileID: 1458642478}
   m_Layer: 0
   m_Name: WorldGenerator
   m_TagString: Untagged
@@ -18352,8 +18353,6 @@ MonoBehaviour:
   regenerationInterval: 604800
   objectsPerFrame: 1
   configurations:
-  - {fileID: 11400000, guid: ea34f3b2cd2412368932d97e46f9a98b, type: 2}
-  - {fileID: 11400000, guid: cfa2c8031deb7bd90acce233afc7ac39, type: 2}
   - {fileID: 11400000, guid: 45614961dffe51ab9a2fdeaaabdf7d95, type: 2}
 --- !u!114 &1458642474
 MonoBehaviour:
@@ -18425,6 +18424,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3eff2d2b4ee3ee5f7a22a9cfdb0cae6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1458642478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1458642469}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fec26c26bdbc3b248aaa74181944b043, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: 8260421220360360718, guid: 535d954a18f375f65af4e09f16729c87, type: 3}
 --- !u!1 &1463562281
 GameObject:
   m_ObjectHideFlags: 0
