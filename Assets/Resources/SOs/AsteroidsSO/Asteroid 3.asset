@@ -16,7 +16,7 @@ MonoBehaviour:
   minScale: 0.5
   maxScale: 1.5
   scale: {x: 0.5, y: 0.5, z: 1}
-  colliderRadius: 3.5
+  colliderRadius: 5.5
   isTrigger: 0
   bodyType: 0
   physicsMaterial: {fileID: 6200000, guid: a0c43d290e2d3f492bf3458f97f022c5, type: 2}
