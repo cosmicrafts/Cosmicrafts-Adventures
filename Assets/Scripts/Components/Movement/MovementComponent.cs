@@ -3,13 +3,12 @@ using Unity.Netcode;
 
 public class MovementComponent : NetworkBehaviour
 {
-    public float moveSpeed = 5f;
-    public float moveSmoothTime = 0.1f;
+    public float moveSpeed = 5f;  // Movement speed
+    public float moveSmoothTime = 0.1f;  // Smoothing time for the movement
 
     private Rigidbody2D rb;
     private Vector2 moveInput;
     private Vector2 smoothMoveVelocity;
-
     private bool canMove = true;
 
     public void ApplyConfiguration(ObjectSO config)
@@ -18,25 +17,31 @@ public class MovementComponent : NetworkBehaviour
         moveSmoothTime = config.moveSmoothTime;
     }
 
-
-    // Expose moveInput for external access
     public Vector2 MoveInput => moveInput;
 
-    // Start is called before the first frame update
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;  // Prevent any rotation caused by physics
     }
 
-    // Update is called once per frame
     private void Update()
     {
         if (!IsOwner || !canMove) return;
 
-        // Handle Movement Input
-        moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        // Get input from either joystick or WASD
+        Vector2 joystickInput = Vector2.zero;
+        if (JoystickController.Instance != null)
+        {
+            joystickInput = JoystickController.Instance.GetJoystickDirection();
+        }
 
-        // Apply immediate movement for the owning client
+        Vector2 wasdInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+
+        // Combine joystick and WASD inputs
+        moveInput = joystickInput + wasdInput;
+        moveInput = Vector2.ClampMagnitude(moveInput, 1f); // Ensure the combined input does not exceed 1
+
         ClientMove();
     }
 
@@ -44,42 +49,49 @@ public class MovementComponent : NetworkBehaviour
     {
         if (IsOwner && canMove)
         {
-            UpdateMovement();
+            UpdateMovement();  // Apply movement in FixedUpdate for physics consistency
         }
     }
 
-    /// <summary>
-    /// Immediate local movement for the owning client.
-    /// </summary>
     private void ClientMove()
     {
+        // Move only if there's input
         if (moveInput != Vector2.zero)
         {
-            Vector2 targetVelocity = moveInput * moveSpeed;
+            Vector2 targetVelocity = moveInput.normalized * moveSpeed;  // Normalize input and scale by speed
             rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, targetVelocity, ref smoothMoveVelocity, moveSmoothTime);
         }
         else
         {
-            rb.linearVelocity = Vector2.zero; // Stop movement when no input is provided
+            rb.linearVelocity = Vector2.zero;  // Stop movement when there's no input
         }
     }
 
     private void UpdateMovement()
     {
-        // Update movement based on the latest input.
-        Vector2 targetVelocity = moveInput * moveSpeed;
+        Vector2 targetVelocity = moveInput.normalized * moveSpeed;  // Normalize and apply speed
         rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, targetVelocity, ref smoothMoveVelocity, moveSmoothTime);
     }
 
     public void SetMoveInput(Vector2 input)
     {
-        moveInput = input;
+        moveInput = input; // Store the received input
+
+        // If the input is non-zero, apply movement speed
+        if (moveInput != Vector2.zero)
+        {
+            Vector2 normalizedMoveInput = moveInput.normalized;
+            Vector2 targetVelocity = normalizedMoveInput * moveSpeed;
+            rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, targetVelocity, ref smoothMoveVelocity, moveSmoothTime);
+        }
+        else
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
     }
 
     public void SetCanMove(bool value)
     {
         canMove = value;
     }
-
-
 }

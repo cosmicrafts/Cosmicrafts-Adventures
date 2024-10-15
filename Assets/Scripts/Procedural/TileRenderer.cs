@@ -1,37 +1,30 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Jobs;
+using Unity.Collections;
+using Unity.Burst;
 
 public class SpaceProceduralGenerator : MonoBehaviour
 {
     [Header("Space Tile Settings")]
-    public Sprite spaceTileSpriteForeground;
-    public Sprite spaceTileSpriteBackground;
-    public float tileWorldSize = 16f;
-    public int renderDistance = 4;
-
-    [Header("Foreground Movement Settings")]
-    public Vector2 foregroundMovementDirection = new Vector2(0.1f, 0.1f);
-    public float minForegroundMovementSpeed = 0.05f;
-    public float maxForegroundMovementSpeed = 0.2f;
-
-    [Header("Material Settings")]
-    public Material additiveMaterialForeground;
+    public Sprite spaceTileSpriteBackground; 
+    public float tileWorldSize = 16f; 
+    public int gridSize = 4;
 
     [Header("Customization Options")]
-    public Color foregroundColor = Color.white;
     public Color backgroundColor = Color.white;
-    [Range(0.5f, 10f)] public float foregroundScaleFactor = 1f;
-    [Range(0.5f, 10f)] public float backgroundScaleFactor = 1f;
+    public float backgroundScaleFactor = 1f;
 
     private Transform player;
-    private Vector2 playerPosition;
-    private Dictionary<Vector2, GameObject> foregroundChunks = new Dictionary<Vector2, GameObject>();
-    private Dictionary<Vector2, GameObject> backgroundChunks = new Dictionary<Vector2, GameObject>();
-    private Dictionary<Vector2, float> foregroundChunkSpeeds = new Dictionary<Vector2, float>();
-    
-    private Queue<GameObject> chunkPool = new Queue<GameObject>(); // Pool for recycling chunks
-    private float updateInterval = 0.2f; // Update chunks every 0.2 seconds
-    private float updateTimer = 0f;
+    private Queue<GameObject> chunkPool = new Queue<GameObject>();
+    private GameObject[,] activeChunks;
+    private Vector2 gridOrigin;
+
+    private float moveThreshold;
+
+    // Job data
+    private NativeArray<Vector3> chunkPositions;
+    private JobHandle jobHandle;
 
     private void Start()
     {
@@ -42,160 +35,209 @@ public class SpaceProceduralGenerator : MonoBehaviour
             return;
         }
 
-        GenerateInitialChunks();
+        activeChunks = new GameObject[gridSize, gridSize];
+        gridOrigin = SnapToGrid(player.position - new Vector3((gridSize / 2) * tileWorldSize, (gridSize / 2) * tileWorldSize, 0));
+        moveThreshold = tileWorldSize / 4f;
+        InitializeGrid();
     }
 
     private void Update()
     {
-        updateTimer += Time.deltaTime;
-        if (updateTimer >= updateInterval)
+        Vector2 playerPosition = new Vector2(player.position.x, player.position.y);
+        Vector2 offset = playerPosition - gridOrigin * tileWorldSize;
+
+        if (Mathf.Abs(offset.x) >= moveThreshold || Mathf.Abs(offset.y) >= moveThreshold)
         {
-            UpdateChunksAroundPlayer();
-            RemoveDistantChunks();
-            updateTimer = 0f; // Reset timer after update
-        }
+            Vector2 newGridOrigin = SnapToGrid(player.position - new Vector3((gridSize / 2) * tileWorldSize, (gridSize / 2) * tileWorldSize, 0));
 
-        MoveForegroundChunks();
-    }
-
-    void GenerateInitialChunks()
-    {
-        playerPosition = new Vector2(Mathf.FloorToInt(player.position.x / tileWorldSize), Mathf.FloorToInt(player.position.y / tileWorldSize));
-
-        for (int x = -renderDistance; x <= renderDistance; x++)
-        {
-            for (int y = -renderDistance; y <= renderDistance; y++)
+            if (newGridOrigin != gridOrigin)
             {
-                Vector2 chunkCoord = new Vector2(playerPosition.x + x, playerPosition.y + y);
-                GenerateChunk(chunkCoord, spaceTileSpriteForeground, foregroundChunks, additiveMaterialForeground, foregroundColor, foregroundScaleFactor, true);
-                GenerateChunk(chunkCoord, spaceTileSpriteBackground, backgroundChunks, null, backgroundColor, backgroundScaleFactor, false);
+                Vector2 direction = newGridOrigin - gridOrigin;
+                ShiftGrid(direction);
+                gridOrigin = newGridOrigin;
             }
         }
     }
 
-    void GenerateChunk(Vector2 chunkCoord, Sprite sprite, Dictionary<Vector2, GameObject> chunksDict, Material material, Color color, float scaleFactor, bool isForeground)
+    void InitializeGrid()
     {
-        if (chunksDict.ContainsKey(chunkCoord)) return;
-
-        GameObject newChunk = GetChunkFromPool(); // Get a chunk from the pool
-        newChunk.transform.position = new Vector3(chunkCoord.x * tileWorldSize, chunkCoord.y * tileWorldSize, 0);
-        newChunk.layer = 6;
-
-        SpriteRenderer spriteRenderer = newChunk.GetComponent<SpriteRenderer>();
-        if (spriteRenderer == null)
+        chunkPositions = new NativeArray<Vector3>(gridSize * gridSize, Allocator.TempJob);
+        for (int x = 0; x < gridSize; x++)
         {
-            spriteRenderer = newChunk.AddComponent<SpriteRenderer>();
-        }
-        spriteRenderer.sprite = sprite;
-        spriteRenderer.color = color;
-
-        if (material != null)
-        {
-            spriteRenderer.material = material;
+            for (int y = 0; y < gridSize; y++)
+            {
+                Vector2 chunkCoord = gridOrigin + new Vector2(x, y);
+                chunkPositions[y * gridSize + x] = new Vector3(chunkCoord.x, chunkCoord.y, 0);
+                activeChunks[x, y] = GetChunkFromPool(chunkCoord);
+            }
         }
 
-        newChunk.transform.localScale = new Vector3(scaleFactor * tileWorldSize / sprite.bounds.size.x, scaleFactor * tileWorldSize / sprite.bounds.size.y, 1);
-        int randomRotation = Random.Range(0, 4) * 90;
-        newChunk.transform.rotation = Quaternion.Euler(0, 0, randomRotation);
-
-        chunksDict.Add(chunkCoord, newChunk);
-
-        if (isForeground)
+        // Burst Job to update chunk positions
+        var chunkUpdateJob = new UpdateChunkPositionsJob
         {
-            float randomSpeed = Random.Range(minForegroundMovementSpeed, maxForegroundMovementSpeed);
-            foregroundChunkSpeeds[chunkCoord] = randomSpeed;
-        }
+            ChunkPositions = chunkPositions,
+            TileWorldSize = tileWorldSize
+        };
+
+        jobHandle = chunkUpdateJob.Schedule(gridSize * gridSize, 64);
+        jobHandle.Complete();
     }
 
-    void UpdateChunksAroundPlayer()
+    void ShiftGrid(Vector2 direction)
     {
-        Vector2 newPlayerPos = new Vector2(Mathf.FloorToInt(player.position.x / tileWorldSize), Mathf.FloorToInt(player.position.y / tileWorldSize));
-
-        if (newPlayerPos != playerPosition)
+        if (direction.x != 0)
         {
-            playerPosition = newPlayerPos;
-
-            for (int x = -renderDistance; x <= renderDistance; x++)
+            int shiftX = (int)direction.x;
+            if (shiftX > 0)
             {
-                for (int y = -renderDistance; y <= renderDistance; y++)
-                {
-                    Vector2 chunkCoord = new Vector2(playerPosition.x + x, playerPosition.y + y);
-                    if (!backgroundChunks.ContainsKey(chunkCoord))
-                    {
-                        GenerateChunk(chunkCoord, spaceTileSpriteBackground, backgroundChunks, null, backgroundColor, backgroundScaleFactor, false);
-                    }
-                }
+                MoveColumnLeft();
+                AddNewColumn(gridSize - 1, gridOrigin.x + gridSize);
+            }
+            else if (shiftX < 0)
+            {
+                MoveColumnRight();
+                AddNewColumn(0, gridOrigin.x - 1);
+            }
+        }
+
+        if (direction.y != 0)
+        {
+            int shiftY = (int)direction.y;
+            if (shiftY > 0)
+            {
+                MoveRowDown();
+                AddNewRow(gridSize - 1, gridOrigin.y + gridSize);
+            }
+            else if (shiftY < 0)
+            {
+                MoveRowUp();
+                AddNewRow(0, gridOrigin.y - 1);
             }
         }
     }
 
-    void MoveForegroundChunks()
+    // Move column/row methods remain the same (optimized only slightly)
+    void MoveColumnLeft()
     {
-        foreach (var chunk in foregroundChunks)
+        for (int y = 0; y < gridSize; y++)
         {
-            Vector2 chunkCoord = chunk.Key;
-            GameObject chunkObject = chunk.Value;
-            if (foregroundChunkSpeeds.TryGetValue(chunkCoord, out float speed))
+            ReturnChunkToPool(activeChunks[0, y]);
+            for (int x = 1; x < gridSize; x++)
             {
-                Vector3 movement = (Vector3)foregroundMovementDirection * speed * Time.deltaTime;
-                chunkObject.transform.position += movement;
+                activeChunks[x - 1, y] = activeChunks[x, y];
             }
         }
     }
 
-    void RemoveDistantChunks()
+    void MoveColumnRight()
     {
-        List<Vector2> chunksToRemove = new List<Vector2>();
-
-        foreach (var chunk in foregroundChunks)
+        for (int y = 0; y < gridSize; y++)
         {
-            float distanceToPlayer = Vector2.Distance(playerPosition, chunk.Key);
-            if (distanceToPlayer > renderDistance + 2)
+            ReturnChunkToPool(activeChunks[gridSize - 1, y]);
+            for (int x = gridSize - 2; x >= 0; x--)
             {
-                chunksToRemove.Add(chunk.Key);
+                activeChunks[x + 1, y] = activeChunks[x, y];
             }
-        }
-
-        foreach (var chunkCoord in chunksToRemove)
-        {
-            ReturnChunkToPool(foregroundChunks[chunkCoord]); // Return to pool
-            foregroundChunks.Remove(chunkCoord);
-            foregroundChunkSpeeds.Remove(chunkCoord);
-        }
-
-        chunksToRemove.Clear();
-
-        foreach (var chunk in backgroundChunks)
-        {
-            float distanceToPlayer = Vector2.Distance(playerPosition, chunk.Key);
-            if (distanceToPlayer > renderDistance + 1)
-            {
-                chunksToRemove.Add(chunk.Key);
-            }
-        }
-
-        foreach (var chunkCoord in chunksToRemove)
-        {
-            ReturnChunkToPool(backgroundChunks[chunkCoord]); // Return to pool
-            backgroundChunks.Remove(chunkCoord);
         }
     }
 
-    GameObject GetChunkFromPool()
+    void MoveRowDown()
     {
+        for (int x = 0; x < gridSize; x++)
+        {
+            ReturnChunkToPool(activeChunks[x, 0]);
+            for (int y = 1; y < gridSize; y++)
+            {
+                activeChunks[x, y - 1] = activeChunks[x, y];
+            }
+        }
+    }
+
+    void MoveRowUp()
+    {
+        for (int x = 0; x < gridSize; x++)
+        {
+            ReturnChunkToPool(activeChunks[x, gridSize - 1]);
+            for (int y = gridSize - 2; y >= 0; y--)
+            {
+                activeChunks[x, y + 1] = activeChunks[x, y];
+            }
+        }
+    }
+
+    void AddNewColumn(int colIndex, float newX)
+    {
+        for (int y = 0; y < gridSize; y++)
+        {
+            Vector2 newChunkCoord = new Vector2(newX, gridOrigin.y + y);
+            activeChunks[colIndex, y] = GetChunkFromPool(newChunkCoord);
+        }
+    }
+
+    void AddNewRow(int rowIndex, float newY)
+    {
+        for (int x = 0; x < gridSize; x++)
+        {
+            Vector2 newChunkCoord = new Vector2(gridOrigin.x + x, newY);
+            activeChunks[x, rowIndex] = GetChunkFromPool(newChunkCoord);
+        }
+    }
+
+    GameObject GetChunkFromPool(Vector2 chunkCoord)
+    {
+        GameObject chunk;
         if (chunkPool.Count > 0)
         {
-            GameObject chunk = chunkPool.Dequeue();
+            chunk = chunkPool.Dequeue();
             chunk.SetActive(true);
-            return chunk;
+        }
+        else
+        {
+            chunk = new GameObject("Chunk");
+            var renderer = chunk.AddComponent<SpriteRenderer>();
+            renderer.sprite = spaceTileSpriteBackground;
+            renderer.color = backgroundColor;
+            chunk.transform.localScale = new Vector3(backgroundScaleFactor, backgroundScaleFactor, 1);
         }
 
-        return new GameObject("Chunk");
+        chunk.transform.position = new Vector3(chunkCoord.x * tileWorldSize, chunkCoord.y * tileWorldSize, 0);
+        return chunk;
     }
 
     void ReturnChunkToPool(GameObject chunk)
     {
-        chunk.SetActive(false); // Disable the chunk
-        chunkPool.Enqueue(chunk); // Return it to the pool
+        chunk.SetActive(false);
+        chunkPool.Enqueue(chunk);
+    }
+
+    Vector2 SnapToGrid(Vector3 position)
+    {
+        float x = Mathf.FloorToInt(position.x / tileWorldSize);
+        float y = Mathf.FloorToInt(position.y / tileWorldSize);
+        return new Vector2(x, y);
+    }
+
+    [BurstCompile]
+    struct UpdateChunkPositionsJob : IJobParallelFor
+    {
+        [ReadOnly]
+        public NativeArray<Vector3> ChunkPositions;
+        public float TileWorldSize;
+
+        public void Execute(int index)
+        {
+            // Example of what you could do here:
+            Vector3 chunkPos = ChunkPositions[index];
+            chunkPos.x *= TileWorldSize;
+            chunkPos.y *= TileWorldSize;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (chunkPositions.IsCreated)
+        {
+            chunkPositions.Dispose();
+        }
     }
 }

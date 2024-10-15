@@ -71,8 +71,20 @@ public class InputComponent : NetworkBehaviour
 
     private void UpdateMovementAndRotation()
     {
+        // Get input from either joystick or WASD
+        Vector2 joystickInput = Vector2.zero;
+        if (JoystickController.Instance != null)
+        {
+            joystickInput = JoystickController.Instance.GetJoystickDirection();
+        }
+
+        Vector2 wasdInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+
+        // Combine joystick and WASD inputs
+        Vector2 moveInput = joystickInput + wasdInput;
+        moveInput = Vector2.ClampMagnitude(moveInput, 1f); // Ensure the combined input does not exceed 1
+
         // Handle Movement Input
-        Vector2 moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         movementComponent.SetMoveInput(moveInput);
 
         // Handle Rotation Input based on the current mouse position
@@ -80,7 +92,6 @@ public class InputComponent : NetworkBehaviour
             Input.mousePosition.x, Input.mousePosition.y, -mainCamera.transform.position.z));
         rotationComponent.SetMousePosition(mouseWorldPosition);
     }
-
 
     private void HandleCameraZoomInput()
     {

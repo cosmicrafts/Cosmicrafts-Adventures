@@ -3,31 +3,24 @@ using Unity.Netcode;
 
 public class RotationComponent : NetworkBehaviour
 {
-    private Rigidbody2D rb;
     private MovementComponent movementComponent;
-
     private Vector3 mousePosition;
 
-    // Network variable to synchronize the rotation across clients
     private NetworkVariable<Quaternion> networkRotation = new NetworkVariable<Quaternion>(
         Quaternion.identity, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private float rotationSpeed;
-    private bool usePointerRotation;  // NEW: Local flag for controlling pointer-based rotation
+    private bool usePointerRotation;
 
     public void ApplyConfiguration(ObjectSO config)
     {
-        // Apply rotation settings from the ObjectSO
         rotationSpeed = config.rotationSpeed;
-        usePointerRotation = config.usePointerRotation;  // Apply the pointer rotation setting
+        usePointerRotation = config.usePointerRotation;
     }
 
     private void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
         movementComponent = GetComponent<MovementComponent>();
-
-        // Subscribe to the network variable change to update non-owner clients
         networkRotation.OnValueChanged += OnRotationChanged;
     }
 
@@ -35,20 +28,18 @@ public class RotationComponent : NetworkBehaviour
     {
         if (usePointerRotation)
         {
-            // Handle pointer-based rotation (for players)
             if (IsOwner)
             {
                 HandlePointerRotation();
             }
             else
             {
-                // Synchronize rotation for non-owner clients
+                // Sync rotation for non-owner clients
                 transform.rotation = Quaternion.Lerp(transform.rotation, networkRotation.Value, Time.deltaTime * 10f);
             }
         }
         else
         {
-            // Automatic rotation for non-pointer-based objects (like asteroids)
             HandleAutomaticRotation();
         }
     }
@@ -56,8 +47,6 @@ public class RotationComponent : NetworkBehaviour
     private void HandlePointerRotation()
     {
         Quaternion newRotation = CalculateRotation(mousePosition);
-
-        // Smoothly interpolate towards the new rotation
         float rotationSmoothingSpeed = 12f;
         transform.rotation = Quaternion.Lerp(transform.rotation, newRotation, Time.deltaTime * rotationSmoothingSpeed);
 
@@ -69,7 +58,7 @@ public class RotationComponent : NetworkBehaviour
 
     private void HandleAutomaticRotation()
     {
-        // Apply automatic rotation on the Z-axis based on the configured speed
+        // Only update rotation using transform, avoid Rigidbody interference
         transform.Rotate(Vector3.forward, rotationSpeed * Time.deltaTime);
     }
 

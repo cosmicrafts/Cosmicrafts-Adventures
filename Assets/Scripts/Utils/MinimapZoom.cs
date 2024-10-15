@@ -5,7 +5,7 @@ public class MinimapZoom : MonoBehaviour
     [SerializeField] private Camera minimapCamera;  // Reference to the minimap camera
     private float currentZoomLevel = 36f;           // Default starting size
     private const float minZoomLevel = 24f;         // Minimum zoom level
-    private const float maxZoomLevel = 64f;         // Maximum zoom level
+    private const float maxZoomLevel = 48f;         // Maximum zoom level
     private const float zoomStep = 4f;              // Amount to increase/decrease per click
 
     private void Start()
