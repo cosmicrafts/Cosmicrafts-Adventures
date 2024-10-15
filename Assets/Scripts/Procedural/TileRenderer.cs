@@ -4,36 +4,38 @@ using UnityEngine;
 public class SpaceProceduralGenerator : MonoBehaviour
 {
     [Header("Space Tile Settings")]
-    public Sprite spaceTileSpriteForeground; // Foreground sprite
-    public Sprite spaceTileSpriteBackground; // Background sprite
-    public float tileWorldSize = 16f; // Size of each space tile
-    public int renderDistance = 4; // How far the camera should render chunks
+    public Sprite spaceTileSpriteForeground;
+    public Sprite spaceTileSpriteBackground;
+    public float tileWorldSize = 16f;
+    public int renderDistance = 4;
 
     [Header("Foreground Movement Settings")]
-    public Vector2 foregroundMovementDirection = new Vector2(0.1f, 0.1f); // Diagonal movement speed
-    public float minForegroundMovementSpeed = 0.05f; // Minimum speed at which the foreground moves
-    public float maxForegroundMovementSpeed = 0.2f; // Maximum speed at which the foreground moves
+    public Vector2 foregroundMovementDirection = new Vector2(0.1f, 0.1f);
+    public float minForegroundMovementSpeed = 0.05f;
+    public float maxForegroundMovementSpeed = 0.2f;
 
     [Header("Material Settings")]
-    public Material additiveMaterialForeground; // Additive material for the foreground
+    public Material additiveMaterialForeground;
 
     [Header("Customization Options")]
-    public Color foregroundColor = Color.white; // Tint color for the foreground
-    public Color backgroundColor = Color.white; // Tint color for the background
-    [Range(0.5f, 10f)] public float foregroundScaleFactor = 1f; // Scale factor for foreground
-    [Range(0.5f, 10f)] public float backgroundScaleFactor = 1f; // Scale factor for background
+    public Color foregroundColor = Color.white;
+    public Color backgroundColor = Color.white;
+    [Range(0.5f, 10f)] public float foregroundScaleFactor = 1f;
+    [Range(0.5f, 10f)] public float backgroundScaleFactor = 1f;
 
     private Transform player;
     private Vector2 playerPosition;
-    private Dictionary<Vector2, GameObject> foregroundChunks = new Dictionary<Vector2, GameObject>(); // Store foreground chunks
-    private Dictionary<Vector2, GameObject> backgroundChunks = new Dictionary<Vector2, GameObject>(); // Store background chunks
-
-    // Dictionary to store random speeds for each foreground chunk
+    private Dictionary<Vector2, GameObject> foregroundChunks = new Dictionary<Vector2, GameObject>();
+    private Dictionary<Vector2, GameObject> backgroundChunks = new Dictionary<Vector2, GameObject>();
     private Dictionary<Vector2, float> foregroundChunkSpeeds = new Dictionary<Vector2, float>();
+    
+    private Queue<GameObject> chunkPool = new Queue<GameObject>(); // Pool for recycling chunks
+    private float updateInterval = 0.2f; // Update chunks every 0.2 seconds
+    private float updateTimer = 0f;
 
     private void Start()
     {
-        player = Camera.main.transform; // Use the main camera's transform
+        player = Camera.main.transform;
         if (player == null)
         {
             Debug.LogWarning("Main camera not found.");
@@ -45,22 +47,21 @@ public class SpaceProceduralGenerator : MonoBehaviour
 
     private void Update()
     {
-        UpdateChunksAroundPlayer();
-        RemoveDistantChunks();
+        updateTimer += Time.deltaTime;
+        if (updateTimer >= updateInterval)
+        {
+            UpdateChunksAroundPlayer();
+            RemoveDistantChunks();
+            updateTimer = 0f; // Reset timer after update
+        }
 
-        // Move the foreground layer in the specified diagonal direction
         MoveForegroundChunks();
-
-        // Continuously generate new foreground chunks over time
-        GenerateNewForegroundChunks();
     }
 
     void GenerateInitialChunks()
     {
-        // Calculate the player's initial chunk position
         playerPosition = new Vector2(Mathf.FloorToInt(player.position.x / tileWorldSize), Mathf.FloorToInt(player.position.y / tileWorldSize));
 
-        // Generate chunks within the render distance around the player for both layers
         for (int x = -renderDistance; x <= renderDistance; x++)
         {
             for (int y = -renderDistance; y <= renderDistance; y++)
@@ -74,36 +75,31 @@ public class SpaceProceduralGenerator : MonoBehaviour
 
     void GenerateChunk(Vector2 chunkCoord, Sprite sprite, Dictionary<Vector2, GameObject> chunksDict, Material material, Color color, float scaleFactor, bool isForeground)
     {
-        // Check if the chunk has already been generated
         if (chunksDict.ContainsKey(chunkCoord)) return;
 
-        // Create a new GameObject with a SpriteRenderer to use the given sprite
-        GameObject newChunk = new GameObject($"Chunk_{chunkCoord.x}_{chunkCoord.y}_Layer");
-        newChunk.transform.position = new Vector3(chunkCoord.x * tileWorldSize, chunkCoord.y * tileWorldSize, 0); // Generate at the same initial position for overlap
-        newChunk.layer = 6; // Assign directly to Layer 6 (Space tiles layer)
+        GameObject newChunk = GetChunkFromPool(); // Get a chunk from the pool
+        newChunk.transform.position = new Vector3(chunkCoord.x * tileWorldSize, chunkCoord.y * tileWorldSize, 0);
+        newChunk.layer = 6;
 
-        // Add a SpriteRenderer component and set the sprite
-        SpriteRenderer spriteRenderer = newChunk.AddComponent<SpriteRenderer>();
+        SpriteRenderer spriteRenderer = newChunk.GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+        {
+            spriteRenderer = newChunk.AddComponent<SpriteRenderer>();
+        }
         spriteRenderer.sprite = sprite;
+        spriteRenderer.color = color;
 
-        // Set the size of the sprite to match the tileWorldSize and apply the scale factor
-        newChunk.transform.localScale = new Vector3(scaleFactor * tileWorldSize / sprite.bounds.size.x, scaleFactor * tileWorldSize / sprite.bounds.size.y, 1);
-
-        // Set a random rotation of 0, 90, 180, or 270 degrees
-        int randomRotation = Random.Range(0, 4) * 90;
-        newChunk.transform.rotation = Quaternion.Euler(0, 0, randomRotation);
-
-        // Set the material and color
         if (material != null)
         {
             spriteRenderer.material = material;
         }
-        spriteRenderer.color = color;
 
-        // Add the new chunk to the dictionary
+        newChunk.transform.localScale = new Vector3(scaleFactor * tileWorldSize / sprite.bounds.size.x, scaleFactor * tileWorldSize / sprite.bounds.size.y, 1);
+        int randomRotation = Random.Range(0, 4) * 90;
+        newChunk.transform.rotation = Quaternion.Euler(0, 0, randomRotation);
+
         chunksDict.Add(chunkCoord, newChunk);
 
-        // If this is a foreground chunk, assign it a random speed
         if (isForeground)
         {
             float randomSpeed = Random.Range(minForegroundMovementSpeed, maxForegroundMovementSpeed);
@@ -113,15 +109,12 @@ public class SpaceProceduralGenerator : MonoBehaviour
 
     void UpdateChunksAroundPlayer()
     {
-        // Calculate the player's current chunk position
         Vector2 newPlayerPos = new Vector2(Mathf.FloorToInt(player.position.x / tileWorldSize), Mathf.FloorToInt(player.position.y / tileWorldSize));
 
-        // Only update if the player has moved to a new chunk
         if (newPlayerPos != playerPosition)
         {
             playerPosition = newPlayerPos;
 
-            // Generate new chunks within the render distance for the background layer only
             for (int x = -renderDistance; x <= renderDistance; x++)
             {
                 for (int y = -renderDistance; y <= renderDistance; y++)
@@ -136,25 +129,8 @@ public class SpaceProceduralGenerator : MonoBehaviour
         }
     }
 
-    void GenerateNewForegroundChunks()
-    {
-        // Generate new foreground chunks continuously within a larger distance to keep creating fresh ones
-        for (int x = -renderDistance - 1; x <= renderDistance + 1; x++)
-        {
-            for (int y = -renderDistance - 1; y <= renderDistance + 1; y++)
-            {
-                Vector2 chunkCoord = new Vector2(playerPosition.x + x, playerPosition.y + y);
-                if (!foregroundChunks.ContainsKey(chunkCoord))
-                {
-                    GenerateChunk(chunkCoord, spaceTileSpriteForeground, foregroundChunks, additiveMaterialForeground, foregroundColor, foregroundScaleFactor, true);
-                }
-            }
-        }
-    }
-
     void MoveForegroundChunks()
     {
-        // Move foreground chunks in a diagonal direction over time with their respective random speeds
         foreach (var chunk in foregroundChunks)
         {
             Vector2 chunkCoord = chunk.Key;
@@ -171,27 +147,24 @@ public class SpaceProceduralGenerator : MonoBehaviour
     {
         List<Vector2> chunksToRemove = new List<Vector2>();
 
-        // Find foreground chunks that are beyond the render distance and mark them for removal
         foreach (var chunk in foregroundChunks)
         {
             float distanceToPlayer = Vector2.Distance(playerPosition, chunk.Key);
-            if (distanceToPlayer > renderDistance + 2) // Use a larger threshold to keep fresh chunks
+            if (distanceToPlayer > renderDistance + 2)
             {
                 chunksToRemove.Add(chunk.Key);
             }
         }
 
-        // Remove and destroy distant foreground chunks
         foreach (var chunkCoord in chunksToRemove)
         {
-            Destroy(foregroundChunks[chunkCoord]);
+            ReturnChunkToPool(foregroundChunks[chunkCoord]); // Return to pool
             foregroundChunks.Remove(chunkCoord);
             foregroundChunkSpeeds.Remove(chunkCoord);
         }
 
         chunksToRemove.Clear();
 
-        // Find background chunks that are beyond the render distance and mark them for removal
         foreach (var chunk in backgroundChunks)
         {
             float distanceToPlayer = Vector2.Distance(playerPosition, chunk.Key);
@@ -201,11 +174,28 @@ public class SpaceProceduralGenerator : MonoBehaviour
             }
         }
 
-        // Remove and destroy distant background chunks
         foreach (var chunkCoord in chunksToRemove)
         {
-            Destroy(backgroundChunks[chunkCoord]);
+            ReturnChunkToPool(backgroundChunks[chunkCoord]); // Return to pool
             backgroundChunks.Remove(chunkCoord);
         }
+    }
+
+    GameObject GetChunkFromPool()
+    {
+        if (chunkPool.Count > 0)
+        {
+            GameObject chunk = chunkPool.Dequeue();
+            chunk.SetActive(true);
+            return chunk;
+        }
+
+        return new GameObject("Chunk");
+    }
+
+    void ReturnChunkToPool(GameObject chunk)
+    {
+        chunk.SetActive(false); // Disable the chunk
+        chunkPool.Enqueue(chunk); // Return it to the pool
     }
 }

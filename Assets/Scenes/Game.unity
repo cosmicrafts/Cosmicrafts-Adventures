@@ -18441,7 +18441,6 @@ GameObject:
   - component: {fileID: 1458642471}
   - component: {fileID: 1458642472}
   - component: {fileID: 1458642476}
-  - component: {fileID: 1458642475}
   - component: {fileID: 1458642473}
   - component: {fileID: 1458642474}
   - component: {fileID: 1458642470}
@@ -18647,22 +18646,6 @@ MonoBehaviour:
   sectorSize: 50
   gridColor: {r: 0, g: 1, b: 0, a: 1}
   lineWidth: 0.1
---- !u!114 &1458642475
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1458642469}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e29c5b05209581eaad161535efd49f7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  PooledPrefabsList:
-  - Prefab: {fileID: 628412359505069944, guid: f40ecf204176849b2a3d0067c43049f4, type: 3}
-    PrewarmCount: 0
 --- !u!114 &1458642476
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18697,7 +18680,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1458642469}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3eff2d2b4ee3ee5f7a22a9cfdb0cae6a, type: 3}
   m_Name: 

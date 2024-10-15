@@ -8,27 +8,25 @@ public class HealthComponent : NetworkBehaviour
     public NetworkVariable<float> currentHealth = new NetworkVariable<float>(100f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public Slider healthSlider;
     public float collisionDamage = 4f;
-    public Animation animationComponent; // Reference to the Animation component
-    public string damageAnimationName = "Damage"; // Name of the damage animation clip
+    public Animation animationComponent;
+    public string damageAnimationName = "Damage";
 
     private float predictedHealth;
     public GameObject explosionPrefab;
     public float explosionDuration = 1f;
     private bool isDead = false;
-    private ObjectLoader objectLoader;
 
     public void ApplyConfiguration(ObjectSO config)
     {
         maxHealth = config.maxHealth;
     }
-
-    // OnEnable to reset object when reused from pool
+    
     private void OnEnable()
     {
-        isDead = false; // Reset isDead flag when object is re-enabled
+        isDead = false;
         if (IsServer)
         {
-            currentHealth.Value = maxHealth; // Reset health on server
+            currentHealth.Value = maxHealth;
         }
     }
 
@@ -47,8 +45,6 @@ public class HealthComponent : NetworkBehaviour
             healthSlider.maxValue = maxHealth;
             healthSlider.value = currentHealth.Value;
         }
-
-        objectLoader = GetComponent<ObjectLoader>();
     }
 
     private new void OnDestroy()
@@ -62,25 +58,22 @@ public class HealthComponent : NetworkBehaviour
         predictedHealth = newHealth;
         UpdateHealthUI(predictedHealth);
 
-        // Play the damage animation every time health changes
-        if (newHealth < oldHealth && !isDead) // Only play if health decreases
+        if (newHealth < oldHealth && !isDead)
         {
             PlayDamageAnimation();
         }
 
-        // If health drops to 0, trigger the death sequence
         if (newHealth <= 0 && !isDead)
         {
             HandleDeath();
         }
     }
 
-    // Play the damage animation
     private void PlayDamageAnimation()
     {
         if (animationComponent != null && animationComponent.GetClip(damageAnimationName) != null)
         {
-            animationComponent.Play(damageAnimationName); // Play the Damage animation
+            animationComponent.Play(damageAnimationName);
         }
     }
 
@@ -95,7 +88,7 @@ public class HealthComponent : NetworkBehaviour
 
     private void ApplyDamage(float amount)
     {
-        if (isDead || currentHealth.Value <= 0) return;  // Simplified conditions
+        if (isDead || currentHealth.Value <= 0) return;
 
         currentHealth.Value = Mathf.Max(currentHealth.Value - amount, 0);
 
@@ -107,8 +100,7 @@ public class HealthComponent : NetworkBehaviour
 
     private void HandleDeath()
     {
-        if (isDead) return; // Simplified multiple death check
-
+        if (isDead) return;
         isDead = true;
 
         if (explosionPrefab != null)
@@ -117,26 +109,20 @@ public class HealthComponent : NetworkBehaviour
             Destroy(explosionInstance, explosionDuration);
         }
 
-        if (objectLoader != null)
+        if (IsServer)
         {
             NetworkObject netObject = GetComponent<NetworkObject>();
             if (netObject != null && netObject.IsSpawned)
             {
-                NetworkObjectPool.Singleton.ReturnNetworkObject(netObject, objectLoader.GetOriginalPrefab());
-                DeactivateClientRpc();
+                netObject.Despawn(); // Properly despawn the object from the network
+                Destroy(gameObject); // Fully destroy the object
             }
         }
     }
 
-    [ClientRpc]
-    private void DeactivateClientRpc()
-    {
-        gameObject.SetActive(false);
-    }
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (isDead) return; // Only check if already dead
+        if (isDead) return;
 
         if (collision.gameObject.CompareTag("Bullet"))
         {

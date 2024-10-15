@@ -23,15 +23,15 @@ MonoBehaviour:
   isKinematic: 0
   mass: 1
   hasMovement: 1
-  moveSpeed: 10
+  moveSpeed: 20
   moveSmoothTime: 0.1
   hasRotation: 1
   rotationSpeed: 160
   usePointerRotation: 1
   hasShooting: 1
-  bulletSpeed: 24
-  shootingCooldown: 0.15
-  bulletDamage: 10
+  bulletSpeed: 42
+  shootingCooldown: 0.1
+  bulletDamage: 500
   bulletLifespan: 1
   maxHealth: 100
   hasInput: 1

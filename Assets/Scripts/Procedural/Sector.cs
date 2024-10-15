@@ -8,3 +8,4 @@ public class Sector : ScriptableObject
     public bool isGenerated = false;
 
 }
+//

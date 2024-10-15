@@ -10,6 +10,7 @@ public class AsteroidManager : MonoBehaviour
     {
         Instance = this;
     }
+
     public enum MovementType
     {
         Linear,
@@ -19,69 +20,99 @@ public class AsteroidManager : MonoBehaviour
         ZigZag
     }
 
-public void RegisterAsteroidForCircularMovement(GameObject asteroid, Vector2 center, float speed, float radius)
-{
-    int randomDirection = Random.value > 0.5f ? 1 : -1; // Randomize direction
-    asteroids.Add(new AsteroidData(asteroid, Vector2.zero, speed * randomDirection, MovementType.Circular, center, radius));
-}
+    // Registers an asteroid for circular movement
+    public void RegisterAsteroidForCircularMovement(GameObject asteroid, Vector2 center, float speed, float radius)
+    {
+        int randomDirection = Random.value > 0.5f ? 1 : -1; // Randomize direction
+        asteroids.Add(new AsteroidData(asteroid, Vector2.zero, speed * randomDirection, MovementType.Circular, center, radius));
+    }
 
-public void RegisterAsteroidForSpiralMovement(GameObject asteroid, Vector2 initialDirection, float speed, float growthRate)
-{
-    int randomDirection = Random.value > 0.5f ? 1 : -1; // Randomize direction
-    asteroids.Add(new AsteroidData(asteroid, initialDirection, speed * randomDirection, MovementType.Spiral, Vector2.zero, growthRate));
-}
+    // Registers an asteroid for spiral movement
+    public void RegisterAsteroidForSpiralMovement(GameObject asteroid, Vector2 initialDirection, float speed, float growthRate)
+    {
+        int randomDirection = Random.value > 0.5f ? 1 : -1; // Randomize direction
+        asteroids.Add(new AsteroidData(asteroid, initialDirection, speed * randomDirection, MovementType.Spiral, Vector2.zero, growthRate));
+    }
 
-public void RegisterAsteroid(GameObject asteroid, Vector2 direction, float driftSpeed)
-{
-    int randomDirection = Random.value > 0.5f ? 1 : -1; // Randomize direction
-    asteroids.Add(new AsteroidData(asteroid, direction * randomDirection, driftSpeed, MovementType.Linear));
-}
+    // Registers a linear moving asteroid
+    public void RegisterAsteroid(GameObject asteroid, Vector2 direction, float driftSpeed)
+    {
+        int randomDirection = Random.value > 0.5f ? 1 : -1; // Randomize direction
+        asteroids.Add(new AsteroidData(asteroid, direction * randomDirection, driftSpeed, MovementType.Linear));
+    }
 
-
+    // Registers an asteroid for random jitter movement
     public void RegisterAsteroidForRandomJitter(GameObject asteroid, Vector2 direction, float speed)
     {
         asteroids.Add(new AsteroidData(asteroid, direction, speed, MovementType.RandomJitter));
     }
 
+    // Registers an asteroid for zigzag movement
     public void RegisterAsteroidForZigZag(GameObject asteroid, Vector2 initialDirection, float speed, float frequency)
     {
         asteroids.Add(new AsteroidData(asteroid, initialDirection, speed, MovementType.ZigZag, Vector2.zero, frequency));
     }
 
+    // Update function to move asteroids
     private void Update()
     {
         float deltaTime = Time.deltaTime;
-        foreach (var asteroid in asteroids)
+
+        // Iterate backwards to safely remove items from the list
+        for (int i = asteroids.Count - 1; i >= 0; i--)
         {
-            switch (asteroid.movementType)
+            var asteroidData = asteroids[i];
+
+            if (asteroidData.asteroid == null)
+            {
+                // The asteroid has been destroyed; remove it from the list
+                asteroids.RemoveAt(i);
+                continue;
+            }
+
+            // Update asteroid's position based on movement type
+            switch (asteroidData.movementType)
             {
                 case MovementType.Linear:
-                    asteroid.asteroid.transform.Translate(asteroid.direction * asteroid.driftSpeed * deltaTime);
+                    asteroidData.asteroid.transform.Translate(asteroidData.direction * asteroidData.driftSpeed * deltaTime);
                     break;
 
                 case MovementType.Circular:
-                    asteroid.angle += asteroid.driftSpeed * deltaTime; // Circular movement
-                    asteroid.asteroid.transform.position = asteroid.center + new Vector2(Mathf.Cos(asteroid.angle), Mathf.Sin(asteroid.angle)) * asteroid.radius;
+                    asteroidData.angle += asteroidData.driftSpeed * deltaTime;
+                    asteroidData.asteroid.transform.position = asteroidData.center + new Vector2(Mathf.Cos(asteroidData.angle), Mathf.Sin(asteroidData.angle)) * asteroidData.radius;
                     break;
 
                 case MovementType.Spiral:
-                    asteroid.angle += asteroid.driftSpeed * deltaTime; // Spiral movement
-                    asteroid.radius += asteroid.growthRate * deltaTime; // Spiral outwards
-                    asteroid.asteroid.transform.position += new Vector3(Mathf.Cos(asteroid.angle), Mathf.Sin(asteroid.angle), 0) * asteroid.radius * deltaTime;
+                    asteroidData.angle += asteroidData.driftSpeed * deltaTime;
+                    asteroidData.radius += asteroidData.growthRate * deltaTime; // Spiral outwards
+                    asteroidData.asteroid.transform.position += new Vector3(Mathf.Cos(asteroidData.angle), Mathf.Sin(asteroidData.angle), 0) * asteroidData.radius * deltaTime;
                     break;
 
                 case MovementType.RandomJitter:
-                    asteroid.direction = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
-                    asteroid.asteroid.transform.Translate(asteroid.direction * asteroid.driftSpeed * deltaTime);
+                    asteroidData.direction = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
+                    asteroidData.asteroid.transform.Translate(asteroidData.direction * asteroidData.driftSpeed * deltaTime);
                     break;
 
                 case MovementType.ZigZag:
-                    asteroid.angle += asteroid.driftSpeed * asteroid.frequency * deltaTime;
-                    float zigZagX = Mathf.Sin(asteroid.angle);
-                    asteroid.asteroid.transform.Translate(new Vector3(zigZagX, asteroid.driftSpeed * deltaTime, 0));
+                    asteroidData.angle += asteroidData.driftSpeed * asteroidData.frequency * deltaTime;
+                    float zigZagX = Mathf.Sin(asteroidData.angle);
+                    asteroidData.asteroid.transform.Translate(new Vector3(zigZagX, asteroidData.driftSpeed * deltaTime, 0));
                     break;
             }
         }
+    }
+
+    // Clears all asteroids when needed, ensuring all references are removed
+    public void ClearAllAsteroids()
+    {
+        foreach (var asteroidData in asteroids)
+        {
+            if (asteroidData.asteroid != null)
+            {
+                Destroy(asteroidData.asteroid); // Properly destroy all active asteroids
+            }
+        }
+        asteroids.Clear(); // Clear the list to remove any lingering references
     }
 
     private class AsteroidData
@@ -96,7 +127,7 @@ public void RegisterAsteroid(GameObject asteroid, Vector2 direction, float drift
         public float growthRate;
         public float frequency;
 
-        // Linear or Jitter
+        // Constructor for Linear or RandomJitter movement types
         public AsteroidData(GameObject asteroid, Vector2 direction, float driftSpeed, MovementType type)
         {
             this.asteroid = asteroid;
@@ -105,7 +136,7 @@ public void RegisterAsteroid(GameObject asteroid, Vector2 direction, float drift
             this.movementType = type;
         }
 
-        // Circular, Spiral, or ZigZag
+        // Constructor for Circular, Spiral, or ZigZag movement types
         public AsteroidData(GameObject asteroid, Vector2 direction, float driftSpeed, MovementType type, Vector2 center, float param)
         {
             this.asteroid = asteroid;

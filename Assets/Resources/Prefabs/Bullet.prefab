@@ -427,7 +427,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   lifespan: 4
   impactEffectPrefab: {fileID: 8601097328188198969, guid: 7ab7b8d1f2f5a3f408ab55ec19fabc50, type: 3}
-  bulletDamage: 16
+  bulletDamage: 500
 --- !u!95 &5501222328670418658
 Animator:
   serializedVersion: 7

@@ -5,8 +5,8 @@ using Unity.Netcode.Components;
 public class Bullet : NetworkBehaviour
 {
     public float lifespan = 5f;
-    public GameObject impactEffectPrefab; // Impact effect prefab for collision effect
-    public float bulletDamage = 16f; // Amount of damage each bullet deals
+    public GameObject impactEffectPrefab; // Impact effect prefab for collision
+    public float bulletDamage = 16f;
     private ulong shooterClientId;
     private TeamComponent.TeamTag shooterTeamTag;
 
@@ -20,28 +20,28 @@ public class Bullet : NetworkBehaviour
         bulletRenderer = GetComponent<Renderer>();
         bulletCollider = GetComponent<Collider2D>();
 
-        // Set the bullet tag (optional, but removed tag comparison logic)
+        // Set the bullet tag
         gameObject.tag = "Bullet";
     }
 
-public void Initialize(ulong shooterId, TeamComponent.TeamTag teamTag)
-{
-    shooterClientId = shooterId;
-    shooterTeamTag = teamTag;
-
-    // Ignore collision between bullet and entities on the same team (whether Friend or Enemy)
-    foreach (var entity in FindObjectsByType<TeamComponent>(FindObjectsSortMode.None))
+    public void Initialize(ulong shooterId, TeamComponent.TeamTag teamTag)
     {
-        if (entity.GetTeam() == shooterTeamTag) // If the entity has the same team tag as the shooter
+        shooterClientId = shooterId;
+        shooterTeamTag = teamTag;
+
+        // Ignore collision between bullet and entities on the same team
+        foreach (var entity in FindObjectsByType<TeamComponent>(FindObjectsSortMode.None))
         {
-            Collider2D entityCollider = entity.GetComponent<Collider2D>();
-            if (entityCollider != null && bulletCollider != null)
+            if (entity.GetTeam() == shooterTeamTag)
             {
-                Physics2D.IgnoreCollision(bulletCollider, entityCollider); // Ignore collisions with same team entities
+                Collider2D entityCollider = entity.GetComponent<Collider2D>();
+                if (entityCollider != null && bulletCollider != null)
+                {
+                    Physics2D.IgnoreCollision(bulletCollider, entityCollider);
+                }
             }
         }
     }
-}
 
     public void SetLocalOnly()
     {
@@ -62,44 +62,39 @@ public void Initialize(ulong shooterId, TeamComponent.TeamTag teamTag)
     {
         if (isLocalOnly)
         {
-            Destroy(gameObject, lifespan);
+            Destroy(gameObject, lifespan); // Auto-destroy after lifespan locally
         }
-        else if (IsServer && !IsHost)
+        else if (IsServer)
         {
-            // Only despawn the bullet on the server if it is not the host
-            Invoke(nameof(DespawnBullet), lifespan);
+            Invoke(nameof(DespawnBullet), lifespan); // Auto-despawn after lifespan on the server
         }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         HealthComponent healthComponent = collision.gameObject.GetComponent<HealthComponent>();
+
         if (healthComponent != null)
         {
-            if (IsServer && !IsHost)
+            if (IsServer)
             {
-                // Only despawn on the server if it is not the host
-                if (healthComponent.NetworkObject != null)
-                {
-                    healthComponent.TakeDamageServerRpc(bulletDamage);
-                }
-                DespawnBullet();
+                healthComponent.TakeDamageServerRpc(bulletDamage); // Apply damage on the server
+                HandleImpact(collision.contacts[0].point);
             }
             else if (isLocalOnly)
             {
-                HandleLocalCollision(collision.contacts[0].point);
+                HandleLocalCollision(collision.contacts[0].point); // Local-only collision
             }
         }
         else
         {
             if (isLocalOnly)
             {
-                HandleLocalCollision(collision.contacts[0].point);
+                HandleLocalCollision(collision.contacts[0].point); // Local collision
             }
-            else if (IsServer && !IsHost)
+            else if (IsServer)
             {
-                // Only despawn on the server if it is not the host
-                DespawnBullet();
+                HandleImpact(collision.contacts[0].point); // Server-side collision
             }
         }
     }
@@ -108,12 +103,22 @@ public void Initialize(ulong shooterId, TeamComponent.TeamTag teamTag)
     {
         if (IsServer && NetworkObject != null && NetworkObject.IsSpawned)
         {
-            // Only despawn if not the host
-            if (!IsHost)
-            {
-                NetworkObject.Despawn(true);
-            }
+            NetworkObject.Despawn(true);
         }
+
+        Destroy(gameObject); // Ensure complete destruction
+    }
+
+    private void HandleImpact(Vector2 impactPoint)
+    {
+        // Spawn impact effect
+        if (impactEffectPrefab != null)
+        {
+            GameObject impactEffect = Instantiate(impactEffectPrefab, impactPoint, Quaternion.identity);
+            Destroy(impactEffect, 0.25f); // Clean up impact effect
+        }
+
+        DespawnBullet(); // Ensure bullet cleanup
     }
 
     private void HandleLocalCollision(Vector2 impactPoint)
@@ -121,9 +126,10 @@ public void Initialize(ulong shooterId, TeamComponent.TeamTag teamTag)
         if (impactEffectPrefab != null)
         {
             GameObject impactEffect = Instantiate(impactEffectPrefab, impactPoint, Quaternion.identity);
-            Destroy(impactEffect, 0.25f);
+            Destroy(impactEffect, 0.25f); // Clean up impact effect
         }
-        Destroy(gameObject);
+
+        Destroy(gameObject); // Local-only destruction
     }
 
     [ClientRpc]
