@@ -53,6 +53,12 @@ public class MovementComponent : NetworkBehaviour
         // Get input from the new input system (replacing the old Input.GetAxis)
         moveInput = controls.Move.Moveaction.ReadValue<Vector2>();
 
+        // Check if dash is active and skip overriding velocity during dash
+        if (dashComponent != null && dashComponent.IsDashing())
+        {
+            return;  // Skip movement updates while dashing
+        }
+
         ClientMove();
     }
 
@@ -66,16 +72,13 @@ public class MovementComponent : NetworkBehaviour
 
     private void ClientMove()
     {
-        // Skip movement if the player is dashing
-        if (dashComponent != null && dashComponent.IsDashing()) return;
-
         // Move only if there's input
-        if (moveInput != Vector2.zero)
+        if (moveInput != Vector2.zero && canMove)
         {
             Vector2 targetVelocity = moveInput.normalized * moveSpeed;  // Normalize input and scale by speed
             rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, targetVelocity, ref smoothMoveVelocity, moveSmoothTime);
         }
-        else
+        else if (canMove)
         {
             rb.linearVelocity = Vector2.zero;  // Stop movement when there's no input
         }
@@ -98,13 +101,13 @@ public class MovementComponent : NetworkBehaviour
         if (dashComponent != null && dashComponent.IsDashing()) return;
 
         // If the input is non-zero, apply movement speed
-        if (moveInput != Vector2.zero)
+        if (moveInput != Vector2.zero && canMove)
         {
             Vector2 normalizedMoveInput = moveInput.normalized;
             Vector2 targetVelocity = normalizedMoveInput * moveSpeed;
             rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, targetVelocity, ref smoothMoveVelocity, moveSmoothTime);
         }
-        else
+        else if (canMove)
         {
             rb.linearVelocity = Vector2.zero;
         }
