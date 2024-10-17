@@ -17,6 +17,9 @@ public class InputComponent : NetworkBehaviour
     private int currentZoomIndex; // The current zoom level index
     private float zoomInput;
 
+    private float initialPinchDistance;
+    private float previousPinchDistance;
+
     public void ApplyConfiguration(ObjectSO config)
     {
         // default settings
@@ -116,6 +119,29 @@ public class InputComponent : NetworkBehaviour
         {
             // Zoom out, increase the zoom index
             currentZoomIndex++;
+        }
+
+        // Handle pinch gesture for mobile devices
+        if (Input.touchCount == 2)
+        {
+            Touch touchZero = Input.GetTouch(0);
+            Touch touchOne = Input.GetTouch(1);
+
+            if (touchZero.phase == TouchPhase.Began || touchOne.phase == TouchPhase.Began)
+            {
+                initialPinchDistance = Vector2.Distance(touchZero.position, touchOne.position);
+                previousPinchDistance = initialPinchDistance;
+            }
+            else if (touchZero.phase == TouchPhase.Moved || touchOne.phase == TouchPhase.Moved)
+            {
+                float currentPinchDistance = Vector2.Distance(touchZero.position, touchOne.position);
+                float pinchDelta = currentPinchDistance - previousPinchDistance;
+
+                // Adjust zoom based on pinch delta
+                zoomInput = pinchDelta * 0.01f; // Adjust sensitivity as needed
+
+                previousPinchDistance = currentPinchDistance;
+            }
         }
 
         // Reset zoom input after processing to prevent continuous zoom

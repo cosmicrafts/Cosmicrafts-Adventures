@@ -515,10 +515,10 @@ RectTransform:
   - {fileID: 1627920078}
   m_Father: {fileID: 182867678}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -85.4, y: 26}
-  m_SizeDelta: {x: 45, y: 52}
+  m_AnchorMin: {x: 0.65141165, y: 0}
+  m_AnchorMax: {x: 0.79841167, y: 0.16178517}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &154913443
 MonoBehaviour:
@@ -4440,7 +4440,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 42.65
+  m_fontSize: 43.6
   m_fontSizeBase: 42
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -17236,10 +17236,10 @@ RectTransform:
   - {fileID: 790370354}
   m_Father: {fileID: 182867678}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -23.5, y: 73.8999}
-  m_SizeDelta: {x: 47, y: 52}
+  m_AnchorMin: {x: 0.85280395, y: 0.1493365}
+  m_AnchorMax: {x: 1, y: 0.3143365}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!95 &1213355057
 Animator:
@@ -19947,10 +19947,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spaceTileSpriteBackground: {fileID: 21300000, guid: 8df60219e0fb91b45ac3feca8b72bf9b, type: 3}
-  tileWorldSize: 128
+  tileWorldSize: 48
   gridSize: 5
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  backgroundScaleFactor: 128
+  backgroundScaleFactor: 48
 --- !u!4 &1474598984
 Transform:
   m_ObjectHideFlags: 0
