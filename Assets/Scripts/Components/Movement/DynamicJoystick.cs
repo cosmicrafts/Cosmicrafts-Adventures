@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class JoystickController : MonoBehaviour, IDragHandler, IPointerDownHandler, IPointerUpHandler
 {
@@ -7,6 +8,8 @@ public class JoystickController : MonoBehaviour, IDragHandler, IPointerDownHandl
 
     [SerializeField] private RectTransform background;
     [SerializeField] private RectTransform handle;
+    [SerializeField] private Button shootButton; // Reference to the shooting button
+
     private Vector2 joystickDirection;
     private Vector2 joystickPosition;
     private bool isDragging;
@@ -20,6 +23,12 @@ public class JoystickController : MonoBehaviour, IDragHandler, IPointerDownHandl
         else
         {
             Destroy(gameObject);
+        }
+
+        // Add a listener to the shooting button
+        if (shootButton != null)
+        {
+            shootButton.onClick.AddListener(OnShootButtonPressed);
         }
     }
 
@@ -71,5 +80,11 @@ public class JoystickController : MonoBehaviour, IDragHandler, IPointerDownHandl
     public Vector2 GetJoystickDirection()
     {
         return joystickDirection;
+    }
+
+    // Method to handle the shooting button press
+    private void OnShootButtonPressed()
+    {
+        InputComponent.Instance.OnShootButtonPressed();
     }
 }
