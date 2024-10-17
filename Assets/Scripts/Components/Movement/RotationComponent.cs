@@ -67,6 +67,21 @@ public class RotationComponent : NetworkBehaviour
         this.mousePosition = mousePosition;
     }
 
+    public void SetJoystickDirection(Vector2 direction)
+    {
+        if (direction != Vector2.zero)
+        {
+            Quaternion newRotation = CalculateRotationFromJoystick(direction);
+            float rotationSmoothingSpeed = 12f;
+            transform.rotation = Quaternion.Lerp(transform.rotation, newRotation, Time.deltaTime * rotationSmoothingSpeed);
+
+            if (!IsServer)
+            {
+                UpdateRotationOnServerRpc(transform.rotation);
+            }
+        }
+    }
+
     private Quaternion CalculateRotation(Vector3 mousePosition)
     {
         Vector2 direction = (mousePosition - transform.position);
@@ -75,6 +90,12 @@ public class RotationComponent : NetworkBehaviour
             return transform.rotation;
         }
         direction.Normalize();
+        float rotationZ = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
+        return Quaternion.Euler(0f, 0f, rotationZ);
+    }
+
+    private Quaternion CalculateRotationFromJoystick(Vector2 direction)
+    {
         float rotationZ = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
         return Quaternion.Euler(0f, 0f, rotationZ);
     }

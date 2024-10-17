@@ -87,10 +87,18 @@ public class InputComponent : NetworkBehaviour
         // Handle Movement Input
         movementComponent.SetMoveInput(moveInput);
 
-        // Handle Rotation Input based on the current mouse position
-        Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(new Vector3(
-            Input.mousePosition.x, Input.mousePosition.y, -mainCamera.transform.position.z));
-        rotationComponent.SetMousePosition(mouseWorldPosition);
+        // Handle Rotation Input based on the joystick direction
+        if (joystickInput != Vector2.zero)
+        {
+            rotationComponent.SetJoystickDirection(joystickInput);
+        }
+        else
+        {
+            // Handle Rotation Input based on the current mouse position
+            Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(new Vector3(
+                Input.mousePosition.x, Input.mousePosition.y, -mainCamera.transform.position.z));
+            rotationComponent.SetMousePosition(mouseWorldPosition);
+        }
     }
 
     private void HandleCameraZoomInput()
