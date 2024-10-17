@@ -10,7 +10,12 @@ public class DashComponent : NetworkBehaviour
     private MovementComponent movementComponent;
     private Rigidbody2D rb;
 
-        public void ApplyConfiguration(ObjectSO config)
+    private NetworkVariable<bool> isDashing = new NetworkVariable<bool>(
+        false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    private float serverDashCooldownTimer;
+
+    public void ApplyConfiguration(ObjectSO config)
     {
         if (config.hasDashAbility)
         {
@@ -19,12 +24,6 @@ public class DashComponent : NetworkBehaviour
             dashCooldown = config.dashCooldown;
         }
     }
-
-
-    private NetworkVariable<bool> isDashing = new NetworkVariable<bool>(
-        false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-
-    private float serverDashCooldownTimer;
 
     private void Start()
     {
@@ -59,7 +58,7 @@ public class DashComponent : NetworkBehaviour
     [ServerRpc]
     private void RequestDashServerRpc()
     {
-        if (!isDashing.Value && serverDashCooldownTimer <= 0f)
+        if (!isDashing.Value)
         {
             isDashing.Value = true;
             serverDashCooldownTimer = dashCooldown;
@@ -86,10 +85,16 @@ public class DashComponent : NetworkBehaviour
 
     private void EndDash()
     {
-        movementComponent.SetCanMove(true);
         if (IsServer)
         {
             isDashing.Value = false;
         }
+        //movementComponent.SetCanMove(true);
+    }
+
+    // Public method to check if the player is dashing
+    public bool IsDashing()
+    {
+        return isDashing.Value;
     }
 }

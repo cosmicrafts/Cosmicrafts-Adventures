@@ -75,12 +75,12 @@
         },
         {
             "name": "Dash",
-            "id": "f4091d77-564f-4b67-a1e5-d00696598bde",
+            "id": "43de2a2d-56e3-4e77-89b3-6c445032235b",
             "actions": [
                 {
                     "name": "Dash",
                     "type": "Value",
-                    "id": "9266d31e-d3ff-4b6a-b6f9-1679e5ae7f78",
+                    "id": "b9859b5d-1fcc-45d0-9763-90c14f1d00f4",
                     "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
@@ -89,15 +89,26 @@
             ],
             "bindings": [
                 {
-                    "name": "",
-                    "id": "f83a5a3b-5735-4706-a502-16f46ae65e24",
-                    "path": "<Keyboard>/backspace",
+                    "name": "2D Vector",
+                    "id": "6b8de454-67ad-423a-9e5d-9d2c8f605b40",
+                    "path": "2DVector",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Dash",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "02fdb432-8440-4750-9661-cf4fa85ca64f",
+                    "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Dash",
                     "isComposite": false,
-                    "isPartOfComposite": false
+                    "isPartOfComposite": true
                 }
             ]
         },

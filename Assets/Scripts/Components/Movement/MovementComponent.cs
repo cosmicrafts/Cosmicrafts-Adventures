@@ -14,10 +14,12 @@ public class MovementComponent : NetworkBehaviour
 
     // Reference to the input controls
     private Controls controls;
+    private DashComponent dashComponent;  // Reference to the DashComponent
 
     private void Awake()
     {
         controls = new Controls();
+        dashComponent = GetComponent<DashComponent>();  // Get the DashComponent reference
     }
 
     private void OnEnable()
@@ -64,6 +66,9 @@ public class MovementComponent : NetworkBehaviour
 
     private void ClientMove()
     {
+        // Skip movement if the player is dashing
+        if (dashComponent != null && dashComponent.IsDashing()) return;
+
         // Move only if there's input
         if (moveInput != Vector2.zero)
         {
@@ -78,6 +83,9 @@ public class MovementComponent : NetworkBehaviour
 
     private void UpdateMovement()
     {
+        // Skip movement if the player is dashing
+        if (dashComponent != null && dashComponent.IsDashing()) return;
+
         Vector2 targetVelocity = moveInput.normalized * moveSpeed;  // Normalize and apply speed
         rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, targetVelocity, ref smoothMoveVelocity, moveSmoothTime);
     }
@@ -85,6 +93,9 @@ public class MovementComponent : NetworkBehaviour
     public void SetMoveInput(Vector2 input)
     {
         moveInput = input; // Store the received input
+
+        // Skip movement if the player is dashing
+        if (dashComponent != null && dashComponent.IsDashing()) return;
 
         // If the input is non-zero, apply movement speed
         if (moveInput != Vector2.zero)
