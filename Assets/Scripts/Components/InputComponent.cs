@@ -3,8 +3,6 @@ using Unity.Netcode;
 
 public class InputComponent : NetworkBehaviour
 {
-    public static InputComponent Instance { get; private set; }
-
     private MovementComponent movementComponent;
     private RotationComponent rotationComponent;
     private DashComponent dashComponent;
@@ -18,18 +16,6 @@ public class InputComponent : NetworkBehaviour
     private readonly float[] zoomLevels = { 8f, 12f, 18f, 24f, 28f, 32f, 36f }; // Predefined zoom levels
     private int currentZoomIndex; // The current zoom level index
     private float zoomInput;
-
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
 
     public void ApplyConfiguration(ObjectSO config)
     {
@@ -101,18 +87,10 @@ public class InputComponent : NetworkBehaviour
         // Handle Movement Input
         movementComponent.SetMoveInput(moveInput);
 
-        // Handle Rotation Input based on the joystick direction
-        if (joystickInput != Vector2.zero)
-        {
-            rotationComponent.SetJoystickDirection(joystickInput);
-        }
-        else
-        {
-            // Handle Rotation Input based on the current mouse position
-            Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(new Vector3(
-                Input.mousePosition.x, Input.mousePosition.y, -mainCamera.transform.position.z));
-            rotationComponent.SetMousePosition(mouseWorldPosition);
-        }
+        // Handle Rotation Input based on the current mouse position
+        Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(new Vector3(
+            Input.mousePosition.x, Input.mousePosition.y, -mainCamera.transform.position.z));
+        rotationComponent.SetMousePosition(mouseWorldPosition);
     }
 
     private void HandleCameraZoomInput()
@@ -159,14 +137,5 @@ public class InputComponent : NetworkBehaviour
         }
 
         return closestIndex;
-    }
-
-    // Method to handle the shooting button press
-    public void OnShootButtonPressed()
-    {
-        if (IsOwner)
-        {
-            shootingComponent.RequestShoot();
-        }
     }
 }

@@ -41,7 +41,7 @@ public class NetworkStartUI : MonoBehaviour
         int fps = Mathf.CeilToInt(1.0f / deltaTime);
         fpsText.text = $"{fps}"; // Using TMP_Text
 
-        // Display network latency (ping) //
+        // Display network latency (ping)
         if (transport != null && NetworkManager.Singleton.IsClient)
         {
             var rtt = transport.GetCurrentRtt(NetworkManager.Singleton.LocalClientId);
@@ -117,7 +117,7 @@ public class NetworkStartUI : MonoBehaviour
             if (transport != null)
             {
                 // Set the client to connect to the server IP address
-                transport.SetConnectionData("74.208.246.177", 7777);
+                transport.SetConnectionData("127.0.0.1", 7777);
 
                 // Set client secure parameters for encrypted communication
                 transport.SetClientSecrets(SecureParameters.ServerCommonName, SecureParameters.MyGameClientCA);
