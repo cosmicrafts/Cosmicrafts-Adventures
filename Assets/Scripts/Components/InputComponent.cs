@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using UnityEngine.InputSystem;
 
 public class InputComponent : NetworkBehaviour
 {
@@ -17,12 +18,21 @@ public class InputComponent : NetworkBehaviour
     private int currentZoomIndex; // The current zoom level index
     private float zoomInput;
 
-    private float initialPinchDistance;
-    private float previousPinchDistance;
+    private Controls controls; // Input action reference
 
-    public void ApplyConfiguration(ObjectSO config)
+    private void Awake()
     {
-        // default settings
+        controls = new Controls(); // Initialize Input Actions
+    }
+
+    private void OnEnable()
+    {
+        controls.Enable(); // Enable the input actions when component is enabled
+    }
+
+    private void OnDisable()
+    {
+        controls.Disable(); // Disable the input actions when component is disabled
     }
 
     private void Start()
@@ -55,14 +65,14 @@ public class InputComponent : NetworkBehaviour
         // Handle Movement and Rotation together
         UpdateMovementAndRotation();
 
-        // Handle Dash Input
-        if (Input.GetKeyDown(KeyCode.Space))
+        // Handle Dash Input (using the new Input System)
+        if (controls.Dash.Dash.triggered)
         {
             dashComponent.RequestDash();
         }
 
         // Handle Shooting Input
-        if (Input.GetMouseButton(0))
+        if (controls.Shoot.Shoot.ReadValue<float>() > 0)
         {
             shootingComponent.RequestShoot();
         }
@@ -75,77 +85,31 @@ public class InputComponent : NetworkBehaviour
     private void UpdateMovementAndRotation()
     {
         // Get input from either joystick or WASD
-        Vector2 joystickInput = Vector2.zero;
-        if (JoystickController.Instance != null)
-        {
-            joystickInput = JoystickController.Instance.GetJoystickDirection();
-        }
-
-        Vector2 wasdInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-
-        // Combine joystick and WASD inputs
-        Vector2 moveInput = joystickInput + wasdInput;
-        moveInput = Vector2.ClampMagnitude(moveInput, 1f); // Ensure the combined input does not exceed 1
+        Vector2 moveInput = controls.Move.Moveaction.ReadValue<Vector2>(); // New Input System for Movement
 
         // Handle Movement Input
         movementComponent.SetMoveInput(moveInput);
 
-        // Handle Rotation Input based on the joystick direction
-        if (joystickInput != Vector2.zero)
-        {
-            rotationComponent.SetJoystickDirection(joystickInput);
-        }
-        else
-        {
-            // Handle Rotation Input based on the current mouse position
-            Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(new Vector3(
-                Input.mousePosition.x, Input.mousePosition.y, -mainCamera.transform.position.z));
-            rotationComponent.SetMousePosition(mouseWorldPosition);
-        }
+        // Handle Rotation Input based on the current mouse position
+        Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(new Vector3(
+            Mouse.current.position.ReadValue().x, Mouse.current.position.ReadValue().y, -mainCamera.transform.position.z));
+        rotationComponent.SetMousePosition(mouseWorldPosition);
     }
 
     private void HandleCameraZoomInput()
     {
-        // Read mouse scroll wheel input for zooming
-        zoomInput = Input.GetAxis("Mouse ScrollWheel");
+        // Handle mouse scroll for zooming (desktop)
+        float zoomScrollInput = controls.Zoom.Zoom.ReadValue<Vector2>().y; // Use y axis for zoom
 
         // Detect if there's a scroll input
-        if (zoomInput > 0 && currentZoomIndex > 0)
+        if (zoomScrollInput > 0 && currentZoomIndex > 0)
         {
-            // Zoom in, decrease the zoom index
             currentZoomIndex--;
         }
-        else if (zoomInput < 0 && currentZoomIndex < zoomLevels.Length - 1)
+        else if (zoomScrollInput < 0 && currentZoomIndex < zoomLevels.Length - 1)
         {
-            // Zoom out, increase the zoom index
             currentZoomIndex++;
         }
-
-        // Handle pinch gesture for mobile devices
-        if (Input.touchCount == 2)
-        {
-            Touch touchZero = Input.GetTouch(0);
-            Touch touchOne = Input.GetTouch(1);
-
-            if (touchZero.phase == TouchPhase.Began || touchOne.phase == TouchPhase.Began)
-            {
-                initialPinchDistance = Vector2.Distance(touchZero.position, touchOne.position);
-                previousPinchDistance = initialPinchDistance;
-            }
-            else if (touchZero.phase == TouchPhase.Moved || touchOne.phase == TouchPhase.Moved)
-            {
-                float currentPinchDistance = Vector2.Distance(touchZero.position, touchOne.position);
-                float pinchDelta = currentPinchDistance - previousPinchDistance;
-
-                // Adjust zoom based on pinch delta
-                zoomInput = pinchDelta * 0.01f; // Adjust sensitivity as needed
-
-                previousPinchDistance = currentPinchDistance;
-            }
-        }
-
-        // Reset zoom input after processing to prevent continuous zoom
-        zoomInput = 0;
     }
 
     private void HandleCameraZoom()

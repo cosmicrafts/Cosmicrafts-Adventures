@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using UnityEngine.InputSystem;
 
 public class MovementComponent : NetworkBehaviour
 {
@@ -10,6 +11,24 @@ public class MovementComponent : NetworkBehaviour
     private Vector2 moveInput;
     private Vector2 smoothMoveVelocity;
     private bool canMove = true;
+
+    // Reference to the input controls
+    private Controls controls;
+
+    private void Awake()
+    {
+        controls = new Controls();
+    }
+
+    private void OnEnable()
+    {
+        controls.Enable();
+    }
+
+    private void OnDisable()
+    {
+        controls.Disable();
+    }
 
     public void ApplyConfiguration(ObjectSO config)
     {
@@ -29,18 +48,8 @@ public class MovementComponent : NetworkBehaviour
     {
         if (!IsOwner || !canMove) return;
 
-        // Get input from either joystick or WASD
-        Vector2 joystickInput = Vector2.zero;
-        if (JoystickController.Instance != null)
-        {
-            joystickInput = JoystickController.Instance.GetJoystickDirection();
-        }
-
-        Vector2 wasdInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-
-        // Combine joystick and WASD inputs
-        moveInput = joystickInput + wasdInput;
-        moveInput = Vector2.ClampMagnitude(moveInput, 1f); // Ensure the combined input does not exceed 1
+        // Get input from the new input system (replacing the old Input.GetAxis)
+        moveInput = controls.Move.Moveaction.ReadValue<Vector2>();
 
         ClientMove();
     }

@@ -89,26 +89,43 @@
             ],
             "bindings": [
                 {
-                    "name": "2D Vector",
-                    "id": "606cd555-46b9-41b0-8cbc-56a7bbf9dfc6",
-                    "path": "2DVector",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Dash",
-                    "isComposite": true,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "up",
-                    "id": "144f5dec-7716-46d0-a9c1-7aeab1a9cb85",
-                    "path": "<Keyboard>/space",
+                    "name": "",
+                    "id": "f83a5a3b-5735-4706-a502-16f46ae65e24",
+                    "path": "<Keyboard>/backspace",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Dash",
                     "isComposite": false,
-                    "isPartOfComposite": true
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Blink",
+            "id": "c3acbb76-8d8c-4fc2-85fb-549fd48d4429",
+            "actions": [
+                {
+                    "name": "Blink",
+                    "type": "Button",
+                    "id": "5c738a94-27c3-48a0-9797-2b4207feb192",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "9d25532c-bfb3-4a51-afc8-6cf1930613eb",
+                    "path": "<Keyboard>/b",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Blink",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },

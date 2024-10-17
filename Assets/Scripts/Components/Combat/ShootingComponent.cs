@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 
 public class ShootingComponent : NetworkBehaviour
 {
@@ -12,6 +13,24 @@ public class ShootingComponent : NetworkBehaviour
 
     private float shootingCooldownTimer;
     private TeamComponent teamComponent;
+
+    // Reference to the input controls
+    private Controls controls;
+
+    private void Awake()
+    {
+        controls = new Controls();
+    }
+
+    private void OnEnable()
+    {
+        controls.Enable();
+    }
+
+    private void OnDisable()
+    {
+        controls.Disable();
+    }
 
     private void Start()
     {
@@ -34,7 +53,8 @@ public class ShootingComponent : NetworkBehaviour
             shootingCooldownTimer -= Time.deltaTime;
         }
 
-        if (Input.GetMouseButton(0))
+        // Replace legacy Input with the new Input System
+        if (controls.Shoot.Shoot.ReadValue<float>() > 0 && shootingCooldownTimer <= 0f)
         {
             RequestShoot();
         }

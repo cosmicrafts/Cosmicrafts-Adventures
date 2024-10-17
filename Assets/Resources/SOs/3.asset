@@ -37,10 +37,10 @@ MonoBehaviour:
   hasInput: 1
   teamTag: 0
   hasDashAbility: 1
-  dashSpeed: 60
+  dashSpeed: 80
   dashDuration: 0.35
-  dashCooldown: 0.75
+  dashCooldown: 0.1
   hasBlinkAbility: 1
   blinkDistance: 10
-  blinkCooldown: 2
+  blinkCooldown: 0.1
   behavior: {fileID: 0}

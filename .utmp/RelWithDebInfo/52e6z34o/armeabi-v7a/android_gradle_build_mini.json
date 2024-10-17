@@ -1,0 +1,28 @@
+{
+  "buildFiles": [
+    "/home/bizkit/GitHub/Cosmicrafts-Adventures/Library/Bee/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/cpp/CMakeLists.txt",
+    "/home/bizkit/GitHub/Cosmicrafts-Adventures/Library/Bee/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/cpp/FramePacing/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/home/bizkit/Unity/Hub/Editor/6000.0.21f1/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/home/bizkit/GitHub/Cosmicrafts-Adventures/.utmp/RelWithDebInfo/52e6z34o/armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/home/bizkit/Unity/Hub/Editor/6000.0.21f1/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/home/bizkit/GitHub/Cosmicrafts-Adventures/.utmp/RelWithDebInfo/52e6z34o/armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "swappywrapper::@7e25bd1f32ce224db4e9": {
+      "artifactName": "swappywrapper",
+      "abi": "armeabi-v7a",
+      "output": "/home/bizkit/GitHub/Cosmicrafts-Adventures/Library/Bee/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/52e6z34o/obj/armeabi-v7a/libswappywrapper.so",
+      "runtimeFiles": []
+    }
+  }
+}

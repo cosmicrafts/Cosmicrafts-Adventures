@@ -131,7 +131,7 @@ public class NetworkStartUI : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("NetworkManager not found in the scene.");
+           // Debug.LogWarning("NetworkManager not found in the scene.");
         }
     }
 }

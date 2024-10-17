@@ -111,26 +111,43 @@ public partial class @Controls: IInputActionCollection2, IDisposable
             ],
             ""bindings"": [
                 {
-                    ""name"": ""2D Vector"",
-                    ""id"": ""606cd555-46b9-41b0-8cbc-56a7bbf9dfc6"",
-                    ""path"": ""2DVector"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Dash"",
-                    ""isComposite"": true,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": ""up"",
-                    ""id"": ""144f5dec-7716-46d0-a9c1-7aeab1a9cb85"",
-                    ""path"": ""<Keyboard>/space"",
+                    ""name"": """",
+                    ""id"": ""f83a5a3b-5735-4706-a502-16f46ae65e24"",
+                    ""path"": ""<Keyboard>/backspace"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Dash"",
                     ""isComposite"": false,
-                    ""isPartOfComposite"": true
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""Blink"",
+            ""id"": ""c3acbb76-8d8c-4fc2-85fb-549fd48d4429"",
+            ""actions"": [
+                {
+                    ""name"": ""Blink"",
+                    ""type"": ""Button"",
+                    ""id"": ""5c738a94-27c3-48a0-9797-2b4207feb192"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""9d25532c-bfb3-4a51-afc8-6cf1930613eb"",
+                    ""path"": ""<Keyboard>/b"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Blink"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -255,6 +272,9 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         // Dash
         m_Dash = asset.FindActionMap("Dash", throwIfNotFound: true);
         m_Dash_Dash = m_Dash.FindAction("Dash", throwIfNotFound: true);
+        // Blink
+        m_Blink = asset.FindActionMap("Blink", throwIfNotFound: true);
+        m_Blink_Blink = m_Blink.FindAction("Blink", throwIfNotFound: true);
         // Shoot
         m_Shoot = asset.FindActionMap("Shoot", throwIfNotFound: true);
         m_Shoot_Shoot = m_Shoot.FindAction("Shoot", throwIfNotFound: true);
@@ -273,6 +293,7 @@ public partial class @Controls: IInputActionCollection2, IDisposable
     {
         UnityEngine.Debug.Assert(!m_Move.enabled, "This will cause a leak and performance issues, Controls.Move.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Dash.enabled, "This will cause a leak and performance issues, Controls.Dash.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Blink.enabled, "This will cause a leak and performance issues, Controls.Blink.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Shoot.enabled, "This will cause a leak and performance issues, Controls.Shoot.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_FireLaser.enabled, "This will cause a leak and performance issues, Controls.FireLaser.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Look.enabled, "This will cause a leak and performance issues, Controls.Look.Disable() has not been called.");
@@ -426,6 +447,52 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         }
     }
     public DashActions @Dash => new DashActions(this);
+
+    // Blink
+    private readonly InputActionMap m_Blink;
+    private List<IBlinkActions> m_BlinkActionsCallbackInterfaces = new List<IBlinkActions>();
+    private readonly InputAction m_Blink_Blink;
+    public struct BlinkActions
+    {
+        private @Controls m_Wrapper;
+        public BlinkActions(@Controls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Blink => m_Wrapper.m_Blink_Blink;
+        public InputActionMap Get() { return m_Wrapper.m_Blink; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(BlinkActions set) { return set.Get(); }
+        public void AddCallbacks(IBlinkActions instance)
+        {
+            if (instance == null || m_Wrapper.m_BlinkActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_BlinkActionsCallbackInterfaces.Add(instance);
+            @Blink.started += instance.OnBlink;
+            @Blink.performed += instance.OnBlink;
+            @Blink.canceled += instance.OnBlink;
+        }
+
+        private void UnregisterCallbacks(IBlinkActions instance)
+        {
+            @Blink.started -= instance.OnBlink;
+            @Blink.performed -= instance.OnBlink;
+            @Blink.canceled -= instance.OnBlink;
+        }
+
+        public void RemoveCallbacks(IBlinkActions instance)
+        {
+            if (m_Wrapper.m_BlinkActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IBlinkActions instance)
+        {
+            foreach (var item in m_Wrapper.m_BlinkActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_BlinkActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public BlinkActions @Blink => new BlinkActions(this);
 
     // Shoot
     private readonly InputActionMap m_Shoot;
@@ -617,6 +684,10 @@ public partial class @Controls: IInputActionCollection2, IDisposable
     public interface IDashActions
     {
         void OnDash(InputAction.CallbackContext context);
+    }
+    public interface IBlinkActions
+    {
+        void OnBlink(InputAction.CallbackContext context);
     }
     public interface IShootActions
     {
