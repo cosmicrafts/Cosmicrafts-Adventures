@@ -7,9 +7,7 @@ using TMPro; // Add this line for TextMeshPro support
 
 public class NetworkStartUI : MonoBehaviour
 {
-    public TMP_Text fpsText; // Change Text to TMP_Text
-    public TMP_Text pingText; // Change Text to TMP_Text
-
+    public TMP_Text fpsText;
     private float deltaTime = 0.0f;
     private UnityTransport transport;
 
@@ -24,12 +22,6 @@ public class NetworkStartUI : MonoBehaviour
             Debug.Log("Running in batch mode - Starting server automatically.");
             NetworkManager.Singleton.StartServer();
         }
-
-        // Cache the UnityTransport component for latency calculations
-        if (NetworkManager.Singleton != null)
-        {
-            transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-        }
     }
 
     private void Update()
@@ -39,14 +31,7 @@ public class NetworkStartUI : MonoBehaviour
 
         // Display FPS
         int fps = Mathf.CeilToInt(1.0f / deltaTime);
-        fpsText.text = $"{fps}"; // Using TMP_Text
-
-        // Display network latency (ping)
-        if (transport != null && NetworkManager.Singleton.IsClient)
-        {
-            var rtt = transport.GetCurrentRtt(NetworkManager.Singleton.LocalClientId);
-            pingText.text = $"Ping: {rtt} ms"; // Using TMP_Text
-        }
+        fpsText.text = $"{fps}";
     }
 
     public void StartHost()
@@ -91,14 +76,6 @@ public class NetworkStartUI : MonoBehaviour
 
                 Debug.Log("Secure server configured and bind address set to 0.0.0.0.");
             }
-            else
-            {
-                Debug.LogWarning("UnityTransport component not found on NetworkManager.");
-            }
-        }
-        else
-        {
-            Debug.LogWarning("NetworkManager not found in the scene.");
         }
     }
 
@@ -116,22 +93,9 @@ public class NetworkStartUI : MonoBehaviour
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
             if (transport != null)
             {
-                // Set the client to connect to the server IP address
-                transport.SetConnectionData("34.136.75.49", 7777);
-
                 // Set client secure parameters for encrypted communication
                 transport.SetClientSecrets(SecureParameters.ServerCommonName, SecureParameters.MyGameClientCA);
-
-                // Debug.Log("Client connection data set to 127.0.0.1:7777 with encryption.");
             }
-            else
-            {
-                Debug.LogWarning("UnityTransport component not found on NetworkManager.");
-            }
-        }
-        else
-        {
-           // Debug.LogWarning("NetworkManager not found in the scene.");
         }
     }
 }
