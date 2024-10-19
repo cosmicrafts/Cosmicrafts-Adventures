@@ -9,7 +9,6 @@ public class JoystickController : MonoBehaviour, IDragHandler, IPointerDownHandl
     [SerializeField] private RectTransform handle;
     private Vector2 joystickDirection;
     private Vector2 joystickPosition;
-    private bool isDragging;
 
     private void Awake()
     {
@@ -57,13 +56,11 @@ public class JoystickController : MonoBehaviour, IDragHandler, IPointerDownHandl
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        isDragging = true;
         OnDrag(eventData);
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        isDragging = false;
         handle.position = joystickPosition; // Reset handle position
         joystickDirection = Vector2.zero; // Reset joystick direction
     }

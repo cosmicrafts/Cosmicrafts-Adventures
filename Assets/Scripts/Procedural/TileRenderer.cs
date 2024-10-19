@@ -1,8 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Unity.Jobs;
-using Unity.Collections;
-using Unity.Burst;
 
 public class SpaceProceduralGenerator : MonoBehaviour
 {
@@ -21,10 +18,6 @@ public class SpaceProceduralGenerator : MonoBehaviour
     private Vector2 gridOrigin;
 
     private float moveThreshold;
-
-    // Job data
-    private NativeArray<Vector3> chunkPositions;
-    private JobHandle jobHandle;
 
     private void Start()
     {
@@ -61,26 +54,14 @@ public class SpaceProceduralGenerator : MonoBehaviour
 
     void InitializeGrid()
     {
-        chunkPositions = new NativeArray<Vector3>(gridSize * gridSize, Allocator.TempJob);
         for (int x = 0; x < gridSize; x++)
         {
             for (int y = 0; y < gridSize; y++)
             {
                 Vector2 chunkCoord = gridOrigin + new Vector2(x, y);
-                chunkPositions[y * gridSize + x] = new Vector3(chunkCoord.x, chunkCoord.y, 0);
                 activeChunks[x, y] = GetChunkFromPool(chunkCoord);
             }
         }
-
-        // Burst Job to update chunk positions
-        var chunkUpdateJob = new UpdateChunkPositionsJob
-        {
-            ChunkPositions = chunkPositions,
-            TileWorldSize = tileWorldSize
-        };
-
-        jobHandle = chunkUpdateJob.Schedule(gridSize * gridSize, 64);
-        jobHandle.Complete();
     }
 
     void ShiftGrid(Vector2 direction)
@@ -116,7 +97,6 @@ public class SpaceProceduralGenerator : MonoBehaviour
         }
     }
 
-    // Move column/row methods remain the same (optimized only slightly)
     void MoveColumnLeft()
     {
         for (int y = 0; y < gridSize; y++)
@@ -217,27 +197,8 @@ public class SpaceProceduralGenerator : MonoBehaviour
         return new Vector2(x, y);
     }
 
-    [BurstCompile]
-    struct UpdateChunkPositionsJob : IJobParallelFor
-    {
-        [ReadOnly]
-        public NativeArray<Vector3> ChunkPositions;
-        public float TileWorldSize;
-
-        public void Execute(int index)
-        {
-            // Example of what you could do here:
-            Vector3 chunkPos = ChunkPositions[index];
-            chunkPos.x *= TileWorldSize;
-            chunkPos.y *= TileWorldSize;
-        }
-    }
-
     private void OnDestroy()
     {
-        if (chunkPositions.IsCreated)
-        {
-            chunkPositions.Dispose();
-        }
+        // No more NativeArray cleanup needed
     }
 }

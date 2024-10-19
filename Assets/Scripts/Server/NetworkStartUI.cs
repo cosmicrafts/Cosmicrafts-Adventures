@@ -117,7 +117,7 @@ public class NetworkStartUI : MonoBehaviour
             if (transport != null)
             {
                 // Set the client to connect to the server IP address
-                transport.SetConnectionData("127.0.0.1", 7777);
+                transport.SetConnectionData("34.136.75.49", 7777);
 
                 // Set client secure parameters for encrypted communication
                 transport.SetClientSecrets(SecureParameters.ServerCommonName, SecureParameters.MyGameClientCA);
