@@ -2,8 +2,8 @@ using UnityEngine;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport;
-using Unity.Networking.Transport.TLS; // Add this line
-using TMPro; // Add this line for TextMeshPro support
+using Unity.Networking.Transport.TLS; // For TLS
+using TMPro; // For TextMeshPro support
 
 public class NetworkStartUI : MonoBehaviour
 {
@@ -15,11 +15,14 @@ public class NetworkStartUI : MonoBehaviour
     {
         if (Application.isBatchMode)
         {
+            // Get port from command line arguments or environment variable
+            int port = GetPortFromArgsOrEnv();
+
             // Set up secure server parameters and start the server
-            SetupSecureServer();
+            SetupSecureServer(port);
 
             // Automatically start the server if running in batch mode (headless mode)
-            Debug.Log("Running in batch mode - Starting server automatically.");
+            Debug.Log($"Running in batch mode - Starting secure server automatically on port {port}.");
             NetworkManager.Singleton.StartServer();
         }
     }
@@ -36,7 +39,7 @@ public class NetworkStartUI : MonoBehaviour
 
     public void StartHost()
     {
-        SetupSecureServer();
+        SetupSecureServer(7777);  // Default port for host
         NetworkManager.Singleton.StartHost();
     }
 
@@ -48,18 +51,12 @@ public class NetworkStartUI : MonoBehaviour
 
     public void StartServer()
     {
-        SetupSecureServer();
+        SetupSecureServer(7777);  // Default port for server
         NetworkManager.Singleton.StartServer();
     }
 
-    private void SetupSecureServer()
+    private void SetupSecureServer(int port)
     {
-        // Create a NetworkSettings object and configure secure server parameters
-        var settings = new NetworkSettings();
-        settings.WithSecureServerParameters(
-            certificate: SecureParameters.MyGameServerCertificate,
-            privateKey: SecureParameters.MyGameServerPrivateKey);
-
         // Get UnityTransport and configure it
         if (NetworkManager.Singleton != null)
         {
@@ -67,14 +64,14 @@ public class NetworkStartUI : MonoBehaviour
             if (transport != null)
             {
                 // Set the bind address to 0.0.0.0 to listen on all network interfaces
-                transport.SetConnectionData("0.0.0.0", 7777);
+                transport.SetConnectionData("0.0.0.0", (ushort)port);
 
                 // Set secure server parameters for encrypted communication
                 transport.SetServerSecrets(
-                    SecureParameters.MyGameServerCertificate,
-                    SecureParameters.MyGameServerPrivateKey);
+                    SecureParameters.MyGameServerCertificate,  // Your SSL certificate
+                    SecureParameters.MyGameServerPrivateKey);  // Your private key
 
-                Debug.Log("Secure server configured and bind address set to 0.0.0.0.");
+                Debug.Log($"Secure server configured and bind address set to 0.0.0.0 on port {port}.");
             }
         }
     }
@@ -84,8 +81,8 @@ public class NetworkStartUI : MonoBehaviour
         // Create a NetworkSettings object and configure secure client parameters
         var settings = new NetworkSettings();
         settings.WithSecureClientParameters(
-            serverName: SecureParameters.ServerCommonName,
-            caCertificate: SecureParameters.MyGameClientCA);
+            serverName: SecureParameters.ServerCommonName, // Your server common name
+            caCertificate: SecureParameters.MyGameClientCA); // Your CA certificate
 
         // Get UnityTransport and configure it
         if (NetworkManager.Singleton != null)
@@ -97,5 +94,34 @@ public class NetworkStartUI : MonoBehaviour
                 transport.SetClientSecrets(SecureParameters.ServerCommonName, SecureParameters.MyGameClientCA);
             }
         }
+    }
+
+    // Function to get port from command line arguments or environment variable
+    private int GetPortFromArgsOrEnv()
+    {
+        // Default port
+        int port = 7777;
+
+        // Check command line arguments
+        string[] args = System.Environment.GetCommandLineArgs();
+        foreach (string arg in args)
+        {
+            if (arg.StartsWith("-port="))
+            {
+                if (int.TryParse(arg.Substring(6), out int parsedPort))
+                {
+                    port = parsedPort;
+                }
+            }
+        }
+
+        // Check environment variable (overrides command line if set)
+        string portEnv = System.Environment.GetEnvironmentVariable("GAME_SERVER_PORT");
+        if (!string.IsNullOrEmpty(portEnv) && int.TryParse(portEnv, out int envPort))
+        {
+            port = envPort;
+        }
+
+        return port;
     }
 }
