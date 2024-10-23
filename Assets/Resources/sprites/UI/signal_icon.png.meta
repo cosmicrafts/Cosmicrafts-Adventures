@@ -1,13 +1,16 @@
 fileFormatVersion: 2
-guid: 5f526aeefdec00c43a104a747f7134aa
+guid: 854d6c8cc34a6ea4a9765d014c6759e0
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8260619320761915181
-    second: PlayerDot_0
+      213: -6543922990860338945
+    second: signal_icon_0
   - first:
-      213: -7570519669538256837
-    second: PlayerDot_1
+      213: -5699471876418537963
+    second: signal_icon_1
+  - first:
+      213: 4999730520879258463
+    second: signal_icon_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -112,17 +115,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PlayerDot_0
+      name: signal_icon_0
       rect:
         serializedVersion: 2
-        x: 2
-        y: 3
-        width: 167
-        height: 190
+        x: 0
+        y: 0
+        width: 13
+        height: 13
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -131,20 +147,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d271ebe618d93a270800000000000000
-      internalID: 8260619320761915181
+      spriteID: ff8f14406b05f25a0800000000000000
+      internalID: -6543922990860338945
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: PlayerDot_1
+      name: signal_icon_1
       rect:
         serializedVersion: 2
-        x: 4
-        y: 163
-        width: 165
-        height: 110
+        x: 14
+        y: 0
+        width: 14
+        height: 28
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -153,8 +169,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b38801c887c10f690800000000000000
-      internalID: -7570519669538256837
+      spriteID: 5167eb6868867e0b0800000000000000
+      internalID: -5699471876418537963
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: signal_icon_2
+      rect:
+        serializedVersion: 2
+        x: 29
+        y: 0
+        width: 13
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5bdfa54b6c926540800000000000000
+      internalID: 4999730520879258463
       vertices: []
       indices: 
       edges: []
@@ -173,8 +211,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PlayerDot_0: 8260619320761915181
-      PlayerDot_1: -7570519669538256837
+      signal_icon_0: -6543922990860338945
+      signal_icon_1: -5699471876418537963
+      signal_icon_2: 4999730520879258463
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

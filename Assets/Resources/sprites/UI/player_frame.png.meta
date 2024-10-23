@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: bc2ec56cfd6bfd23bbcd66b4550d0b18
+guid: 698b885a412a413ca939c85a6433bfcb
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2678342911497519486
-    second: nebula_0
+      213: -1993288178156954278
+    second: player_frame_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -109,17 +109,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: nebula_0
+      name: player_frame_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1024
-        height: 1024
+        width: 256
+        height: 256
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 28e318dff4d94dad0800000000000000
-      internalID: -2678342911497519486
+      spriteID: a5d18fd76fa6654e0800000000000000
+      internalID: -1993288178156954278
       vertices: []
       indices: 
       edges: []
@@ -148,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      nebula_0: -2678342911497519486
+      player_frame_0: -1993288178156954278
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
